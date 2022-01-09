@@ -593,7 +593,7 @@ func (this *DistanceJoint) Dump() {
 	Log("  b2DistanceJointDef jd;\n")
 	Log("  jd.bodyA = bodies[%d];\n", indexA)
 	Log("  jd.bodyB = bodies[%d];\n", indexB)
-	Log("  jd.collideConnected = bool(%d);\n", this.CollideConnected)
+	Log("  jd.collideConnected = bool(%t);\n", this.CollideConnected)
 	Log("  jd.localAnchorA.Set(%.15lef, %.15lef);\n", this.LocalAnchorA.X, this.LocalAnchorA.Y)
 	Log("  jd.localAnchorB.Set(%.15lef, %.15lef);\n", this.LocalAnchorB.X, this.LocalAnchorB.Y)
 	Log("  jd.length = %.15lef;\n", this.Length)
