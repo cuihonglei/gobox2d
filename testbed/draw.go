@@ -410,22 +410,129 @@ type GLRenderTriangles struct {
 	colors   [GLRenderTriangles_e_maxVertices]box2d.Color
 
 	count int
+
+	vaoId             uint32
+	vboIds            [2]uint32
+	programId         uint32
+	projectionUniform int32
+	vertexAttribute   int32
+	colorAttribute    int32
 }
+
+const GLRenderTriangles_vs = `
+#version 330
+uniform mat4 projectionMatrix;
+layout(location = 0) in vec2 v_position;
+layout(location = 1) in vec4 v_color;
+out vec4 f_color;
+void main(void)
+{
+	f_color = v_color;
+	gl_Position = projectionMatrix * vec4(v_position, 0.0f, 1.0f);
+}
+` + "\x00"
+
+const GLRenderTriangles_fs = `
+#version 330
+in vec4 f_color;
+out vec4 color;
+void main(void)
+{
+	color = f_color;
+}
+` + "\x00"
 
 func (rt *GLRenderTriangles) create() {
 
+	rt.programId = sCreateShaderProgram(GLRenderTriangles_vs, GLRenderTriangles_fs)
+	rt.projectionUniform = gl.GetUniformLocation(rt.programId, gl.Str("projectionMatrix\x00"))
+	rt.vertexAttribute = 0
+	rt.colorAttribute = 1
+
+	// Generate
+	gl.GenVertexArrays(1, &rt.vaoId)
+	gl.GenBuffers(2, &rt.vboIds[0])
+
+	gl.BindVertexArray(rt.vaoId)
+	gl.EnableVertexAttribArray(uint32(rt.vertexAttribute))
+	gl.EnableVertexAttribArray(uint32(rt.colorAttribute))
+
+	// Vertex buffer
+	gl.BindBuffer(gl.ARRAY_BUFFER, rt.vboIds[0])
+	gl.VertexAttribPointer(uint32(rt.vertexAttribute), 2, gl.DOUBLE, false, 0, nil)
+	gl.BufferData(gl.ARRAY_BUFFER, int(unsafe.Sizeof(rt.vertices)), unsafe.Pointer(&rt.vertices[0]), gl.DYNAMIC_DRAW)
+
+	gl.BindBuffer(gl.ARRAY_BUFFER, rt.vboIds[1])
+	gl.VertexAttribPointer(uint32(rt.colorAttribute), 4, gl.DOUBLE, false, 0, nil)
+	gl.BufferData(gl.ARRAY_BUFFER, int(unsafe.Sizeof(rt.colors)), unsafe.Pointer(&rt.colors[0]), gl.DYNAMIC_DRAW)
+
+	sCheckGLError()
+
+	// Cleanup
+	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
+	gl.BindVertexArray(0)
+
+	rt.count = 0
 }
 
 func (rt *GLRenderTriangles) destroy() {
 
+	if rt.vaoId > 0 {
+		gl.DeleteVertexArrays(1, &rt.vaoId)
+		gl.DeleteBuffers(2, &rt.vboIds[0])
+		rt.vaoId = 0
+	}
+
+	if rt.programId > 0 {
+		gl.DeleteProgram(rt.programId)
+		rt.programId = 0
+	}
 }
 
 func (rt *GLRenderTriangles) vertex(v box2d.Vec2, c box2d.Color) {
 
+	if rt.count == GLRenderTriangles_e_maxVertices {
+		rt.flush()
+	}
+
+	rt.vertices[rt.count] = v
+	rt.colors[rt.count] = c
+	rt.count += 1
 }
 
 func (rt *GLRenderTriangles) flush() {
 
+	if rt.count == 0 {
+		return
+	}
+
+	gl.UseProgram(rt.programId)
+
+	var proj [16]float32
+	g_camera.buildProjectionMatrix(proj[:], 0.2)
+
+	gl.UniformMatrix4fv(rt.projectionUniform, 1, false, &proj[0])
+
+	gl.BindVertexArray(rt.vaoId)
+
+	gl.BindBuffer(gl.ARRAY_BUFFER, rt.vboIds[0])
+	gl.BufferSubData(gl.ARRAY_BUFFER, 0, rt.count*int(unsafe.Sizeof(box2d.Vec2{})), unsafe.Pointer(&rt.vertices[0]))
+
+	gl.BindBuffer(gl.ARRAY_BUFFER, rt.vboIds[1])
+	gl.BufferSubData(gl.ARRAY_BUFFER, 0, rt.count*int(unsafe.Sizeof(box2d.Color{})), unsafe.Pointer(&rt.colors[0]))
+
+	gl.Enable(gl.BLEND)
+	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+	gl.DrawArrays(gl.TRIANGLES, 0, int32(rt.count))
+	gl.Disable(gl.BLEND)
+
+	sCheckGLError()
+
+	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
+	gl.BindVertexArray(0)
+	gl.UseProgram(0)
+
+	rt.count = 0
 }
 
 // This class implements debug drawing callbacks that are invoked
