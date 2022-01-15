@@ -19,7 +19,7 @@ type Breakable struct {
 	piece2          *box2d.Fixture
 
 	broke  bool
-	ibreak bool
+	xbreak bool
 }
 
 func CreateBreakable() ITest {
@@ -56,10 +56,31 @@ func CreateBreakable() ITest {
 		b.piece2 = b.body1.CreateFixture2(&b.shape2, 1.0)
 	}
 
-	b.ibreak = false
+	b.xbreak = false
 	b.broke = false
 
 	return b
+}
+
+func (b *Breakable) PostSolve(contact box2d.IContact, impulse *box2d.ContactImpulse) {
+
+	if b.broke {
+		// The body already broke.
+		return
+	}
+
+	// Should the body break?
+	count := contact.GetManifold().PointCount
+
+	maxImpulse := 0.0
+	for i := 0; i < count; i++ {
+		maxImpulse = box2d.MaxF(maxImpulse, impulse.NormalImpulses[i])
+	}
+
+	if maxImpulse > 40.0 {
+		// Flag the body for breaking.
+		b.xbreak = true
+	}
 }
 
 func (b *Breakable) Break() {
@@ -96,10 +117,10 @@ func (b *Breakable) Break() {
 
 func (b *Breakable) step(settings *Settings) {
 
-	if b.ibreak {
+	if b.xbreak {
 		b.Break()
 		b.broke = true
-		b.ibreak = false
+		b.xbreak = false
 	}
 
 	// Cache velocities to improve movement on breakage.

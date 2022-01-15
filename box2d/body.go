@@ -268,9 +268,14 @@ func (this *Body) CreateFixture2(shape IShape, density float64) *Fixture {
 // All fixtures attached to a body are implicitly destroyed when the body is destroyed.
 // @param fixture the fixture to be removed.
 // @warning This function is locked during callbacks.
-func (this *Body) DestroyFixture(fixture *Fixture) {
+func (b *Body) DestroyFixture(fixture *Fixture) {
+
+	if fixture == nil {
+		return
+	}
+
 	//Assert(this.world.IsLocked() == false)
-	if this.world.IsLocked() {
+	if b.world.IsLocked() {
 		return
 	}
 
@@ -278,23 +283,23 @@ func (this *Body) DestroyFixture(fixture *Fixture) {
 
 	// Remove the fixture from this body's singly linked list.
 	//Assert(this.fixtureCount > 0)
-	//node := &this.fixtureList
+	node := &b.fixtureList
 	//found := false
-	//for *node != nil {
-	//	if *node == fixture {
-	//		*node = fixture.Next
-	//		found = true
-	//		break
-	//	}
+	for *node != nil {
+		if *node == fixture {
+			*node = fixture.Next
+			//found = true
+			break
+		}
 
-	//	node = &(*node).Next
-	//}
+		node = &(*node).Next
+	}
 
 	// You tried to remove a shape that is not attached to this body.
 	//Assert(found)
 
 	// Destroy any contacts associated with the fixture.
-	edge := this.contactList
+	edge := b.contactList
 	for edge != nil {
 		c := edge.Contact
 		edge = edge.Next
@@ -305,27 +310,27 @@ func (this *Body) DestroyFixture(fixture *Fixture) {
 		if fixture == fixtureA || fixture == fixtureB {
 			// This destroys the contact and removes it from
 			// this body's contact list.
-			this.world.contactManager.Destroy(c)
+			b.world.contactManager.Destroy(c)
 		}
 	}
 
 	//b2BlockAllocator* allocator = &m_world->m_blockAllocator;
 
-	if (this.flags & body_e_activeFlag) != 0 {
-		broadPhase := this.world.contactManager.BroadPhase
+	if (b.flags & body_e_activeFlag) != 0 {
+		broadPhase := b.world.contactManager.BroadPhase
 		fixture.DestroyProxies(broadPhase)
 	}
 
-	fixture.Destroy()
 	fixture.Body = nil
 	fixture.Next = nil
+	fixture.Destroy()
 	//fixture->~b2Fixture();
 	//allocator->Free(fixture, sizeof(b2Fixture));
 
-	this.fixtureCount--
+	b.fixtureCount--
 
 	// Reset the mass data.
-	this.ResetMassData()
+	b.ResetMassData()
 }
 
 // Set the position of the body's origin and rotation.
