@@ -222,11 +222,11 @@ func (rl *GLRenderLines) create() {
 	// Vertex buffer
 	gl.BindBuffer(gl.ARRAY_BUFFER, rl.vboIds[0])
 	gl.VertexAttribPointer(uint32(rl.vertexAttribute), 2, gl.DOUBLE, false, 0, nil)
-	gl.BufferData(gl.ARRAY_BUFFER, 16*1024, unsafe.Pointer(&rl.vertices[0]), gl.DYNAMIC_DRAW)
+	gl.BufferData(gl.ARRAY_BUFFER, int(unsafe.Sizeof(rl.vertices)), unsafe.Pointer(&rl.vertices[0]), gl.DYNAMIC_DRAW)
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, rl.vboIds[1])
 	gl.VertexAttribPointer(uint32(rl.colorAttribute), 4, gl.DOUBLE, false, 0, nil)
-	gl.BufferData(gl.ARRAY_BUFFER, 32*1024, unsafe.Pointer(&rl.colors[0]), gl.DYNAMIC_DRAW)
+	gl.BufferData(gl.ARRAY_BUFFER, int(unsafe.Sizeof(rl.colors)), unsafe.Pointer(&rl.colors[0]), gl.DYNAMIC_DRAW)
 
 	sCheckGLError()
 
@@ -278,10 +278,10 @@ func (rl *GLRenderLines) flush() {
 	gl.BindVertexArray(rl.vaoId)
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, rl.vboIds[0])
-	gl.BufferSubData(gl.ARRAY_BUFFER, 0, rl.count*16, unsafe.Pointer(&rl.vertices[0]))
+	gl.BufferSubData(gl.ARRAY_BUFFER, 0, rl.count*int(unsafe.Sizeof(box2d.Vec2{})), unsafe.Pointer(&rl.vertices[0]))
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, rl.vboIds[1])
-	gl.BufferSubData(gl.ARRAY_BUFFER, 0, rl.count*32, unsafe.Pointer(&rl.colors[0]))
+	gl.BufferSubData(gl.ARRAY_BUFFER, 0, rl.count*int(unsafe.Sizeof(box2d.Color{})), unsafe.Pointer(&rl.colors[0]))
 
 	gl.DrawArrays(gl.LINES, 0, int32(rl.count))
 
