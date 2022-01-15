@@ -135,28 +135,141 @@ type GLRenderPoints struct {
 	sizes    [GLRenderPoints_e_maxVertices]float64
 
 	count int
+
+	vaoId             uint32
+	vboIds            [3]uint32
+	programId         uint32
+	projectionUniform int32
+	vertexAttribute   int32
+	colorAttribute    int32
+	sizeAttribute     int32
 }
 
-func NewGLRenderPoints() *GLRenderPoints {
-	rp := new(GLRenderPoints)
-
-	return rp
+const GLRenderPoints_vs = `
+#version 330
+uniform mat4 projectionMatrix;
+layout(location = 0) in vec2 v_position;
+layout(location = 1) in vec4 v_color;
+layout(location = 2) in float v_size;
+out vec4 f_color;
+void main(void)
+{
+	f_color = v_color;
+	gl_Position = projectionMatrix * vec4(v_position, 0.0f, 1.0f);
+   	gl_PointSize = v_size;
 }
+` + "\x00"
+
+const GLRenderPoints_fs = `
+#version 330
+in vec4 f_color;
+out vec4 color;
+void main(void)
+{
+	color = f_color;
+}
+` + "\x00"
 
 func (rp *GLRenderPoints) create() {
 
+	rp.programId = sCreateShaderProgram(GLRenderPoints_vs, GLRenderPoints_fs)
+	rp.projectionUniform = gl.GetUniformLocation(rp.programId, gl.Str("projectionMatrix\x00"))
+	rp.vertexAttribute = 0
+	rp.colorAttribute = 1
+	rp.sizeAttribute = 2
+
+	// Generate
+	gl.GenVertexArrays(1, &rp.vaoId)
+	gl.GenBuffers(3, &rp.vboIds[0])
+
+	gl.BindVertexArray(rp.vaoId)
+	gl.EnableVertexAttribArray(uint32(rp.vertexAttribute))
+	gl.EnableVertexAttribArray(uint32(rp.colorAttribute))
+	gl.EnableVertexAttribArray(uint32(rp.sizeAttribute))
+
+	// Vertex buffer
+	gl.BindBuffer(gl.ARRAY_BUFFER, rp.vboIds[0])
+	gl.VertexAttribPointer(uint32(rp.vertexAttribute), 2, gl.DOUBLE, false, 0, nil)
+	gl.BufferData(gl.ARRAY_BUFFER, int(unsafe.Sizeof(rp.vertices)), unsafe.Pointer(&rp.vertices[0]), gl.DYNAMIC_DRAW)
+
+	gl.BindBuffer(gl.ARRAY_BUFFER, rp.vboIds[1])
+	gl.VertexAttribPointer(uint32(rp.colorAttribute), 4, gl.DOUBLE, false, 0, nil)
+	gl.BufferData(gl.ARRAY_BUFFER, int(unsafe.Sizeof(rp.colors)), unsafe.Pointer(&rp.colors[0]), gl.DYNAMIC_DRAW)
+
+	gl.BindBuffer(gl.ARRAY_BUFFER, rp.vboIds[2])
+	gl.VertexAttribPointer(uint32(rp.sizeAttribute), 1, gl.DOUBLE, false, 0, nil)
+	gl.BufferData(gl.ARRAY_BUFFER, int(unsafe.Sizeof(rp.sizes)), unsafe.Pointer(&rp.sizes[0]), gl.DYNAMIC_DRAW)
+
+	sCheckGLError()
+
+	// Cleanup
+	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
+	gl.BindVertexArray(0)
+
+	rp.count = 0
 }
 
-func (rl *GLRenderPoints) destroy() {
+func (rp *GLRenderPoints) destroy() {
 
+	if rp.vaoId > 0 {
+		gl.DeleteVertexArrays(1, &rp.vaoId)
+		gl.DeleteBuffers(3, &rp.vboIds[0])
+		rp.vaoId = 0
+	}
+
+	if rp.programId > 0 {
+		gl.DeleteProgram(rp.programId)
+		rp.programId = 0
+	}
 }
 
-func (rl *GLRenderPoints) vertex(v box2d.Vec2, c box2d.Color, size float64) {
+func (rp *GLRenderPoints) vertex(v box2d.Vec2, c box2d.Color, size float64) {
 
+	if rp.count == GLRenderPoints_e_maxVertices {
+		rp.flush()
+	}
+
+	rp.vertices[rp.count] = v
+	rp.colors[rp.count] = c
+	rp.sizes[rp.count] = size
+	rp.count += 1
 }
 
-func (rl *GLRenderPoints) flush() {
+func (rp *GLRenderPoints) flush() {
 
+	if rp.count == 0 {
+		return
+	}
+
+	gl.UseProgram(rp.programId)
+
+	var proj [16]float32
+	g_camera.buildProjectionMatrix(proj[:], 0.1)
+
+	gl.UniformMatrix4fv(rp.projectionUniform, 1, false, &proj[0])
+
+	gl.BindVertexArray(rp.vaoId)
+
+	gl.BindBuffer(gl.ARRAY_BUFFER, rp.vboIds[0])
+	gl.BufferSubData(gl.ARRAY_BUFFER, 0, rp.count*int(unsafe.Sizeof(box2d.Vec2{})), unsafe.Pointer(&rp.vertices[0]))
+
+	gl.BindBuffer(gl.ARRAY_BUFFER, rp.vboIds[1])
+	gl.BufferSubData(gl.ARRAY_BUFFER, 0, rp.count*int(unsafe.Sizeof(box2d.Color{})), unsafe.Pointer(&rp.colors[0]))
+
+	gl.BindBuffer(gl.ARRAY_BUFFER, rp.vboIds[2])
+	gl.BufferSubData(gl.ARRAY_BUFFER, 0, rp.count*int(unsafe.Sizeof(float64(0))), unsafe.Pointer(&rp.sizes[0]))
+
+	gl.Enable(gl.PROGRAM_POINT_SIZE_EXT)
+	gl.DrawArrays(gl.POINTS, 0, int32(rp.count))
+	gl.Disable(gl.PROGRAM_POINT_SIZE_EXT)
+
+	sCheckGLError()
+
+	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
+	gl.BindVertexArray(0)
+	gl.UseProgram(0)
+
+	rp.count = 0
 }
 
 //
@@ -174,12 +287,6 @@ type GLRenderLines struct {
 	projectionUniform int32
 	vertexAttribute   int32
 	colorAttribute    int32
-}
-
-func NewGLRenderLines() *GLRenderLines {
-	rl := new(GLRenderLines)
-
-	return rl
 }
 
 const GLRenderLines_vs = `
@@ -206,6 +313,7 @@ void main(void)
 ` + "\x00"
 
 func (rl *GLRenderLines) create() {
+
 	rl.programId = sCreateShaderProgram(GLRenderLines_vs, GLRenderLines_fs)
 	rl.projectionUniform = gl.GetUniformLocation(rl.programId, gl.Str("projectionMatrix\x00"))
 	rl.vertexAttribute = 0
@@ -304,25 +412,19 @@ type GLRenderTriangles struct {
 	count int
 }
 
-func NewGLRenderTriangles() *GLRenderTriangles {
-	rr := new(GLRenderTriangles)
-
-	return rr
-}
-
-func (rr *GLRenderTriangles) create() {
+func (rt *GLRenderTriangles) create() {
 
 }
 
-func (rr *GLRenderTriangles) destroy() {
+func (rt *GLRenderTriangles) destroy() {
 
 }
 
-func (rr *GLRenderTriangles) vertex(v box2d.Vec2, c box2d.Color) {
+func (rt *GLRenderTriangles) vertex(v box2d.Vec2, c box2d.Color) {
 
 }
 
-func (rr *GLRenderTriangles) flush() {
+func (rt *GLRenderTriangles) flush() {
 
 }
 
@@ -346,11 +448,11 @@ func MakeDebugDraw() DebugDraw {
 //
 func (dd *DebugDraw) create() {
 
-	dd.points = NewGLRenderPoints()
+	dd.points = &GLRenderPoints{}
 	dd.points.create()
-	dd.lines = NewGLRenderLines()
+	dd.lines = &GLRenderLines{}
 	dd.lines.create()
-	dd.triangles = NewGLRenderTriangles()
+	dd.triangles = &GLRenderTriangles{}
 	dd.triangles.create()
 }
 
