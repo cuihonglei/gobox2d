@@ -15,4 +15,4 @@ func (bt *BodyTypes) step(settings *Settings) {
 	bt.Test.step(settings)
 }
 
-var _ = RegisterTest("Examples", "Body Types", CreateBodyTypes)
+//var _ = RegisterTest("Examples", "Body Types", CreateBodyTypes)

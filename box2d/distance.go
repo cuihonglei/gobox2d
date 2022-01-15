@@ -4,13 +4,13 @@ package box2d
 // It encapsulates any shape.
 type DistanceProxy struct {
 	Vertices []Vec2
-	Count    int32
+	Count    int
 	Radius   float64
 }
 
 // Initialize the proxy using the given shape. The shape
 // must remain in scope while the proxy is in use.
-func (this *DistanceProxy) Set(shape IShape, index int32) {
+func (this *DistanceProxy) Set(shape IShape, index int) {
 	switch shape.GetType() {
 	case Shape_e_circle:
 		circle := shape.(*CircleShape)
@@ -43,10 +43,10 @@ func (this *DistanceProxy) Set(shape IShape, index int32) {
 }
 
 // Get the supporting vertex index in the given direction.
-func (this *DistanceProxy) GetSupport(d Vec2) int32 {
-	bestIndex := int32(0)
+func (this *DistanceProxy) GetSupport(d Vec2) int {
+	bestIndex := 0
 	bestValue := DotVV(this.Vertices[0], d)
-	for i := int32(1); i < this.Count; i++ {
+	for i := 1; i < this.Count; i++ {
 		value := DotVV(this.Vertices[i], d)
 		if value > bestValue {
 			bestIndex = i
@@ -59,9 +59,9 @@ func (this *DistanceProxy) GetSupport(d Vec2) int32 {
 
 // Get the supporting vertex in the given direction.
 func (this *DistanceProxy) GetSupportVertex(d Vec2) Vec2 {
-	bestIndex := int32(0)
+	bestIndex := 0
 	bestValue := DotVV(this.Vertices[0], d)
-	for i := int32(1); i < this.Count; i++ {
+	for i := 1; i < this.Count; i++ {
 		value := DotVV(this.Vertices[i], d)
 		if value > bestValue {
 			bestIndex = i
@@ -73,12 +73,12 @@ func (this *DistanceProxy) GetSupportVertex(d Vec2) Vec2 {
 }
 
 // Get the vertex count.
-func (this *DistanceProxy) GetVertexCount() int32 {
+func (this *DistanceProxy) GetVertexCount() int {
 	return this.Count
 }
 
 // Get a vertex by index. Used by b2Distance.
-func (this *DistanceProxy) GetVertex(index int32) Vec2 {
+func (this *DistanceProxy) GetVertex(index int) Vec2 {
 	return this.Vertices[index]
 }
 
@@ -107,7 +107,7 @@ type DistanceOutput struct {
 	PointA     Vec2 // closest point on shapeA
 	PointB     Vec2 // closest point on shapeB
 	Distance   float64
-	Iterations int32 // number of GJK iterations used
+	Iterations int // number of GJK iterations used
 }
 
 type SimplexVertex struct {
@@ -115,25 +115,25 @@ type SimplexVertex struct {
 	wB     Vec2    // support point in proxyB
 	w      Vec2    // wB - wA
 	a      float64 // barycentric coordinate for closest point
-	indexA int32   // wA index
-	indexB int32   // wB index
+	indexA int     // wA index
+	indexB int     // wB index
 }
 
 type Simplex struct {
 	v1, v2, v3 SimplexVertex
-	count      int32
+	count      int
 }
 
 func (this *Simplex) ReadCache(cache *SimplexCache,
 	proxyA *DistanceProxy, transformA Transform,
 	proxyB *DistanceProxy, transformB Transform) {
 	// Copy data from cache.
-	this.count = int32(cache.Count)
+	this.count = int(cache.Count)
 	vertices := []*SimplexVertex{&this.v1, &this.v2, &this.v3}
-	for i := int32(0); i < this.count; i++ {
+	for i := 0; i < this.count; i++ {
 		v := vertices[i]
-		v.indexA = int32(cache.IndexA[i])
-		v.indexB = int32(cache.IndexB[i])
+		v.indexA = int(cache.IndexA[i])
+		v.indexB = int(cache.IndexB[i])
 		wALocal := proxyA.GetVertex(v.indexA)
 		wBLocal := proxyB.GetVertex(v.indexB)
 		v.wA = MulX(transformA, wALocal)
@@ -171,7 +171,7 @@ func (this *Simplex) WriteCache(cache *SimplexCache) {
 	cache.Metric = this.GetMetric()
 	cache.Count = uint16(this.count)
 	vertices := []*SimplexVertex{&this.v1, &this.v2, &this.v3}
-	for i := int32(0); i < this.count; i++ {
+	for i := 0; i < this.count; i++ {
 		cache.IndexA[i] = uint8(vertices[i].indexA)
 		cache.IndexB[i] = uint8(vertices[i].indexB)
 	}
@@ -410,7 +410,7 @@ func (this *Simplex) Solve3() {
 }
 
 // GJK using Voronoi regions (Christer Ericson) and Barycentric coordinates.
-var GjkCalls, GjkIters, GjkMaxIters int32
+var GjkCalls, GjkIters, GjkMaxIters int
 
 // Compute the closest points between two shapes. Supports any combination of:
 // b2CircleShape, b2PolygonShape, b2EdgeShape. The simplex cache is input/output.
@@ -430,23 +430,23 @@ func Distance(cache *SimplexCache, input *DistanceInput) (output DistanceOutput)
 
 	// Get simplex vertices as an array.
 	vertices := []*SimplexVertex{&simplex.v1, &simplex.v2, &simplex.v3}
-	const k_maxIters int32 = 20
+	const k_maxIters int = 20
 
 	// These store the vertices of the last simplex so that we
 	// can check for duplicates and prevent cycling.
-	var saveA, saveB [3]int32
-	saveCount := int32(0)
+	var saveA, saveB [3]int
+	saveCount := 0
 
 	closestPoint := simplex.GetClosestPoint()
 	distanceSqr1 := closestPoint.LengthSquared()
 	distanceSqr2 := distanceSqr1
 
 	// Main iteration loop.
-	iter := int32(0)
+	iter := 0
 	for iter < k_maxIters {
 		// Copy simplex so we can identify duplicates.
 		saveCount = simplex.count
-		for i := int32(0); i < saveCount; i++ {
+		for i := 0; i < saveCount; i++ {
 			saveA[i] = vertices[i].indexA
 			saveB[i] = vertices[i].indexB
 		}
@@ -504,7 +504,7 @@ func Distance(cache *SimplexCache, input *DistanceInput) (output DistanceOutput)
 
 		// Check for duplicate support points. This is the main termination criteria.
 		duplicate := false
-		for i := int32(0); i < saveCount; i++ {
+		for i := 0; i < saveCount; i++ {
 			if vertex.indexA == saveA[i] && vertex.indexB == saveB[i] {
 				duplicate = true
 				break

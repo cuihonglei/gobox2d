@@ -92,7 +92,7 @@ type Body struct {
 
 	flags uint16
 
-	islandIndex int32
+	islandIndex int
 
 	xf    Transform // the body origin transform
 	sweep Sweep     // the swept motion for CCD
@@ -108,7 +108,7 @@ type Body struct {
 	next  *Body
 
 	fixtureList  *Fixture
-	fixtureCount int32
+	fixtureCount int
 
 	jointList   *JointEdge
 	contactList *ContactEdge

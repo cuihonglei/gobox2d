@@ -39,14 +39,14 @@ type Vec2 struct {
 	X, Y float64
 }
 
-func (this *Vec2) GetI(i int32) float64 {
+func (this *Vec2) GetI(i int) float64 {
 	if i == 0 {
 		return this.X
 	}
 	return this.Y
 }
 
-func (this *Vec2) SetI(i int32) *float64 {
+func (this *Vec2) SetI(i int) *float64 {
 	if i == 0 {
 		return &this.X
 	}
@@ -562,7 +562,7 @@ func MulTTT(A, B Transform) Transform {
 	return C
 }
 
-func AbsI(x int32) int32 {
+func AbsI(x int) int {
 	switch {
 	case x < 0:
 		return -x
@@ -590,14 +590,14 @@ func AbsM(A Mat22) Mat22 {
 	return Mat22{AbsV(A.Ex), AbsV(A.Ey)}
 }
 
-func MinI(a, b int32) int32 {
+func MinI(a, b int) int {
 	if a < b {
 		return a
 	}
 	return b
 }
 
-func MinI32(a, b int32) int32 {
+func MinI32(a, b int) int {
 	if a < b {
 		return a
 	}
@@ -615,7 +615,7 @@ func MinV(a, b Vec2) Vec2 {
 	return Vec2{MinF(a.X, b.X), MinF(a.Y, b.Y)}
 }
 
-func MaxI(a, b int32) int32 {
+func MaxI(a, b int) int {
 	if a > b {
 		return a
 	}
@@ -633,7 +633,7 @@ func MaxV(a, b Vec2) Vec2 {
 	return Vec2{MaxF(a.X, b.X), MaxF(a.Y, b.Y)}
 }
 
-func ClampI(a, low, high int32) int32 {
+func ClampI(a, low, high int) int {
 	return MaxI(low, MinI(a, high))
 }
 
@@ -650,7 +650,7 @@ func ClampV(a, low, high Vec2) Vec2 {
 // that recursively "folds" the upper bits into the lower bits. This process yields a bit vector with
 // the same most significant 1 as x, but all 1's below it. Adding 1 to that value yields the next
 // largest power of 2. For a 32-bit value:"
-func NextPowerOfTwo(x uint32) uint32 {
+func NextPowerOfTwo(x uint) uint {
 	x |= (x >> 1)
 	x |= (x >> 2)
 	x |= (x >> 4)
@@ -659,6 +659,6 @@ func NextPowerOfTwo(x uint32) uint32 {
 	return x + 1
 }
 
-func IsPowerOfTwo(x uint32) bool {
+func IsPowerOfTwo(x uint) bool {
 	return x > 0 && (x&(x-1)) == 0
 }

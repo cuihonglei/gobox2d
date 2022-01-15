@@ -12,25 +12,25 @@ func (this *Color) Set(r, g, b float64) {
 // Implement and register this class with a b2World to provide debug drawing of physics
 // entities in your game.
 const (
-	Draw_e_shapeBit        = 0x0001 // draw shapes
-	Draw_e_jointBit        = 0x0002 // draw joint connections
-	Draw_e_aabbBit         = 0x0004 // draw axis aligned bounding boxes
-	Draw_e_pairBit         = 0x0008 // draw broad-phase pairs
-	Draw_e_centerOfMassBit = 0x0010 // draw center of mass frame
+	Draw_e_shapeBit        uint = 0x0001 // draw shapes
+	Draw_e_jointBit        uint = 0x0002 // draw joint connections
+	Draw_e_aabbBit         uint = 0x0004 // draw axis aligned bounding boxes
+	Draw_e_pairBit         uint = 0x0008 // draw broad-phase pairs
+	Draw_e_centerOfMassBit uint = 0x0010 // draw center of mass frame
 )
 
 type IDraw interface {
 	// Set the drawing flags.
-	SetFlags(flags uint32)
+	SetFlags(flags uint)
 
 	// Get the drawing flags.
-	GetFlags() uint32
+	GetFlags() uint
 
 	// Append flags to the current flags.
-	AppendFlags(flags uint32)
+	AppendFlags(flags uint)
 
 	// Clear flags from the current flags.
-	ClearFlags(flags uint32)
+	ClearFlags(flags uint)
 
 	// Draw a closed polygon provided in CCW order.
 	DrawPolygon(vertices []Vec2, color Color)
@@ -53,21 +53,21 @@ type IDraw interface {
 }
 
 type Draw struct {
-	DrawFlags uint32
+	DrawFlags uint
 }
 
-func (this *Draw) SetFlags(flags uint32) {
+func (this *Draw) SetFlags(flags uint) {
 	this.DrawFlags = flags
 }
 
-func (this *Draw) GetFlags() uint32 {
+func (this *Draw) GetFlags() uint {
 	return this.DrawFlags
 }
 
-func (this *Draw) AppendFlags(flags uint32) {
+func (this *Draw) AppendFlags(flags uint) {
 	this.DrawFlags |= flags
 }
 
-func (this *Draw) ClearFlags(flags uint32) {
+func (this *Draw) ClearFlags(flags uint) {
 	this.DrawFlags &= ^flags
 }

@@ -9,13 +9,13 @@ type TreeNode struct {
 
 	UserData interface{}
 
-	Parent int32
+	Parent int
 
-	Child1 int32
-	Child2 int32
+	Child1 int
+	Child2 int
 
 	// leaf = 0, free node = -1
-	Height int32
+	Height int
 }
 
 func (this *TreeNode) IsLeaf() bool {
@@ -31,18 +31,18 @@ func (this *TreeNode) IsLeaf() bool {
 //
 // Nodes are pooled and relocatable, so we use node indices rather than pointers.
 type DynamicTree struct {
-	root int32
+	root int
 
 	nodes        []TreeNode
-	nodeCount    int32
-	nodeCapacity int32
+	nodeCount    int
+	nodeCapacity int
 
-	freeList int32
+	freeList int
 
 	// This is used to incrementally traverse the tree for re-balancing.
-	path uint32
+	path uint
 
-	insertionCount int32
+	insertionCount int
 }
 
 func NewDynamicTree() *DynamicTree {
@@ -54,7 +54,7 @@ func NewDynamicTree() *DynamicTree {
 	this.nodes = make([]TreeNode, this.nodeCapacity, this.nodeCapacity)
 
 	// Build a linked list for the free list.
-	for i := int32(0); i < this.nodeCapacity-1; i++ {
+	for i := 0; i < this.nodeCapacity-1; i++ {
 		this.nodes[i].Parent = i + 1
 		this.nodes[i].Height = -1
 	}
@@ -65,7 +65,7 @@ func NewDynamicTree() *DynamicTree {
 }
 
 // Create a proxy. Provide a tight fitting AABB and a userData pointer.
-func (this *DynamicTree) CreateProxy(aabb AABB, userData interface{}) int32 {
+func (this *DynamicTree) CreateProxy(aabb AABB, userData interface{}) int {
 	proxyId := this.allocateNode()
 
 	// Fatten the aabb.
@@ -81,7 +81,7 @@ func (this *DynamicTree) CreateProxy(aabb AABB, userData interface{}) int32 {
 }
 
 // Destroy a proxy. This asserts if the id is invalid.
-func (this *DynamicTree) DestroyProxy(proxyId int32) {
+func (this *DynamicTree) DestroyProxy(proxyId int) {
 	this.removeLeaf(proxyId)
 	this.freeNode(proxyId)
 }
@@ -90,7 +90,7 @@ func (this *DynamicTree) DestroyProxy(proxyId int32) {
 // then the proxy is removed from the tree and re-inserted. Otherwise
 // the function returns immediately.
 // @return true if the proxy was re-inserted.
-func (this *DynamicTree) MoveProxy(proxyId int32, aabb AABB, displacement Vec2) bool {
+func (this *DynamicTree) MoveProxy(proxyId int, aabb AABB, displacement Vec2) bool {
 
 	if this.nodes[proxyId].AABB.Contains(aabb) {
 		return false
@@ -127,23 +127,23 @@ func (this *DynamicTree) MoveProxy(proxyId int32, aabb AABB, displacement Vec2) 
 
 // Get proxy user data.
 // @return the proxy user data or 0 if the id is invalid.
-func (this *DynamicTree) GetUserData(proxyId int32) interface{} {
+func (this *DynamicTree) GetUserData(proxyId int) interface{} {
 	return this.nodes[proxyId].UserData
 }
 
 // Get the fat AABB for a proxy.
-func (this *DynamicTree) GetFatAABB(proxyId int32) AABB {
+func (this *DynamicTree) GetFatAABB(proxyId int) AABB {
 	return this.nodes[proxyId].AABB
 }
 
 // Query an AABB for overlapping proxies. The callback class
 // is called for each proxy that overlaps the supplied AABB.
-func (this *DynamicTree) Query(callback func(int32) bool, aabb AABB) {
+func (this *DynamicTree) Query(callback func(int) bool, aabb AABB) {
 	stack := NewGrowableStack(256)
 	stack.Push(this.root)
 
 	for stack.GetCount() > 0 {
-		nodeId, _ := stack.Pop().(int32)
+		nodeId, _ := stack.Pop().(int)
 		if nodeId == NullNode {
 			continue
 		}
@@ -171,7 +171,7 @@ func (this *DynamicTree) Query(callback func(int32) bool, aabb AABB) {
 // number of proxies in the tree.
 // @param input the ray-cast input data. The ray extends from p1 to p1 + maxFraction * (p2 - p1).
 // @param callback a callback class that is called for each proxy that is hit by the ray.
-func (this *DynamicTree) RayCast(callback func(RayCastInput, int32) float64, input RayCastInput) {
+func (this *DynamicTree) RayCast(callback func(RayCastInput, int) float64, input RayCastInput) {
 	p1 := input.P1
 	p2 := input.P2
 	r := SubVV(p2, p1)
@@ -198,7 +198,7 @@ func (this *DynamicTree) RayCast(callback func(RayCastInput, int32) float64, inp
 	stack.Push(this.root)
 
 	for stack.GetCount() > 0 {
-		nodeId := stack.Pop().(int32)
+		nodeId := stack.Pop().(int)
 		if nodeId == NullNode {
 			continue
 		}
@@ -247,7 +247,7 @@ func (this *DynamicTree) RayCast(callback func(RayCastInput, int32) float64, inp
 
 // Compute the height of the binary tree in O(N) time. Should not be
 // called often.
-func (this *DynamicTree) GetHeight() int32 {
+func (this *DynamicTree) GetHeight() int {
 	if this.root == NullNode {
 		return 0
 	}
@@ -256,9 +256,9 @@ func (this *DynamicTree) GetHeight() int32 {
 
 // Get the maximum balance of an node in the tree. The balance is the difference
 // in height of the two children of a node.
-func (this *DynamicTree) GetMaxBalance() int32 {
-	maxBalance := int32(0)
-	for i := int32(0); i < this.nodeCapacity; i++ {
+func (this *DynamicTree) GetMaxBalance() int {
+	maxBalance := 0
+	for i := 0; i < this.nodeCapacity; i++ {
 		node := &this.nodes[i]
 		if node.Height <= 1 {
 			continue
@@ -283,7 +283,7 @@ func (this *DynamicTree) GetAreaRatio() float64 {
 	rootArea := root.AABB.GetPerimeter()
 
 	totalArea := 0.0
-	for i := int32(0); i < this.nodeCapacity; i++ {
+	for i := 0; i < this.nodeCapacity; i++ {
 		node := &this.nodes[i]
 		if node.Height < 0 {
 			// Free node in pool
@@ -297,7 +297,7 @@ func (this *DynamicTree) GetAreaRatio() float64 {
 }
 
 // Allocate a node from the pool. Grow the pool if necessary.
-func (this *DynamicTree) allocateNode() int32 {
+func (this *DynamicTree) allocateNode() int {
 	// Expand the node pool as needed.
 	if this.freeList == NullNode {
 
@@ -331,14 +331,14 @@ func (this *DynamicTree) allocateNode() int32 {
 }
 
 // Return a node to the pool.
-func (this *DynamicTree) freeNode(nodeId int32) {
+func (this *DynamicTree) freeNode(nodeId int) {
 	this.nodes[nodeId].Parent = this.freeList
 	this.nodes[nodeId].Height = -1
 	this.freeList = nodeId
 	this.nodeCount--
 }
 
-func (this *DynamicTree) insertLeaf(leaf int32) {
+func (this *DynamicTree) insertLeaf(leaf int) {
 	this.insertionCount++
 
 	if this.root == NullNode {
@@ -455,7 +455,7 @@ func (this *DynamicTree) insertLeaf(leaf int32) {
 	//Validate();
 }
 
-func (this *DynamicTree) removeLeaf(leaf int32) {
+func (this *DynamicTree) removeLeaf(leaf int) {
 	if leaf == this.root {
 		this.root = NullNode
 		return
@@ -463,7 +463,7 @@ func (this *DynamicTree) removeLeaf(leaf int32) {
 
 	parent := this.nodes[leaf].Parent
 	grandParent := this.nodes[parent].Parent
-	var sibling int32
+	var sibling int
 	if this.nodes[parent].Child1 == leaf {
 		sibling = this.nodes[parent].Child2
 	} else {
@@ -500,7 +500,7 @@ func (this *DynamicTree) removeLeaf(leaf int32) {
 	}
 }
 
-func (this *DynamicTree) balance(iA int32) int32 {
+func (this *DynamicTree) balance(iA int) int {
 	A := &this.nodes[iA]
 	if A.IsLeaf() || A.Height < 2 {
 		return iA

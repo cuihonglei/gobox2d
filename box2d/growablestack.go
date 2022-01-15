@@ -2,11 +2,11 @@ package box2d
 
 type GrowableStack struct {
 	Stack    []interface{}
-	Count    int32
-	Capacity int32
+	Count    int
+	Capacity int
 }
 
-func NewGrowableStack(capacity int32) *GrowableStack {
+func NewGrowableStack(capacity int) *GrowableStack {
 	this := new(GrowableStack)
 	this.Capacity = capacity
 	this.Stack = make([]interface{}, capacity, capacity)
@@ -30,6 +30,6 @@ func (this *GrowableStack) Pop() interface{} {
 	return this.Stack[this.Count]
 }
 
-func (this *GrowableStack) GetCount() int32 {
+func (this *GrowableStack) GetCount() int {
 	return this.Count
 }

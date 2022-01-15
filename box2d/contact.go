@@ -16,7 +16,7 @@ func MixRestitution(restitution1, restitution2 float64) float64 {
 }
 
 type ContactRegister struct {
-	CreateFcn func(*Fixture, int32, *Fixture, int32) IContact
+	CreateFcn func(*Fixture, int, *Fixture, int) IContact
 	Primary   bool
 }
 
@@ -44,13 +44,13 @@ type IContact interface {
 	GetManifold() *Manifold
 	GetWorldManifold() *WorldManifold
 
-	GetToiCount() int32
-	SetToiCount(int32)
+	GetToiCount() int
+	SetToiCount(int)
 	GetToi() float64
 	SetToi(float64)
 
-	GetFlags() uint32
-	SetFlags(uint32)
+	GetFlags() uint
+	SetFlags(uint)
 
 	GetFriction() float64
 	GetRestitution() float64
@@ -59,13 +59,13 @@ type IContact interface {
 	GetFixtureA() *Fixture
 
 	// Get the child primitive index for fixture A.
-	GetChildIndexA() int32
+	GetChildIndexA() int
 
 	// Get fixture B in this contact.
 	GetFixtureB() *Fixture
 
 	// Get the child primitive index for fixture B.
-	GetChildIndexB() int32
+	GetChildIndexB() int
 
 	// Flag this contact for filtering. Filtering will occur the next time step.
 	FlagForFiltering()
@@ -88,7 +88,7 @@ type IContactEx interface {
 type Contact struct {
 	Ex IContactEx
 
-	Flags uint32
+	Flags uint
 
 	// World pool and list pointers.
 	Prev IContact
@@ -101,12 +101,12 @@ type Contact struct {
 	FixtureA *Fixture
 	FixtureB *Fixture
 
-	IndexA int32
-	IndexB int32
+	IndexA int
+	IndexB int
 
 	Manifold Manifold
 
-	ToiCount int32
+	ToiCount int
 	Toi      float64
 
 	Friction    float64
@@ -116,25 +116,25 @@ type Contact struct {
 // Flags stored in flags
 const (
 	// Used when crawling contact graph when forming islands.
-	Contact_e_islandFlag uint32 = 0x0001
+	Contact_e_islandFlag uint = 0x0001
 
 	// Set when the shapes are touching.
-	Contact_e_touchingFlag uint32 = 0x0002
+	Contact_e_touchingFlag uint = 0x0002
 
 	// This contact can be disabled (by user)
-	Contact_e_enabledFlag uint32 = 0x0004
+	Contact_e_enabledFlag uint = 0x0004
 
 	// This contact needs filtering because a fixture filter was changed.
-	Contact_e_filterFlag uint32 = 0x0008
+	Contact_e_filterFlag uint = 0x0008
 
 	// This bullet contact had a TOI event
-	Contact_e_bulletHitFlag uint32 = 0x0010
+	Contact_e_bulletHitFlag uint = 0x0010
 
 	// This contact has a valid TOI in m_toi
-	Contact_e_toiFlag uint32 = 0x0020
+	Contact_e_toiFlag uint = 0x0020
 )
 
-func (this *Contact) Init(ex IContactEx, fA *Fixture, indexA int32, fB *Fixture, indexB int32) {
+func (this *Contact) Init(ex IContactEx, fA *Fixture, indexA int, fB *Fixture, indexB int) {
 	this.Ex = ex
 
 	this.Flags = Contact_e_enabledFlag
@@ -179,11 +179,11 @@ func (this *Contact) GetManifold() *Manifold {
 	return &this.Manifold
 }
 
-func (this *Contact) GetToiCount() int32 {
+func (this *Contact) GetToiCount() int {
 	return this.ToiCount
 }
 
-func (this *Contact) SetToiCount(toiCount int32) {
+func (this *Contact) SetToiCount(toiCount int) {
 	this.ToiCount = toiCount
 }
 
@@ -195,11 +195,11 @@ func (this *Contact) SetToi(toi float64) {
 	this.Toi = toi
 }
 
-func (this *Contact) GetFlags() uint32 {
+func (this *Contact) GetFlags() uint {
 	return this.Flags
 }
 
-func (this *Contact) SetFlags(flags uint32) {
+func (this *Contact) SetFlags(flags uint) {
 	this.Flags = flags
 }
 
@@ -243,7 +243,7 @@ func (this *Contact) GetFixtureA() *Fixture {
 }
 
 // Get the child primitive index for fixture A.
-func (this *Contact) GetChildIndexA() int32 {
+func (this *Contact) GetChildIndexA() int {
 	return this.IndexA
 }
 
@@ -252,7 +252,7 @@ func (this *Contact) GetFixtureB() *Fixture {
 	return this.FixtureB
 }
 
-func (this *Contact) GetChildIndexB() int32 {
+func (this *Contact) GetChildIndexB() int {
 	return this.IndexB
 }
 
@@ -326,13 +326,13 @@ func (this *Contact) Update(listener IContactListener) {
 
 		// Match old contact ids to new contact ids and copy the
 		// stored impulses to warm start the solver.
-		for i := int32(0); i < this.Manifold.PointCount; i++ {
+		for i := 0; i < this.Manifold.PointCount; i++ {
 			mp2 := &this.Manifold.Points[i]
 			mp2.NormalImpulse = 0.0
 			mp2.TangentImpulse = 0.0
 			id2 := mp2.Id
 
-			for j := int32(0); j < oldManifold.PointCount; j++ {
+			for j := 0; j < oldManifold.PointCount; j++ {
 				mp1 := &oldManifold.Points[j]
 
 				if mp1.Id.Cf == id2.Cf {
@@ -375,7 +375,7 @@ type ChainAndCircleContact struct {
 	Contact
 }
 
-func ChainAndCircleContact_Create(fixtureA *Fixture, indexA int32, fixtureB *Fixture, indexB int32) IContact {
+func ChainAndCircleContact_Create(fixtureA *Fixture, indexA int, fixtureB *Fixture, indexB int) IContact {
 	this := new(ChainAndCircleContact)
 	this.Contact.Init(this, fixtureA, indexA, fixtureB, indexB)
 	return this
@@ -395,7 +395,7 @@ type ChainAndPolygonContact struct {
 	Contact
 }
 
-func ChainAndPolygonContact_Create(fixtureA *Fixture, indexA int32, fixtureB *Fixture, indexB int32) IContact {
+func ChainAndPolygonContact_Create(fixtureA *Fixture, indexA int, fixtureB *Fixture, indexB int) IContact {
 	this := new(ChainAndPolygonContact)
 	this.Contact.Init(this, fixtureA, indexA, fixtureB, indexB)
 	return this
@@ -415,7 +415,7 @@ type CircleContact struct {
 	Contact
 }
 
-func CircleContact_Create(fixtureA *Fixture, indexA int32, fixtureB *Fixture, indexB int32) IContact {
+func CircleContact_Create(fixtureA *Fixture, indexA int, fixtureB *Fixture, indexB int) IContact {
 	this := new(CircleContact)
 	this.Contact.Init(this, fixtureA, indexA, fixtureB, indexB)
 	return this
@@ -433,7 +433,7 @@ type EdgeAndCircleContact struct {
 	Contact
 }
 
-func EdgeAndCircleContact_Create(fixtureA *Fixture, indexA int32, fixtureB *Fixture, indexB int32) IContact {
+func EdgeAndCircleContact_Create(fixtureA *Fixture, indexA int, fixtureB *Fixture, indexB int) IContact {
 	this := new(EdgeAndCircleContact)
 	this.Contact.Init(this, fixtureA, indexA, fixtureB, indexB)
 	return this
@@ -451,7 +451,7 @@ type EdgeAndPolygonContact struct {
 	Contact
 }
 
-func EdgeAndPolygonContact_Create(fixtureA *Fixture, indexA int32, fixtureB *Fixture, indexB int32) IContact {
+func EdgeAndPolygonContact_Create(fixtureA *Fixture, indexA int, fixtureB *Fixture, indexB int) IContact {
 	this := new(EdgeAndPolygonContact)
 	this.Contact.Init(this, fixtureA, indexA, fixtureB, indexB)
 	return this
@@ -469,7 +469,7 @@ type PolygonAndCircleContact struct {
 	Contact
 }
 
-func PolygonAndCircleContact_Create(fixtureA *Fixture, indexA int32, fixtureB *Fixture, indexB int32) IContact {
+func PolygonAndCircleContact_Create(fixtureA *Fixture, indexA int, fixtureB *Fixture, indexB int) IContact {
 	this := new(PolygonAndCircleContact)
 	this.Contact.Init(this, fixtureA, indexA, fixtureB, indexB)
 	return this
@@ -487,7 +487,7 @@ type PolygonContact struct {
 	Contact
 }
 
-func PolygonContact_Create(fixtureA *Fixture, indexA int32, fixtureB *Fixture, indexB int32) IContact {
+func PolygonContact_Create(fixtureA *Fixture, indexA int, fixtureB *Fixture, indexB int) IContact {
 	this := new(PolygonContact)
 	this.Contact.Init(this, fixtureA, indexA, fixtureB, indexB)
 	return this
@@ -501,7 +501,7 @@ func (this *PolygonContact) Evaluate(manifold *Manifold, xfA Transform, xfB Tran
 var Contact_s_registers [Shape_e_typeCount][Shape_e_typeCount]ContactRegister
 var Contact_s_initialized bool = false
 
-func Contact_AddType(createFcn func(*Fixture, int32, *Fixture, int32) IContact, type1, type2 ShapeType) {
+func Contact_AddType(createFcn func(*Fixture, int, *Fixture, int) IContact, type1, type2 ShapeType) {
 	//Assert(0 <= type1 && type1 < Shape_e_typeCount)
 	//Assert(0 <= type2 && type2 < Shape_e_typeCount)
 
@@ -522,7 +522,7 @@ func Contact_InitializeRegisters() {
 	Contact_AddType(ChainAndCircleContact_Create, Shape_e_chain, Shape_e_circle)
 	Contact_AddType(ChainAndPolygonContact_Create, Shape_e_chain, Shape_e_polygon)
 }
-func Contact_Create(fixtureA *Fixture, indexA int32, fixtureB *Fixture, indexB int32) IContact {
+func Contact_Create(fixtureA *Fixture, indexA int, fixtureB *Fixture, indexB int) IContact {
 	if Contact_s_initialized == false {
 		Contact_InitializeRegisters()
 		Contact_s_initialized = true

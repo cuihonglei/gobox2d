@@ -1,6 +1,6 @@
 package box2d
 
-type JointType int32
+type JointType int
 
 const (
 	Joint_e_unknownJoint = iota
@@ -16,7 +16,7 @@ const (
 	Joint_e_ropeJoint
 )
 
-type LimitState int32
+type LimitState int
 
 const (
 	LimitState_e_inactiveLimit = iota
@@ -136,8 +136,8 @@ type IJoint interface {
 	SetIsland(flag bool)
 
 	//
-	GetIndex() int32
-	SetIndex(int32)
+	GetIndex() int
+	SetIndex(int)
 
 	InitVelocityConstraints(data *solverData)
 	SolveVelocityConstraints(data *solverData)
@@ -158,7 +158,7 @@ type Joint struct {
 	BodyA *Body
 	BodyB *Body
 
-	Index int32
+	Index int
 
 	IslandFlag       bool
 	CollideConnected bool
@@ -235,11 +235,11 @@ func (this *Joint) SetIsland(flag bool) {
 	this.IslandFlag = flag
 }
 
-func (this *Joint) GetIndex() int32 {
+func (this *Joint) GetIndex() int {
 	return this.Index
 }
 
-func (this *Joint) SetIndex(index int32) {
+func (this *Joint) SetIndex(index int) {
 	this.Index = index
 }
 
@@ -338,8 +338,8 @@ type DistanceJoint struct {
 	Length       float64
 
 	// Solver temp
-	IndexA       int32
-	IndexB       int32
+	IndexA       int
+	IndexB       int
 	U            Vec2
 	RA           Vec2
 	RB           Vec2
@@ -655,8 +655,8 @@ type MouseJoint struct {
 	Gamma    float64
 
 	// Solver temp
-	IndexA       int32
-	IndexB       int32
+	IndexA       int
+	IndexB       int
 	RB           Vec2
 	LocalCenterB Vec2
 	InvMassB     float64
@@ -932,8 +932,8 @@ type PrismaticJoint struct {
 	LimitState       LimitState
 
 	// Solver temp
-	IndexA       int32
-	IndexB       int32
+	IndexA       int
+	IndexB       int
 	LocalCenterA Vec2
 	LocalCenterB Vec2
 	InvMassA     float64
@@ -1645,8 +1645,8 @@ type RevoluteJoint struct {
 	UpperAngle     float64
 
 	// Solver temp
-	IndexA       int32
-	IndexB       int32
+	IndexA       int
+	IndexB       int
 	RA           Vec2
 	RB           Vec2
 	LocalCenterA Vec2
@@ -2214,8 +2214,8 @@ type PulleyJoint struct {
 	Impulse      float64
 
 	// Solver temp
-	IndexA       int32
-	IndexB       int32
+	IndexA       int
+	IndexB       int
 	UA           Vec2
 	UB           Vec2
 	RA           Vec2
@@ -2558,7 +2558,7 @@ type GearJoint struct {
 	Impulse float64
 
 	// Solver temp
-	IndexA, IndexB, IndexC, IndexD int32
+	IndexA, IndexB, IndexC, IndexD int
 	LcA, LcB, LcC, LcD             Vec2
 	MA, MB, MC, MD                 float64
 	IA, IB, IC, ID                 float64
@@ -3039,8 +3039,8 @@ type WheelJoint struct {
 	EnableMotor    bool
 
 	// Solver temp
-	IndexA       int32
-	IndexB       int32
+	IndexA       int
+	IndexB       int
 	LocalCenterA Vec2
 	LocalCenterB Vec2
 	InvMassA     float64
@@ -3522,8 +3522,8 @@ type WeldJoint struct {
 	Impulse        Vec3
 
 	// Solver temp
-	IndexA       int32
-	IndexB       int32
+	IndexA       int
+	IndexB       int
 	RA           Vec2
 	RB           Vec2
 	LocalCenterA Vec2
@@ -3926,8 +3926,8 @@ type FrictionJoint struct {
 	MaxTorque      float64
 
 	// Solver temp
-	IndexA       int32
-	IndexB       int32
+	IndexA       int
+	IndexB       int
 	RA           Vec2
 	RB           Vec2
 	LocalCenterA Vec2
@@ -4214,8 +4214,8 @@ type RopeJoint struct {
 	Impulse      float64
 
 	// Solver temp
-	IndexA       int32
-	IndexB       int32
+	IndexA       int
+	IndexB       int
 	U            Vec2
 	RA           Vec2
 	RB           Vec2

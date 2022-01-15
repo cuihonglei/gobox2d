@@ -17,8 +17,8 @@ type timeStep struct {
 	dt                 float64 // time step
 	inv_dt             float64 // inverse time step (0 if dt == 0).
 	dtRatio            float64 // dt * inv_dt0
-	velocityIterations int32
-	positionIterations int32
+	velocityIterations int
+	positionIterations int
 	warmStarting       bool
 }
 

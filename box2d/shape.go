@@ -34,7 +34,7 @@ type IShape interface {
 	GetRadius() float64
 
 	// Get the number of child primitives.
-	GetChildCount() int32
+	GetChildCount() int
 
 	// Test a point for containment in this shape. This only works for convex shapes.
 	// @param xf the shape world transform.
@@ -46,13 +46,13 @@ type IShape interface {
 	// @param input the ray-cast input parameters.
 	// @param transform the transform to be applied to the shape.
 	// @param childIndex the child shape index
-	RayCast(input RayCastInput, xf Transform, childIndex int32) (output RayCastOutput, ret bool)
+	RayCast(input RayCastInput, xf Transform, childIndex int) (output RayCastOutput, ret bool)
 
 	// Given a transform, compute the associated axis aligned bounding box for a child shape.
 	// @param aabb returns the axis aligned box.
 	// @param xf the world transform of the shape.
 	// @param childIndex the child shape
-	ComputeAABB(aabb *AABB, xf Transform, childIndex int32)
+	ComputeAABB(aabb *AABB, xf Transform, childIndex int)
 
 	// Compute the mass properties of this shape using its dimensions and density.
 	// The inertia tensor is computed about the local origin.
@@ -95,7 +95,7 @@ func (this *CircleShape) Clone() IShape {
 }
 
 // @see b2Shape::GetChildCount
-func (this *CircleShape) GetChildCount() int32 {
+func (this *CircleShape) GetChildCount() int {
 	return 1
 }
 
@@ -107,7 +107,7 @@ func (this *CircleShape) TestPoint(transform Transform, p Vec2) bool {
 }
 
 // Implement b2Shape.
-func (this *CircleShape) RayCast(input RayCastInput, transform Transform, childIndex int32) (output RayCastOutput, ret bool) {
+func (this *CircleShape) RayCast(input RayCastInput, transform Transform, childIndex int) (output RayCastOutput, ret bool) {
 	position := AddVV(transform.P, MulRV(transform.Q, this.P))
 	s := SubVV(input.P1, position)
 	b := DotVV(s, s) - this.Radius*this.Radius
@@ -140,7 +140,7 @@ func (this *CircleShape) RayCast(input RayCastInput, transform Transform, childI
 }
 
 // @see b2Shape::ComputeAABB
-func (this *CircleShape) ComputeAABB(aabb *AABB, transform Transform, childIndex int32) {
+func (this *CircleShape) ComputeAABB(aabb *AABB, transform Transform, childIndex int) {
 	p := AddVV(transform.P, MulRV(transform.Q, this.P))
 	aabb.LowerBound.Set(p.X-this.Radius, p.Y-this.Radius)
 	aabb.UpperBound.Set(p.X+this.Radius, p.Y+this.Radius)
@@ -156,7 +156,7 @@ func (this *CircleShape) ComputeMass(massData *MassData, density float64) {
 }
 
 // Get the supporting vertex index in the given direction.
-func (this *CircleShape) GetSupport(d *Vec2) int32 {
+func (this *CircleShape) GetSupport(d *Vec2) int {
 	return 0
 }
 
@@ -166,12 +166,12 @@ func (this *CircleShape) GetSupportVertex(d Vec2) Vec2 {
 }
 
 // Get the vertex count.
-func (this *CircleShape) GetVertexCount() int32 {
+func (this *CircleShape) GetVertexCount() int {
 	return 1
 }
 
 // Get a vertex by index. Used by b2Distance.
-func (this *CircleShape) GetVertex(index int32) Vec2 {
+func (this *CircleShape) GetVertex(index int) Vec2 {
 	return this.P
 }
 
@@ -215,7 +215,7 @@ func (this *EdgeShape) Clone() IShape {
 }
 
 // @see b2Shape::GetChildCount
-func (this *EdgeShape) GetChildCount() int32 {
+func (this *EdgeShape) GetChildCount() int {
 	return 1
 }
 
@@ -225,7 +225,7 @@ func (this *EdgeShape) TestPoint(xf Transform, p Vec2) bool {
 }
 
 // Implement b2Shape.
-func (this *EdgeShape) RayCast(input RayCastInput, xf Transform, childIndex int32) (output RayCastOutput, ret bool) {
+func (this *EdgeShape) RayCast(input RayCastInput, xf Transform, childIndex int) (output RayCastOutput, ret bool) {
 	// Put the ray into the edge's frame of reference.
 	p1 := MulTRV(xf.Q, SubVV(input.P1, xf.P))
 	p2 := MulTRV(xf.Q, SubVV(input.P2, xf.P))
@@ -278,7 +278,7 @@ func (this *EdgeShape) RayCast(input RayCastInput, xf Transform, childIndex int3
 }
 
 // @see b2Shape::ComputeAABB
-func (this *EdgeShape) ComputeAABB(aabb *AABB, xf Transform, childIndex int32) {
+func (this *EdgeShape) ComputeAABB(aabb *AABB, xf Transform, childIndex int) {
 	v1 := MulX(xf, this.Vertex1)
 	v2 := MulX(xf, this.Vertex2)
 
@@ -306,14 +306,19 @@ type PolygonShape struct {
 	Centroid    Vec2
 	Vertices    [MaxPolygonVertices]Vec2
 	Normals     [MaxPolygonVertices]Vec2
-	VertexCount int32
+	VertexCount int
+}
+
+func MakePolygonShape() PolygonShape {
+	ps := PolygonShape{}
+	ps.Type = Shape_e_polygon
+	ps.Radius = PolygonRadius
+	return ps
 }
 
 func NewPolygonShape() *PolygonShape {
-	this := new(PolygonShape)
-	this.Type = Shape_e_polygon
-	this.Radius = PolygonRadius
-	return this
+	ps := MakePolygonShape()
+	return &ps
 }
 
 func (this *PolygonShape) Clone() IShape {
@@ -323,11 +328,11 @@ func (this *PolygonShape) Clone() IShape {
 }
 
 // @see b2Shape::GetChildCount
-func (this *PolygonShape) GetChildCount() int32 {
+func (this *PolygonShape) GetChildCount() int {
 	return 1
 }
 
-func computeCentroid(vs []Vec2, count int32) Vec2 {
+func computeCentroid(vs []Vec2, count int) Vec2 {
 	c := Vec2{0.0, 0.0}
 	area := 0.0
 
@@ -338,7 +343,7 @@ func computeCentroid(vs []Vec2, count int32) Vec2 {
 	/*
 	   #if 0
 	   	// This code would put the reference point inside the polygon.
-	   	for (int32 i = 0; i < count; ++i)
+	   	for (int i = 0; i < count; ++i)
 	   	{
 	   		pRef += vs[i];
 	   	}
@@ -348,7 +353,7 @@ func computeCentroid(vs []Vec2, count int32) Vec2 {
 
 	const inv3 float64 = 1.0 / 3.0
 
-	for i := int32(0); i < count; i++ {
+	for i := 0; i < count; i++ {
 		// Triangle vertices.
 		p1 := pRef
 		p2 := vs[i]
@@ -378,7 +383,7 @@ func computeCentroid(vs []Vec2, count int32) Vec2 {
 // It is assumed that the exterior is the the right of each edge.
 // The count must be in the range [3, b2_maxPolygonVertices].
 func (this *PolygonShape) Set(vertices []Vec2) {
-	this.VertexCount = int32(len(vertices))
+	this.VertexCount = len(vertices)
 
 	// Copy vertices.
 	for i, v := range vertices {
@@ -386,9 +391,9 @@ func (this *PolygonShape) Set(vertices []Vec2) {
 	}
 
 	// Compute normals. Ensure the edges have non-zero length.
-	for i := int32(0); i < this.VertexCount; i++ {
+	for i := 0; i < this.VertexCount; i++ {
 		i1 := i
-		i2 := int32(0)
+		i2 := 0
 		if i+1 < this.VertexCount {
 			i2 = i + 1
 		}
@@ -400,13 +405,13 @@ func (this *PolygonShape) Set(vertices []Vec2) {
 	   #ifdef _DEBUG
 	   	// Ensure the polygon is convex and the interior
 	   	// is to the left of each edge.
-	   	for (int32 i = 0; i < m_vertexCount; ++i)
+	   	for (int i = 0; i < m_vertexCount; ++i)
 	   	{
-	   		int32 i1 = i;
-	   		int32 i2 = i + 1 < m_vertexCount ? i + 1 : 0;
+	   		int i1 = i;
+	   		int i2 = i + 1 < m_vertexCount ? i + 1 : 0;
 	   		b2Vec2 edge = m_vertices[i2] - m_vertices[i1];
 
-	   		for (int32 j = 0; j < m_vertexCount; ++j)
+	   		for (int j = 0; j < m_vertexCount; ++j)
 	   		{
 	   			// Don't check vertices on the current edge.
 	   			if (j == i1 || j == i2)
@@ -467,7 +472,7 @@ func (this *PolygonShape) SetAsOrientedBox(hx float64, hy float64, center Vec2, 
 	xf.Q.Set(angle)
 
 	// Transform vertices and normals.
-	for i := int32(0); i < this.VertexCount; i++ {
+	for i := 0; i < this.VertexCount; i++ {
 		this.Vertices[i] = MulX(xf, this.Vertices[i])
 		this.Normals[i] = MulRV(xf.Q, this.Normals[i])
 	}
@@ -477,7 +482,7 @@ func (this *PolygonShape) SetAsOrientedBox(hx float64, hy float64, center Vec2, 
 func (this *PolygonShape) TestPoint(xf Transform, p Vec2) bool {
 	pLocal := MulTRV(xf.Q, SubVV(p, xf.P))
 
-	for i := int32(0); i < this.VertexCount; i++ {
+	for i := 0; i < this.VertexCount; i++ {
 		dot := DotVV(this.Normals[i], SubVV(pLocal, this.Vertices[i]))
 		if dot > 0.0 {
 			return false
@@ -488,7 +493,7 @@ func (this *PolygonShape) TestPoint(xf Transform, p Vec2) bool {
 }
 
 // Implement b2Shape.
-func (this *PolygonShape) RayCast(input RayCastInput, xf Transform, childIndex int32) (output RayCastOutput, ret bool) {
+func (this *PolygonShape) RayCast(input RayCastInput, xf Transform, childIndex int) (output RayCastOutput, ret bool) {
 	// Put the ray into the polygon's frame of reference.
 	p1 := MulTRV(xf.Q, SubVV(input.P1, xf.P))
 	p2 := MulTRV(xf.Q, SubVV(input.P2, xf.P))
@@ -496,9 +501,9 @@ func (this *PolygonShape) RayCast(input RayCastInput, xf Transform, childIndex i
 
 	lower, upper := 0.0, input.MaxFraction
 
-	index := int32(-1)
+	index := -1
 
-	for i := int32(0); i < this.VertexCount; i++ {
+	for i := 0; i < this.VertexCount; i++ {
 		// p = p1 + a * d
 		// dot(normal, p - v) = 0
 		// dot(normal, p1 - v) + a * dot(normal, d) = 0
@@ -546,12 +551,12 @@ func (this *PolygonShape) RayCast(input RayCastInput, xf Transform, childIndex i
 }
 
 // @see b2Shape::ComputeAABB
-func (this *PolygonShape) ComputeAABB(aabb *AABB, xf Transform, childIndex int32) {
+func (this *PolygonShape) ComputeAABB(aabb *AABB, xf Transform, childIndex int) {
 
 	lower := MulX(xf, this.Vertices[0])
 	upper := lower
 
-	for i := int32(1); i < this.VertexCount; i++ {
+	for i := 1; i < this.VertexCount; i++ {
 		v := MulX(xf, this.Vertices[i])
 		lower = MinV(lower, v)
 		upper = MaxV(upper, v)
@@ -567,10 +572,10 @@ func (this *PolygonShape) ComputeMass(massData *MassData, density float64) {
 	// Polygon mass, centroid, and inertia.
 	// Let rho be the polygon density in mass per unit area.
 	// Then:
-	// mass = rho * int32(dA)
-	// centroid.x = (1/mass) * rho * int32(x * dA)
-	// centroid.y = (1/mass) * rho * int32(y * dA)
-	// I = rho * int32((x*x + y*y) * dA)
+	// mass = rho * int(dA)
+	// centroid.x = (1/mass) * rho * int(x * dA)
+	// centroid.y = (1/mass) * rho * int(y * dA)
+	// I = rho * int((x*x + y*y) * dA)
 	//
 	// We can compute these integrals by summing all the integrals
 	// for each triangle of the polygon. To evaluate the integral
@@ -598,14 +603,14 @@ func (this *PolygonShape) ComputeMass(massData *MassData, density float64) {
 	s := Vec2{0.0, 0.0}
 
 	// This code would put the reference point inside the polygon.
-	for i := int32(0); i < this.VertexCount; i++ {
+	for i := 0; i < this.VertexCount; i++ {
 		s.Add(this.Vertices[i])
 	}
 	s.Mul(1.0 / float64(this.VertexCount))
 
 	k_inv3 := 1.0 / 3.0
 
-	for i := int32(0); i < this.VertexCount; i++ {
+	for i := 0; i < this.VertexCount; i++ {
 		// Triangle vertices.
 		e1 := SubVV(this.Vertices[i], s)
 		var e2 Vec2
@@ -647,12 +652,12 @@ func (this *PolygonShape) ComputeMass(massData *MassData, density float64) {
 }
 
 // Get the vertex count.
-func (this *PolygonShape) GetVertexCount() int32 {
+func (this *PolygonShape) GetVertexCount() int {
 	return this.VertexCount
 }
 
 // Get a vertex by index.
-func (this *PolygonShape) GetVertex(index int32) Vec2 {
+func (this *PolygonShape) GetVertex(index int) Vec2 {
 	return this.Vertices[index]
 }
 
@@ -669,7 +674,7 @@ type ChainShape struct {
 	Vertices []Vec2
 
 	// The vertex count.
-	Count int32
+	Count int
 
 	PrevVertex, NextVertex       Vec2
 	HasPrevVertex, HasNextVertex bool
@@ -696,7 +701,7 @@ func (this *ChainShape) Clone() IShape {
 // @param vertices an array of vertices, these are copied
 // @param count the vertex count
 func (this *ChainShape) CreateLoop(vertices []Vec2) {
-	count := int32(len(vertices))
+	count := len(vertices)
 	this.Count = count + 1
 	this.Vertices = make([]Vec2, this.Count, this.Count)
 	copy(this.Vertices, vertices)
@@ -711,7 +716,7 @@ func (this *ChainShape) CreateLoop(vertices []Vec2) {
 // @param vertices an array of vertices, these are copied
 // @param count the vertex count
 func (this *ChainShape) CreateChain(vertices []Vec2) {
-	this.Count = int32(len(vertices))
+	this.Count = len(vertices)
 	this.Vertices = make([]Vec2, this.Count, this.Count)
 	copy(this.Vertices, vertices)
 	this.HasPrevVertex = false
@@ -733,12 +738,12 @@ func (this *ChainShape) SetNextVertex(nextVertex Vec2) {
 }
 
 // @see b2Shape::GetChildCount
-func (this *ChainShape) GetChildCount() int32 {
+func (this *ChainShape) GetChildCount() int {
 	return this.Count - 1
 }
 
 // Get a child edge.
-func (this *ChainShape) GetChildEdge(index int32) *EdgeShape {
+func (this *ChainShape) GetChildEdge(index int) *EdgeShape {
 	edge := NewEdgeShape()
 
 	edge.Type = Shape_e_edge
@@ -773,7 +778,7 @@ func (this *ChainShape) TestPoint(xf Transform, p Vec2) bool {
 }
 
 // Implement b2Shape.
-func (this *ChainShape) RayCast(input RayCastInput, xf Transform, childIndex int32) (output RayCastOutput, ret bool) {
+func (this *ChainShape) RayCast(input RayCastInput, xf Transform, childIndex int) (output RayCastOutput, ret bool) {
 	edgeShape := NewEdgeShape()
 
 	i1 := childIndex
@@ -789,7 +794,7 @@ func (this *ChainShape) RayCast(input RayCastInput, xf Transform, childIndex int
 }
 
 // @see b2Shape::ComputeAABB
-func (this *ChainShape) ComputeAABB(aabb *AABB, xf Transform, childIndex int32) {
+func (this *ChainShape) ComputeAABB(aabb *AABB, xf Transform, childIndex int) {
 	i1 := childIndex
 	i2 := childIndex + 1
 	if i2 == this.Count {

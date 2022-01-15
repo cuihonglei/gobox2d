@@ -51,6 +51,11 @@ func RegisterTest(category string, name string, fcn TestCreateFcn) int {
 
 type ITest interface {
 	step(*Settings)
+
+	BeginContact(contact box2d.IContact)
+	EndContact(contact box2d.IContact)
+	PreSolve(contact box2d.IContact, oldManifold *box2d.Manifold)
+	PostSolve(contact box2d.IContact, impulse *box2d.ContactImpulse)
 }
 
 const k_maxContactPoints = 2048
@@ -113,7 +118,7 @@ func (t *Test) init(test ITest) {
 
 	t.destructionListener.test = test
 	t.world.SetDestructionListener(&t.destructionListener)
-	t.world.SetContactListener(t)
+	t.world.SetContactListener(test)
 	t.world.SetDebugDraw(&g_debugDraw)
 
 	t.bombSpawning = false
@@ -143,4 +148,70 @@ func (t *Test) PostSolve(contact box2d.IContact, impulse *box2d.ContactImpulse) 
 
 func (t *Test) step(settings *Settings) {
 
+	timeStep := 0.0
+	if settings.hertz > 0.0 {
+		timeStep = 1.0 / settings.hertz
+	}
+
+	if settings.pause {
+		if settings.singleStep {
+			settings.singleStep = false
+		} else {
+			timeStep = 0.0
+		}
+
+		g_debugDraw.DrawString(5, t.textLine, "****PAUSED****")
+		t.textLine += t.textIncrement
+	}
+
+	flags := uint(0)
+	flags += b2ui(settings.drawShapes) * box2d.Draw_e_shapeBit
+	flags += b2ui(settings.drawJoints) * box2d.Draw_e_jointBit
+	flags += b2ui(settings.drawAABBs) * box2d.Draw_e_aabbBit
+	flags += b2ui(settings.drawCOMs) * box2d.Draw_e_centerOfMassBit
+	g_debugDraw.SetFlags(flags)
+
+	t.world.SetAllowSleeping(settings.enableSleep)
+	t.world.SetWarmStarting(settings.enableWarmStarting)
+	t.world.SetContinuousPhysics(settings.enableContinuous)
+	t.world.SetSubStepping(settings.enableSubStepping)
+
+	t.pointCount = 0
+
+	t.world.Step(timeStep, settings.velocityIterations, settings.positionIterations)
+
+	t.world.DebugDraw()
+	g_debugDraw.Flush()
+
+	if timeStep > 0.0 {
+		t.stepCount += 1
+	}
+
+	if settings.drawStats {
+		// TODO
+	}
+
+	// Track maximum profile times
+	{
+		// TODO
+	}
+
+	if settings.drawProfile {
+		// TODO
+	}
+
+	if t.bombSpawning {
+		// TODO
+	}
+
+	if settings.drawContactPoints {
+		// TODO
+	}
+}
+
+func b2ui(b bool) uint {
+	if b {
+		return 1
+	}
+	return 0
 }

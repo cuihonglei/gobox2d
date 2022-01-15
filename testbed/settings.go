@@ -27,11 +27,11 @@ type Settings struct {
 
 func MakeSettings() Settings {
 	s := Settings{}
-	s.Reset()
+	s.reset()
 	return s
 }
 
-func (s *Settings) Reset() {
+func (s *Settings) reset() {
 	s.testIndex = 0
 	s.windowWidth = 1600
 	s.windowHeight = 900
@@ -56,10 +56,10 @@ func (s *Settings) Reset() {
 	s.singleStep = false
 }
 
-func (s *Settings) Save() {
+func (s *Settings) save() {
 	// TODO
 }
 
-func (s *Settings) Load() {
+func (s *Settings) load() {
 	// TODO
 }

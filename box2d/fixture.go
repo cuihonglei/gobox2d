@@ -72,8 +72,8 @@ func NewFixtureDef() *FixtureDef {
 type FixtureProxy struct {
 	AABB       AABB
 	Fixture    *Fixture
-	ChildIndex int32
-	ProxyId    int32
+	ChildIndex int
+	ProxyId    int
 }
 
 // A fixture is used to attach a shape to a body for collision detection. A fixture
@@ -93,7 +93,7 @@ type Fixture struct {
 	Restitution float64
 
 	Proxies    []FixtureProxy
-	ProxyCount int32
+	ProxyCount int
 
 	Filter Filter
 
@@ -126,7 +126,7 @@ func (this *Fixture) Create(body *Body, def *FixtureDef) {
 	// Reserve proxy space
 	childCount := this.Shape.GetChildCount()
 	this.Proxies = make([]FixtureProxy, childCount, childCount)
-	for i := int32(0); i < childCount; i++ {
+	for i := 0; i < childCount; i++ {
 		this.Proxies[i].Fixture = nil
 		this.Proxies[i].ProxyId = BroadPhase_e_nullProxy
 	}
@@ -151,7 +151,7 @@ func (this *Fixture) CreateProxies(broadPhase *BroadPhase, xf Transform) {
 	// Create proxies in the broad-phase.
 	this.ProxyCount = this.Shape.GetChildCount()
 
-	for i := int32(0); i < this.ProxyCount; i++ {
+	for i := 0; i < this.ProxyCount; i++ {
 		proxy := &this.Proxies[i]
 		this.Shape.ComputeAABB(&proxy.AABB, xf, i)
 		proxy.ProxyId = broadPhase.CreateProxy(proxy.AABB, proxy)
@@ -162,7 +162,7 @@ func (this *Fixture) CreateProxies(broadPhase *BroadPhase, xf Transform) {
 
 func (this *Fixture) DestroyProxies(broadPhase *BroadPhase) {
 	// Destroy proxies in the broad-phase.
-	for i := int32(0); i < this.ProxyCount; i++ {
+	for i := 0; i < this.ProxyCount; i++ {
 		proxy := &this.Proxies[i]
 		broadPhase.DestroyProxy(proxy.ProxyId)
 		proxy.ProxyId = BroadPhase_e_nullProxy
@@ -176,7 +176,7 @@ func (this *Fixture) Synchronize(broadPhase *BroadPhase, transform1 Transform, t
 		return
 	}
 
-	for i := int32(0); i < this.ProxyCount; i++ {
+	for i := 0; i < this.ProxyCount; i++ {
 		proxy := &this.Proxies[i]
 
 		// Compute an AABB that covers the swept shape (may miss some rotation effect).
@@ -259,7 +259,7 @@ func (this *Fixture) Refilter() {
 
 	// Touch each proxy so that new pairs may be created
 	broadPhase := world.contactManager.BroadPhase
-	for i := int32(0); i < this.ProxyCount; i++ {
+	for i := 0; i < this.ProxyCount; i++ {
 		broadPhase.TouchProxy(this.Proxies[i].ProxyId)
 	}
 }
@@ -296,7 +296,7 @@ func (this *Fixture) TestPoint(p Vec2) bool {
 // Cast a ray against this shape.
 // @param output the ray-cast results.
 // @param input the ray-cast input parameters.
-func (this *Fixture) RayCast(input RayCastInput, childIndex int32) (output RayCastOutput, ret bool) {
+func (this *Fixture) RayCast(input RayCastInput, childIndex int) (output RayCastOutput, ret bool) {
 	return this.Shape.RayCast(input, this.Body.GetTransform(), childIndex)
 }
 
@@ -343,12 +343,12 @@ func (this *Fixture) SetRestitution(restitution float64) {
 // Get the fixture's AABB. This AABB may be enlarge and/or stale.
 // If you need a more accurate AABB, compute it using the shape and
 // the body transform.
-func (this *Fixture) GetAABB(childIndex int32) AABB {
+func (this *Fixture) GetAABB(childIndex int) AABB {
 	return this.Proxies[childIndex].AABB
 }
 
 // Dump this fixture to the log file.
-func (this *Fixture) Dump(bodyIndex int32) {
+func (this *Fixture) Dump(bodyIndex int) {
 	Log("    b2FixtureDef fd;\n")
 	Log("    fd.friction = %.15f;\n", this.Friction)
 	Log("    fd.restitution = %.15f;\n", this.Restitution)
@@ -383,7 +383,7 @@ func (this *Fixture) Dump(bodyIndex int32) {
 			s := this.Shape.(*PolygonShape)
 			Log("    b2PolygonShape shape;\n")
 			Log("    b2Vec2 vs[%d];\n", MaxPolygonVertices)
-			for i := int32(0); i < s.VertexCount; i++ {
+			for i := 0; i < s.VertexCount; i++ {
 				Log("    vs[%d].Set(%.15f, %.15f);\n", i, s.Vertices[i].X, s.Vertices[i].Y)
 			}
 			Log("    shape.Set(vs, %d);\n", s.VertexCount)
@@ -393,7 +393,7 @@ func (this *Fixture) Dump(bodyIndex int32) {
 			s := this.Shape.(*ChainShape)
 			Log("    b2ChainShape shape;\n")
 			Log("    b2Vec2 vs[%d];\n", len(s.Vertices))
-			for i := int32(0); i < int32(len(s.Vertices)); i++ {
+			for i := 0; i < len(s.Vertices); i++ {
 				Log("    vs[%d].Set(%.15f, %.15f);\n", i, s.Vertices[i].X, s.Vertices[i].Y)
 			}
 			Log("    shape.CreateChain(vs, %d);\n", len(s.Vertices))

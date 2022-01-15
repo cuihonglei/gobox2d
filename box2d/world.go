@@ -4,15 +4,15 @@ package box2d
 // and asynchronous queries. The world also contains efficient memory
 // management facilities.
 type World struct {
-	flags int32
+	flags int
 
 	contactManager *ContactManager
 
 	bodyList  *Body
 	jointList IJoint
 
-	bodyCount  int32
-	jointCount int32
+	bodyCount  int
+	jointCount int
 
 	gravity    Vec2
 	allowSleep bool
@@ -331,7 +331,7 @@ func (this *World) DestroyJoint(j IJoint) {
 // @param timeStep the amount of time to simulate, this should not vary.
 // @param velocityIterations for the velocity constraint solver.
 // @param positionIterations for the position constraint solver.
-func (this *World) Step(dt float64, velocityIterations int32, positionIterations int32) {
+func (this *World) Step(dt float64, velocityIterations int, positionIterations int) {
 	stepTimer := NewTimer()
 
 	// If new fixtures were added, we need to find the new contacts.
@@ -425,7 +425,7 @@ func (this *World) DrawShape(fixture *Fixture, xf Transform, color Color) {
 		vertices := chain.Vertices
 
 		v1 := MulX(xf, vertices[0])
-		for i := int32(0); i < count; i++ {
+		for i := 0; i < count; i++ {
 			v2 := MulX(xf, vertices[i])
 			this.debugDraw.DrawSegment(v1, v2, color)
 			this.debugDraw.DrawCircle(v1, 0.05, color)
@@ -436,7 +436,7 @@ func (this *World) DrawShape(fixture *Fixture, xf Transform, color Color) {
 		vertexCount := poly.VertexCount
 		var vertices [MaxPolygonVertices]Vec2
 
-		for i := int32(0); i < vertexCount; i++ {
+		for i := 0; i < vertexCount; i++ {
 			vertices[i] = MulX(xf, poly.Vertices[i])
 		}
 
@@ -476,8 +476,8 @@ func (this *World) drawJoint(joint IJoint) {
 	}
 }
 
-// Call this to draw shapes and other debug draw data.
-func (this *World) DrawDebugData() {
+// Call this to draw shapes and other debug draw data. This is intentionally non-const.
+func (this *World) DebugDraw() {
 	if this.debugDraw == nil {
 		return
 	}
@@ -526,7 +526,7 @@ func (this *World) DrawDebugData() {
 			}
 
 			for f := b.GetFixtureList(); f != nil; f = f.GetNext() {
-				for i := int32(0); i < f.ProxyCount; i++ {
+				for i := 0; i < f.ProxyCount; i++ {
 					proxy := &f.Proxies[i]
 					aabb := bp.GetFatAABB(proxy.ProxyId)
 					var vs [4]Vec2
@@ -559,7 +559,7 @@ type WorldQueryAABBWrapper struct {
 	callback   func(*Fixture) bool
 }
 
-func (this *WorldQueryAABBWrapper) QueryCallback(proxyId int32) bool {
+func (this *WorldQueryAABBWrapper) QueryCallback(proxyId int) bool {
 	proxy := this.broadPhase.GetUserData(proxyId).(*FixtureProxy)
 	return this.callback(proxy.Fixture)
 }
@@ -582,7 +582,7 @@ type WorldQueryShapeWrapper struct {
 	transform  *Transform
 }
 
-func (this *WorldQueryShapeWrapper) QueryCallback(proxyId int32) bool {
+func (this *WorldQueryShapeWrapper) QueryCallback(proxyId int) bool {
 	fixture := this.broadPhase.GetUserData(proxyId).(*FixtureProxy).Fixture
 	if TestOverlap(this.shape, 0, fixture.GetShape(), 0, *this.transform, fixture.GetBody().GetTransform()) {
 		return this.callback(fixture)
@@ -616,7 +616,7 @@ type WorldRayCastWrapper struct {
 	callback   func(*Fixture, Vec2, Vec2, float64) float64
 }
 
-func (this *WorldRayCastWrapper) RayCastCallback(input RayCastInput, proxyId int32) float64 {
+func (this *WorldRayCastWrapper) RayCastCallback(input RayCastInput, proxyId int) float64 {
 	proxy := this.broadPhase.GetUserData(proxyId).(*FixtureProxy)
 	fixture := proxy.Fixture
 	index := proxy.ChildIndex
@@ -710,32 +710,32 @@ func (this *World) GetSubStepping() bool {
 }
 
 /// Get the number of broad-phase proxies.
-func (this *World) GetProxyCount() int32 {
+func (this *World) GetProxyCount() int {
 	return this.contactManager.BroadPhase.GetProxyCount()
 }
 
 /// Get the number of bodies.
-func (this *World) GetBodyCount() int32 {
+func (this *World) GetBodyCount() int {
 	return this.bodyCount
 }
 
 /// Get the number of joints.
-func (this *World) GetJointCount() int32 {
+func (this *World) GetJointCount() int {
 	return this.jointCount
 }
 
 /// Get the number of contacts (each may have 0 or more contact points).
-func (this *World) GetContactCount() int32 {
+func (this *World) GetContactCount() int {
 	return this.contactManager.ContactCount
 }
 
 /// Get the height of the dynamic tree.
-func (this *World) GetTreeHeight() int32 {
+func (this *World) GetTreeHeight() int {
 	return this.contactManager.BroadPhase.GetTreeHeight()
 }
 
 /// Get the balance of the dynamic tree.
-func (this *World) GetTreeBalance() int32 {
+func (this *World) GetTreeBalance() int {
 	return this.contactManager.BroadPhase.GetTreeBalance()
 }
 
@@ -824,7 +824,7 @@ func (this *World) solve(step *timeStep) {
 
 		// Reset island and stack.
 		island.Clear()
-		stackCount := int32(0)
+		stackCount := 0
 		stack[stackCount] = seed
 		stackCount++
 		seed.flags |= body_e_islandFlag
@@ -914,7 +914,7 @@ func (this *World) solve(step *timeStep) {
 		this.profile.solvePosition += profile.solvePosition
 
 		// Post solve cleanup.
-		for i := int32(0); i < island.BodyCount; i++ {
+		for i := 0; i < island.BodyCount; i++ {
 			// Allow static bodies to participate in other islands.
 			b := island.Bodies[i]
 			if b.GetType() == StaticBody {
@@ -1197,7 +1197,7 @@ func (this *World) solveTOI(step *timeStep) {
 		island.SolveTOI(&subStep, bA.islandIndex, bB.islandIndex)
 
 		// Reset island flags and synchronize broad-phase proxies.
-		for i := int32(0); i < island.BodyCount; i++ {
+		for i := 0; i < island.BodyCount; i++ {
 			body := island.Bodies[i]
 			body.flags &= ^body_e_islandFlag
 
@@ -1236,7 +1236,7 @@ func (this *World) Dump() {
 
 	Log("b2Body** bodies = (b2Body**)b2Alloc(%d * sizeof(b2Body*));\n", this.bodyCount)
 	Log("b2Joint** joints = (b2Joint**)b2Alloc(%d * sizeof(b2Joint*));\n", this.jointCount)
-	i := int32(0)
+	i := 0
 	for b := this.bodyList; b != nil; b = b.next {
 		b.islandIndex = i
 		b.Dump()

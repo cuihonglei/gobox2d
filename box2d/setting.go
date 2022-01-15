@@ -103,9 +103,9 @@ func Log(format string, a ...interface{}) {
 // Version numbering scheme.
 // See http://en.wikipedia.org/wiki/Software_versioning
 type Version struct {
-	Major    int32 // significant changes
-	Minor    int32 // incremental changes
-	Revision int32 // bug fixes
+	Major    int // significant changes
+	Minor    int // incremental changes
+	Revision int // bug fixes
 }
 
 // Current version.

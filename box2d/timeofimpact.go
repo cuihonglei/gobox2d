@@ -59,8 +59,8 @@ func (this *SeparationFunction) Initialize(cache *SimplexCache,
 
 	if count == 1 {
 		this.itype = SeparationFunction_e_points
-		localPointA := this.proxyA.GetVertex(int32(cache.IndexA[0]))
-		localPointB := this.proxyB.GetVertex(int32(cache.IndexB[0]))
+		localPointA := this.proxyA.GetVertex(int(cache.IndexA[0]))
+		localPointB := this.proxyB.GetVertex(int(cache.IndexB[0]))
 		pointA := MulX(xfA, localPointA)
 		pointB := MulX(xfB, localPointB)
 		this.axis = SubVV(pointB, pointA)
@@ -69,8 +69,8 @@ func (this *SeparationFunction) Initialize(cache *SimplexCache,
 	} else if cache.IndexA[0] == cache.IndexA[1] {
 		// Two points on B and one on A.
 		this.itype = SeparationFunction_e_faceB
-		localPointB1 := proxyB.GetVertex(int32(cache.IndexB[0]))
-		localPointB2 := proxyB.GetVertex(int32(cache.IndexB[1]))
+		localPointB1 := proxyB.GetVertex(int(cache.IndexB[0]))
+		localPointB2 := proxyB.GetVertex(int(cache.IndexB[1]))
 
 		this.axis = CrossVF(SubVV(localPointB2, localPointB1), 1.0)
 		this.axis.Normalize()
@@ -79,7 +79,7 @@ func (this *SeparationFunction) Initialize(cache *SimplexCache,
 		this.localPoint = MulFV(0.5, AddVV(localPointB1, localPointB2))
 		pointB := MulX(xfB, this.localPoint)
 
-		localPointA := proxyA.GetVertex(int32(cache.IndexA[0]))
+		localPointA := proxyA.GetVertex(int(cache.IndexA[0]))
 		pointA := MulX(xfA, localPointA)
 
 		s := DotVV(SubVV(pointA, pointB), normal)
@@ -91,8 +91,8 @@ func (this *SeparationFunction) Initialize(cache *SimplexCache,
 	} else {
 		// Two points on A and one or two points on B.
 		this.itype = SeparationFunction_e_faceA
-		localPointA1 := this.proxyA.GetVertex(int32(cache.IndexA[0]))
-		localPointA2 := this.proxyA.GetVertex(int32(cache.IndexA[1]))
+		localPointA1 := this.proxyA.GetVertex(int(cache.IndexA[0]))
+		localPointA2 := this.proxyA.GetVertex(int(cache.IndexA[1]))
 
 		this.axis = CrossVF(SubVV(localPointA2, localPointA1), 1.0)
 		this.axis.Normalize()
@@ -101,7 +101,7 @@ func (this *SeparationFunction) Initialize(cache *SimplexCache,
 		this.localPoint = MulFV(0.5, AddVV(localPointA1, localPointA2))
 		pointA := MulX(xfA, this.localPoint)
 
-		localPointB := this.proxyB.GetVertex(int32(cache.IndexB[0]))
+		localPointB := this.proxyB.GetVertex(int(cache.IndexB[0]))
 		pointB := MulX(xfB, localPointB)
 
 		s := DotVV(SubVV(pointB, pointA), normal)
@@ -113,7 +113,7 @@ func (this *SeparationFunction) Initialize(cache *SimplexCache,
 	}
 }
 
-func (this *SeparationFunction) FindMinSeparation(t float64) (indexA, indexB int32, separation float64) {
+func (this *SeparationFunction) FindMinSeparation(t float64) (indexA, indexB int, separation float64) {
 	xfA := this.sweepA.GetTransform(t)
 	xfB := this.sweepB.GetTransform(t)
 
@@ -171,7 +171,7 @@ func (this *SeparationFunction) FindMinSeparation(t float64) (indexA, indexB int
 	return
 }
 
-func (this *SeparationFunction) Evaluate(indexA int32, indexB int32, t float64) (separation float64) {
+func (this *SeparationFunction) Evaluate(indexA int, indexB int, t float64) (separation float64) {
 	xfA := this.sweepA.GetTransform(t)
 	xfB := this.sweepB.GetTransform(t)
 
@@ -217,8 +217,8 @@ func (this *SeparationFunction) Evaluate(indexA int32, indexB int32, t float64) 
 	return
 }
 
-var ToiCalls, ToiIters, ToiMaxIters int32
-var ToiRootIters, ToiMaxRootIters int32
+var ToiCalls, ToiIters, ToiMaxIters int
+var ToiRootIters, ToiMaxRootIters int
 
 // Compute the upper bound on time before two shapes penetrate. Time is represented as
 // a fraction between [0,tMax]. This uses a swept separating axis and may miss some intermediate,
@@ -249,8 +249,8 @@ func TimeOfImpact(output *TOIOutput, input *TOIInput) {
 	tolerance := 0.25 * LinearSlop
 
 	t1 := 0.0
-	const k_maxIterations int32 = 20 // TODO_ERIN b2Settings
-	iter := int32(0)
+	const k_maxIterations int = 20 // TODO_ERIN b2Settings
+	iter := 0
 
 	// Prepare input for distance query.
 	var cache SimplexCache
@@ -293,14 +293,14 @@ func TimeOfImpact(output *TOIOutput, input *TOIInput) {
 		/*#if 0
 				// Dump the curve seen by the root finder
 				{
-					const int32 N = 100;
+					const int N = 100;
 					float64 dx = 1.0f / N;
 					float64 xs[N+1];
 					float64 fs[N+1];
 
 					float64 x = 0.0f;
 
-					for (int32 i = 0; i <= N; ++i)
+					for (int i = 0; i <= N; ++i)
 					{
 						sweepA.GetTransform(&xfA, x);
 						sweepB.GetTransform(&xfB, x);
@@ -320,7 +320,7 @@ func TimeOfImpact(output *TOIOutput, input *TOIInput) {
 		// resolving the deepest point. This loop is bounded by the number of vertices.
 		done := false
 		t2 := tMax
-		pushBackIter := int32(0)
+		pushBackIter := 0
 		for {
 			// Find the deepest point at t2. Store the witness point indices.
 			indexA, indexB, s2 := fcn.FindMinSeparation(t2)
@@ -363,7 +363,7 @@ func TimeOfImpact(output *TOIOutput, input *TOIInput) {
 			}
 
 			// Compute 1D root of: f(x) - target = 0
-			rootIterCount := int32(0)
+			rootIterCount := 0
 			a1, a2 := t1, t2
 			for {
 				// Use a mix of the secant rule and bisection.

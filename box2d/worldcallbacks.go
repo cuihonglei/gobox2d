@@ -41,7 +41,7 @@ func (cf *ContactFilter) ShouldCollide(fixtureA *Fixture, fixtureB *Fixture) boo
 type ContactImpulse struct {
 	NormalImpulses  [MaxManifoldPoints]float64
 	TangentImpulses [MaxManifoldPoints]float64
-	Count           int32
+	Count           int
 }
 
 // Implement this class to get contact information. You can use these results for

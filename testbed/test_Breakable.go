@@ -23,7 +23,10 @@ type Breakable struct {
 }
 
 func CreateBreakable() ITest {
-	b := new(Breakable)
+	b := &Breakable{
+		shape1: box2d.MakePolygonShape(),
+		shape2: box2d.MakePolygonShape(),
+	}
 	b.Test.init(b)
 
 	// Ground body

@@ -4,7 +4,7 @@ package box2d
 type ContactManager struct {
 	BroadPhase      *BroadPhase
 	ContactList     IContact
-	ContactCount    int32
+	ContactCount    int
 	ContactFilter   IContactFilter
 	ContactListener IContactListener
 }

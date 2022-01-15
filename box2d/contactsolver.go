@@ -14,14 +14,14 @@ type ContactPositionConstraint struct {
 	LocalPoints                [MaxManifoldPoints]Vec2
 	LocalNormal                Vec2
 	LocalPoint                 Vec2
-	IndexA                     int32
-	IndexB                     int32
+	IndexA                     int
+	IndexB                     int
 	InvMassA, InvMassB         float64
 	LocalCenterA, LocalCenterB Vec2
 	InvIA, InvIB               float64
 	Type                       ManifoldType
 	RadiusA, RadiusB           float64
-	PointCount                 int32
+	PointCount                 int
 }
 
 type ContactVelocityConstraint struct {
@@ -29,20 +29,20 @@ type ContactVelocityConstraint struct {
 	Normal             Vec2
 	NormalMass         Mat22
 	K                  Mat22
-	IndexA             int32
-	IndexB             int32
+	IndexA             int
+	IndexB             int
 	InvMassA, InvMassB float64
 	InvIA, InvIB       float64
 	Friction           float64
 	Restitution        float64
-	PointCount         int32
-	ContactIndex       int32
+	PointCount         int
+	ContactIndex       int
 }
 
 type ContactSolverDef struct {
 	Step       timeStep
 	Contacts   []IContact
-	Count      int32
+	Count      int
 	Positions  []position
 	Velocities []velocity
 }
@@ -54,7 +54,7 @@ type ContactSolver struct {
 	PositionConstraints []ContactPositionConstraint
 	VelocityConstraints []ContactVelocityConstraint
 	Contacts            []IContact
-	Count               int32
+	Count               int
 }
 
 func NewContactSolver(def *ContactSolverDef) *ContactSolver {
@@ -68,7 +68,7 @@ func NewContactSolver(def *ContactSolverDef) *ContactSolver {
 	this.Contacts = def.Contacts
 
 	// Initialize position independent portions of the constraints.
-	for i := int32(0); i < this.Count; i++ {
+	for i := 0; i < this.Count; i++ {
 		contact := this.Contacts[i]
 
 		fixtureA := contact.GetFixtureA()
@@ -113,7 +113,7 @@ func NewContactSolver(def *ContactSolverDef) *ContactSolver {
 		pc.RadiusB = radiusB
 		pc.Type = manifold.Type
 
-		for j := int32(0); j < pointCount; j++ {
+		for j := 0; j < pointCount; j++ {
 			cp := &manifold.Points[j]
 			vcp := &vc.Points[j]
 
@@ -138,7 +138,7 @@ func NewContactSolver(def *ContactSolverDef) *ContactSolver {
 }
 
 func (this *ContactSolver) InitializeVelocityConstraints() {
-	for i := int32(0); i < this.Count; i++ {
+	for i := 0; i < this.Count; i++ {
 		vc := &this.VelocityConstraints[i]
 		pc := &this.PositionConstraints[i]
 
@@ -178,7 +178,7 @@ func (this *ContactSolver) InitializeVelocityConstraints() {
 		vc.Normal = worldManifold.Normal
 
 		pointCount := vc.PointCount
-		for j := int32(0); j < pointCount; j++ {
+		for j := 0; j < pointCount; j++ {
 			vcp := &vc.Points[j]
 
 			vcp.RA = SubVV(worldManifold.Points[j], cA)
@@ -246,7 +246,7 @@ func (this *ContactSolver) InitializeVelocityConstraints() {
 
 func (this *ContactSolver) WarmStart() {
 	// Warm start.
-	for i := int32(0); i < this.Count; i++ {
+	for i := 0; i < this.Count; i++ {
 		vc := &this.VelocityConstraints[i]
 
 		indexA := vc.IndexA
@@ -265,7 +265,7 @@ func (this *ContactSolver) WarmStart() {
 		normal := vc.Normal
 		tangent := CrossVF(normal, 1.0)
 
-		for j := int32(0); j < pointCount; j++ {
+		for j := 0; j < pointCount; j++ {
 			vcp := &vc.Points[j]
 			P := AddVV(MulFV(vcp.NormalImpulse, normal), MulFV(vcp.TangentImpulse, tangent))
 			wA -= iA * CrossVV(vcp.RA, P)
@@ -282,7 +282,7 @@ func (this *ContactSolver) WarmStart() {
 }
 
 func (this *ContactSolver) SolveVelocityConstraints() {
-	for i := int32(0); i < this.Count; i++ {
+	for i := 0; i < this.Count; i++ {
 		vc := &this.VelocityConstraints[i]
 
 		indexA := vc.IndexA
@@ -304,7 +304,7 @@ func (this *ContactSolver) SolveVelocityConstraints() {
 
 		// Solve tangent constraints first because non-penetration is more important
 		// than friction.
-		for j := int32(0); j < pointCount; j++ {
+		for j := 0; j < pointCount; j++ {
 			vcp := &vc.Points[j]
 
 			// Relative velocity at contact
@@ -578,11 +578,11 @@ func (this *ContactSolver) SolveVelocityConstraints() {
 }
 
 func (this *ContactSolver) StoreImpulses() {
-	for i := int32(0); i < this.Count; i++ {
+	for i := 0; i < this.Count; i++ {
 		vc := &this.VelocityConstraints[i]
 		manifold := this.Contacts[vc.ContactIndex].GetManifold()
 
-		for j := int32(0); j < vc.PointCount; j++ {
+		for j := 0; j < vc.PointCount; j++ {
 			manifold.Points[j].NormalImpulse = vc.Points[j].NormalImpulse
 			manifold.Points[j].TangentImpulse = vc.Points[j].TangentImpulse
 		}
@@ -595,7 +595,7 @@ type PositionSolverManifold struct {
 	Separation float64
 }
 
-func (this *PositionSolverManifold) Initialize(pc *ContactPositionConstraint, xfA, xfB Transform, index int32) {
+func (this *PositionSolverManifold) Initialize(pc *ContactPositionConstraint, xfA, xfB Transform, index int) {
 	//Assert(pc.PointCount > 0)
 	switch pc.Type {
 	case Manifold_e_circles:
@@ -630,7 +630,7 @@ func (this *PositionSolverManifold) Initialize(pc *ContactPositionConstraint, xf
 func (this *ContactSolver) SolvePositionConstraints() bool {
 	minSeparation := 0.0
 
-	for i := int32(0); i < this.Count; i++ {
+	for i := 0; i < this.Count; i++ {
 		pc := &this.PositionConstraints[i]
 
 		indexA := pc.IndexA
@@ -650,7 +650,7 @@ func (this *ContactSolver) SolvePositionConstraints() bool {
 		aB := this.Positions[indexB].a
 
 		// Solve normal constraints
-		for j := int32(0); j < pointCount; j++ {
+		for j := 0; j < pointCount; j++ {
 			var xfA, xfB Transform
 			xfA.Q.Set(aA)
 			xfB.Q.Set(aB)
@@ -705,10 +705,10 @@ func (this *ContactSolver) SolvePositionConstraints() bool {
 	return minSeparation >= -3.0*LinearSlop
 }
 
-func (this *ContactSolver) SolveTOIPositionConstraints(toiIndexA, toiIndexB int32) bool {
+func (this *ContactSolver) SolveTOIPositionConstraints(toiIndexA, toiIndexB int) bool {
 	minSeparation := 0.0
 
-	for i := int32(0); i < this.Count; i++ {
+	for i := 0; i < this.Count; i++ {
 		pc := &this.PositionConstraints[i]
 
 		indexA := pc.IndexA
@@ -738,7 +738,7 @@ func (this *ContactSolver) SolveTOIPositionConstraints(toiIndexA, toiIndexB int3
 		aB := this.Positions[indexB].a
 
 		// Solve normal constraints
-		for j := int32(0); j < pointCount; j++ {
+		for j := 0; j < pointCount; j++ {
 			var xfA, xfB Transform
 			xfA.Q.Set(aA)
 			xfB.Q.Set(aB)

@@ -28,7 +28,7 @@ const (
 // Contact ids to facilitate warm starting.
 type ContactID struct {
 	Cf ContactFeature
-	//Key uint32 // Used to quickly compare contact ids.
+	//Key uint // Used to quickly compare contact ids.
 }
 
 // A manifold point is a contact point belonging to a contact
@@ -69,7 +69,7 @@ type Manifold struct {
 	LocalNormal Vec2                             // not use for Type::e_points
 	LocalPoint  Vec2                             // usage depends on manifold type
 	Type        ManifoldType
-	PointCount  int32 // the number of manifold points
+	PointCount  int // the number of manifold points
 }
 
 type ManifoldType byte
@@ -114,7 +114,7 @@ func (this *WorldManifold) Initialize(manifold *Manifold,
 		this.Normal = MulRV(xfA.Q, manifold.LocalNormal)
 		planePoint := MulX(xfA, manifold.LocalPoint)
 
-		for i := int32(0); i < manifold.PointCount; i++ {
+		for i := 0; i < manifold.PointCount; i++ {
 			clipPoint := MulX(xfB, manifold.Points[i].LocalPoint)
 			cA := AddVV(clipPoint, MulFV(radiusA-DotVV(SubVV(clipPoint, planePoint), this.Normal), this.Normal))
 			cB := SubVV(clipPoint, MulFV(radiusB, this.Normal))
@@ -124,7 +124,7 @@ func (this *WorldManifold) Initialize(manifold *Manifold,
 		this.Normal = MulRV(xfB.Q, manifold.LocalNormal)
 		planePoint := MulX(xfB, manifold.LocalPoint)
 
-		for i := int32(0); i < manifold.PointCount; i++ {
+		for i := 0; i < manifold.PointCount; i++ {
 			clipPoint := MulX(xfA, manifold.Points[i].LocalPoint)
 			cB := AddVV(clipPoint, MulFV(radiusB-DotVV(SubVV(clipPoint, planePoint), this.Normal), this.Normal))
 			cA := SubVV(clipPoint, MulFV(radiusA, this.Normal))
@@ -150,18 +150,18 @@ const (
 // to manifold2. So state1 is either persist or remove while state2 is either add or persist.
 func GetPointStates(state1 *[MaxManifoldPoints]PointState, state2 *[MaxManifoldPoints]PointState,
 	manifold1 *Manifold, manifold2 *Manifold) {
-	for i := int32(0); i < MaxManifoldPoints; i++ {
+	for i := 0; i < MaxManifoldPoints; i++ {
 		state1[i] = NullState
 		state2[i] = NullState
 	}
 
 	// Detect persists and removes.
-	for i := int32(0); i < manifold1.PointCount; i++ {
+	for i := 0; i < manifold1.PointCount; i++ {
 		id := manifold1.Points[i].Id
 
 		state1[i] = RemoveState
 
-		for j := int32(0); j < manifold2.PointCount; j++ {
+		for j := 0; j < manifold2.PointCount; j++ {
 			if manifold2.Points[j].Id.Cf == id.Cf {
 				state1[i] = PersistState
 				break
@@ -170,12 +170,12 @@ func GetPointStates(state1 *[MaxManifoldPoints]PointState, state2 *[MaxManifoldP
 	}
 
 	// Detect persists and adds.
-	for i := int32(0); i < manifold2.PointCount; i++ {
+	for i := 0; i < manifold2.PointCount; i++ {
 		id := manifold2.Points[i].Id
 
 		state2[i] = AddState
 
-		for j := int32(0); j < manifold1.PointCount; j++ {
+		for j := 0; j < manifold1.PointCount; j++ {
 			if manifold1.Points[j].Id.Cf == id.Cf {
 				state2[i] = PersistState
 				break
@@ -266,7 +266,7 @@ func (this *AABB) RayCast(input RayCastInput) (output RayCastOutput, ret bool) {
 
 	var normal Vec2
 
-	for i := int32(0); i < 2; i++ {
+	for i := 0; i < 2; i++ {
 		if absD.GetI(i) < Epsilon {
 			// Parallel.
 			if p.GetI(i) < this.LowerBound.GetI(i) || this.UpperBound.GetI(i) < p.GetI(i) {
@@ -349,14 +349,14 @@ func CollidePolygonAndCircle(manifold *Manifold, polygonA *PolygonShape, xfA Tra
 	cLocal := MulXT(xfA, c)
 
 	// Find the min separating edge.
-	normalIndex := int32(0)
+	normalIndex := 0
 	separation := -MaxFloat
 	radius := polygonA.Radius + circleB.Radius
 	vertexCount := polygonA.VertexCount
 	vertices := &polygonA.Vertices
 	normals := &polygonA.Normals
 
-	for i := int32(0); i < vertexCount; i++ {
+	for i := 0; i < vertexCount; i++ {
 		s := DotVV(normals[i], SubVV(cLocal, vertices[i]))
 
 		if s > radius {
@@ -372,7 +372,7 @@ func CollidePolygonAndCircle(manifold *Manifold, polygonA *PolygonShape, xfA Tra
 
 	// Vertices that subtend the incident face.
 	vertIndex1 := normalIndex
-	vertIndex2 := int32(0)
+	vertIndex2 := 0
 	if vertIndex1+1 < vertexCount {
 		vertIndex2 = vertIndex1 + 1
 	}
@@ -434,7 +434,7 @@ func CollidePolygonAndCircle(manifold *Manifold, polygonA *PolygonShape, xfA Tra
 }
 
 // Find the separation between poly1 and poly2 for a give edge normal on poly1.
-func EdgeSeparation(poly1 *PolygonShape, xf1 Transform, edge1 int32, poly2 *PolygonShape, xf2 Transform) float64 {
+func EdgeSeparation(poly1 *PolygonShape, xf1 Transform, edge1 int, poly2 *PolygonShape, xf2 Transform) float64 {
 	vertices1 := &poly1.Vertices
 	normals1 := &poly1.Normals
 
@@ -446,10 +446,10 @@ func EdgeSeparation(poly1 *PolygonShape, xf1 Transform, edge1 int32, poly2 *Poly
 	normal1 := MulTRV(xf2.Q, normal1World)
 
 	// Find support vertex on poly2 for -normal.
-	index := int32(0)
+	index := 0
 	minDot := MaxFloat
 
-	for i := int32(0); i < count2; i++ {
+	for i := 0; i < count2; i++ {
 		dot := DotVV(vertices2[i], normal1)
 		if dot < minDot {
 			minDot = dot
@@ -464,7 +464,7 @@ func EdgeSeparation(poly1 *PolygonShape, xf1 Transform, edge1 int32, poly2 *Poly
 }
 
 // Find the max separation between poly1 and poly2 using edge normals from poly1.
-func FindMaxSeparation(edgeIndex *int32, poly1 *PolygonShape, xf1 Transform, poly2 *PolygonShape, xf2 Transform) float64 {
+func FindMaxSeparation(edgeIndex *int, poly1 *PolygonShape, xf1 Transform, poly2 *PolygonShape, xf2 Transform) float64 {
 	count1 := poly1.VertexCount
 	normals1 := &poly1.Normals
 
@@ -473,9 +473,9 @@ func FindMaxSeparation(edgeIndex *int32, poly1 *PolygonShape, xf1 Transform, pol
 	dLocal1 := MulTRV(xf1.Q, d)
 
 	// Find edge normal on poly1 that has the largest projection onto d.
-	edge := int32(0)
+	edge := 0
 	maxDot := -MaxFloat
-	for i := int32(0); i < count1; i++ {
+	for i := 0; i < count1; i++ {
 		dot := DotVV(normals1[i], dLocal1)
 		if dot > maxDot {
 			maxDot = dot
@@ -494,16 +494,16 @@ func FindMaxSeparation(edgeIndex *int32, poly1 *PolygonShape, xf1 Transform, pol
 	sPrev := EdgeSeparation(poly1, xf1, prevEdge, poly2, xf2)
 
 	// Check the separation for the next edge normal.
-	nextEdge := int32(0)
+	nextEdge := 0
 	if edge+1 < count1 {
 		nextEdge = edge + 1
 	}
 	sNext := EdgeSeparation(poly1, xf1, nextEdge, poly2, xf2)
 
 	// Find the best edge and the search direction.
-	var bestEdge int32
+	var bestEdge int
 	var bestSeparation float64
-	var increment int32
+	var increment int
 	if sPrev > s && sPrev > sNext {
 		increment = -1
 		bestEdge = prevEdge
@@ -543,7 +543,7 @@ func FindMaxSeparation(edgeIndex *int32, poly1 *PolygonShape, xf1 Transform, pol
 	return bestSeparation
 }
 
-func FindIncidentEdge(c []ClipVertex, poly1 *PolygonShape, xf1 Transform, edge1 int32, poly2 *PolygonShape, xf2 Transform) {
+func FindIncidentEdge(c []ClipVertex, poly1 *PolygonShape, xf1 Transform, edge1 int, poly2 *PolygonShape, xf2 Transform) {
 	normals1 := &poly1.Normals
 
 	count2 := poly2.VertexCount
@@ -554,9 +554,9 @@ func FindIncidentEdge(c []ClipVertex, poly1 *PolygonShape, xf1 Transform, edge1 
 	normal1 := MulTRV(xf2.Q, MulRV(xf1.Q, normals1[edge1]))
 
 	// Find the incident edge on poly2.
-	index := int32(0)
+	index := 0
 	minDot := MaxFloat
-	for i := int32(0); i < count2; i++ {
+	for i := 0; i < count2; i++ {
 		dot := DotVV(normal1, normals2[i])
 		if dot < minDot {
 			minDot = dot
@@ -566,7 +566,7 @@ func FindIncidentEdge(c []ClipVertex, poly1 *PolygonShape, xf1 Transform, edge1 
 
 	// Build the clip vertices for the incident edge.
 	i1 := index
-	i2 := int32(0)
+	i2 := 0
 	if i1+1 < count2 {
 		i2 = i1 + 1
 	}
@@ -589,13 +589,13 @@ func CollidePolygons(manifold *Manifold, polyA *PolygonShape, xfA Transform, pol
 	manifold.PointCount = 0
 	totalRadius := polyA.Radius + polyB.Radius
 
-	edgeA := int32(0)
+	edgeA := 0
 	separationA := FindMaxSeparation(&edgeA, polyA, xfA, polyB, xfB)
 	if separationA > totalRadius {
 		return
 	}
 
-	edgeB := int32(0)
+	edgeB := 0
 	separationB := FindMaxSeparation(&edgeB, polyB, xfB, polyA, xfA)
 	if separationB > totalRadius {
 		return
@@ -604,7 +604,7 @@ func CollidePolygons(manifold *Manifold, polyA *PolygonShape, xfA Transform, pol
 	var poly1 *PolygonShape // reference polygon
 	var poly2 *PolygonShape // incident polygon
 	var xf1, xf2 Transform
-	var edge1 int32 // reference edge
+	var edge1 int // reference edge
 	var flip uint8
 	const k_relativeTol float64 = 0.98
 	const k_absoluteTol float64 = 0.001
@@ -634,7 +634,7 @@ func CollidePolygons(manifold *Manifold, polyA *PolygonShape, xfA Transform, pol
 	vertices1 := &poly1.Vertices
 
 	iv1 := edge1
-	iv2 := int32(0)
+	iv2 := 0
 	if edge1+1 < count1 {
 		iv2 = edge1 + 1
 	}
@@ -664,7 +664,7 @@ func CollidePolygons(manifold *Manifold, polyA *PolygonShape, xfA Transform, pol
 	// Clip incident edge against extruded edge1 side edges.
 	clipPoints1 := make([]ClipVertex, 2, 2)
 	clipPoints2 := make([]ClipVertex, 2, 2)
-	var np int32
+	var np int
 
 	// Clip to box side 1
 	np = ClipSegmentToLine(clipPoints1, incidentEdge, tangent.Minus(), sideOffset1, iv1)
@@ -684,8 +684,8 @@ func CollidePolygons(manifold *Manifold, polyA *PolygonShape, xfA Transform, pol
 	manifold.LocalNormal = localNormal
 	manifold.LocalPoint = planePoint
 
-	pointCount := int32(0)
-	for i := int32(0); i < MaxManifoldPoints; i++ {
+	pointCount := 0
+	for i := 0; i < MaxManifoldPoints; i++ {
 		separation := DotVV(normal, clipPoints2[i].V) - frontOffset
 
 		if separation <= totalRadius {
@@ -833,7 +833,7 @@ const (
 
 type EPAxis struct {
 	Type       EPAxisType
-	Index      int32
+	Index      int
 	Separation float64
 }
 
@@ -841,12 +841,12 @@ type EPAxis struct {
 type TempPolygon struct {
 	Vertices [MaxPolygonVertices]Vec2
 	Normals  [MaxPolygonVertices]Vec2
-	Count    int32
+	Count    int
 }
 
 // Reference face used for clipping
 type ReferenceFace struct {
-	I1, I2 int32
+	I1, I2 int
 
 	V1, V2 Vec2
 
@@ -1039,7 +1039,7 @@ func (this *EPCollider) Collide(manifold *Manifold, edgeA *EdgeShape, xfA Transf
 
 	// Get polygonB in frameA
 	this.PolygonB.Count = polygonB.VertexCount
-	for i := int32(0); i < polygonB.VertexCount; i++ {
+	for i := 0; i < polygonB.VertexCount; i++ {
 		this.PolygonB.Vertices[i] = MulX(this.Xf, polygonB.Vertices[i])
 		this.PolygonB.Normals[i] = MulRV(this.Xf.Q, polygonB.Normals[i])
 	}
@@ -1083,9 +1083,9 @@ func (this *EPCollider) Collide(manifold *Manifold, edgeA *EdgeShape, xfA Transf
 		manifold.Type = Manifold_e_faceA
 
 		// Search for the polygon normal that is most anti-parallel to the edge normal.
-		bestIndex := int32(0)
+		bestIndex := 0
 		bestValue := DotVV(this.Normal, this.PolygonB.Normals[0])
-		for i := int32(1); i < this.PolygonB.Count; i++ {
+		for i := 1; i < this.PolygonB.Count; i++ {
 			value := DotVV(this.Normal, this.PolygonB.Normals[i])
 			if value < bestValue {
 				bestValue = value
@@ -1094,7 +1094,7 @@ func (this *EPCollider) Collide(manifold *Manifold, edgeA *EdgeShape, xfA Transf
 		}
 
 		i1 := bestIndex
-		i2 := int32(0)
+		i2 := 0
 		if i1+1 < this.PolygonB.Count {
 			i2 = i1 + 1
 		}
@@ -1157,7 +1157,7 @@ func (this *EPCollider) Collide(manifold *Manifold, edgeA *EdgeShape, xfA Transf
 	// Clip incident edge against extruded edge1 side edges.
 	clipPoints1 := make([]ClipVertex, 2, 2)
 	clipPoints2 := make([]ClipVertex, 2, 2)
-	var np int32
+	var np int
 
 	// Clip to box side 1
 	np = ClipSegmentToLine(clipPoints1, ie, rf.SideNormal1, rf.SideOffset1, rf.I1)
@@ -1182,8 +1182,8 @@ func (this *EPCollider) Collide(manifold *Manifold, edgeA *EdgeShape, xfA Transf
 		manifold.LocalPoint = polygonB.Vertices[rf.I1]
 	}
 
-	pointCount := int32(0)
-	for i := int32(0); i < MaxManifoldPoints; i++ {
+	pointCount := 0
+	for i := 0; i < MaxManifoldPoints; i++ {
 		separation := DotVV(rf.Normal, SubVV(clipPoints2[i].V, rf.V1))
 
 		if separation <= this.Radius {
@@ -1216,7 +1216,7 @@ func (this *EPCollider) ComputeEdgeSeparation() EPAxis {
 	}
 	axis.Separation = math.MaxFloat64
 
-	for i := int32(0); i < this.PolygonB.Count; i++ {
+	for i := 0; i < this.PolygonB.Count; i++ {
 		s := DotVV(this.Normal, SubVV(this.PolygonB.Vertices[i], this.V1))
 		if s < axis.Separation {
 			axis.Separation = s
@@ -1234,7 +1234,7 @@ func (this *EPCollider) ComputePolygonSeparation() EPAxis {
 
 	perp := Vec2{-this.Normal.Y, this.Normal.X}
 
-	for i := int32(0); i < this.PolygonB.Count; i++ {
+	for i := 0; i < this.PolygonB.Count; i++ {
 		n := this.PolygonB.Normals[i].Minus()
 
 		s1 := DotVV(n, SubVV(this.PolygonB.Vertices[i], this.V1))
@@ -1279,10 +1279,10 @@ func CollideEdgeAndPolygon(manifold *Manifold, edgeA *EdgeShape, xfA Transform,
 
 // Clipping for contact manifolds.
 func ClipSegmentToLine(vOut []ClipVertex, vIn []ClipVertex,
-	normal Vec2, offset float64, vertexIndexA int32) int32 {
+	normal Vec2, offset float64, vertexIndexA int) int {
 
 	// Start with no output points
-	numOut := int32(0)
+	numOut := 0
 
 	// Calculate the distance of end points to the line
 	distance0 := DotVV(normal, vIn[0].V) - offset
@@ -1316,7 +1316,7 @@ func ClipSegmentToLine(vOut []ClipVertex, vIn []ClipVertex,
 }
 
 // Determine if two generic shapes overlap.
-func TestOverlap(shapeA IShape, indexA int32, shapeB IShape, indexB int32,
+func TestOverlap(shapeA IShape, indexA int, shapeB IShape, indexB int,
 	xfA Transform, xfB Transform) bool {
 
 	var input DistanceInput
