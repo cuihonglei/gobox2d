@@ -29,7 +29,7 @@ type SeparationFunction struct {
 	proxyA         *DistanceProxy
 	proxyB         *DistanceProxy
 	sweepA, sweepB Sweep
-	itype          SeparationFunctionType
+	xtype          SeparationFunctionType
 	localPoint     Vec2
 	axis           Vec2
 }
@@ -58,7 +58,7 @@ func (this *SeparationFunction) Initialize(cache *SimplexCache,
 	xfB := this.sweepB.GetTransform(t1)
 
 	if count == 1 {
-		this.itype = SeparationFunction_e_points
+		this.xtype = SeparationFunction_e_points
 		localPointA := this.proxyA.GetVertex(int(cache.IndexA[0]))
 		localPointB := this.proxyB.GetVertex(int(cache.IndexB[0]))
 		pointA := MulX(xfA, localPointA)
@@ -68,7 +68,7 @@ func (this *SeparationFunction) Initialize(cache *SimplexCache,
 		return s
 	} else if cache.IndexA[0] == cache.IndexA[1] {
 		// Two points on B and one on A.
-		this.itype = SeparationFunction_e_faceB
+		this.xtype = SeparationFunction_e_faceB
 		localPointB1 := proxyB.GetVertex(int(cache.IndexB[0]))
 		localPointB2 := proxyB.GetVertex(int(cache.IndexB[1]))
 
@@ -90,7 +90,7 @@ func (this *SeparationFunction) Initialize(cache *SimplexCache,
 		return s
 	} else {
 		// Two points on A and one or two points on B.
-		this.itype = SeparationFunction_e_faceA
+		this.xtype = SeparationFunction_e_faceA
 		localPointA1 := this.proxyA.GetVertex(int(cache.IndexA[0]))
 		localPointA2 := this.proxyA.GetVertex(int(cache.IndexA[1]))
 
@@ -117,7 +117,7 @@ func (this *SeparationFunction) FindMinSeparation(t float64) (indexA, indexB int
 	xfA := this.sweepA.GetTransform(t)
 	xfB := this.sweepB.GetTransform(t)
 
-	switch this.itype {
+	switch this.xtype {
 	case SeparationFunction_e_points:
 		axisA := MulTRV(xfA.Q, this.axis)
 		axisB := MulTRV(xfB.Q, this.axis.Minus())
@@ -175,7 +175,7 @@ func (this *SeparationFunction) Evaluate(indexA int, indexB int, t float64) (sep
 	xfA := this.sweepA.GetTransform(t)
 	xfB := this.sweepB.GetTransform(t)
 
-	switch this.itype {
+	switch this.xtype {
 	case SeparationFunction_e_points:
 		//axisA := MulTRV(xfA.Q, this.axis)
 		//axisB := MulTRV(xfB.Q, this.axis.Minus())

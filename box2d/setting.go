@@ -109,4 +109,4 @@ type Version struct {
 }
 
 // Current version.
-var B2_version Version = Version{2, 2, 1}
+var B2_version = Version{2, 2, 1}

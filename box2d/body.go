@@ -88,7 +88,7 @@ func NewBodyDef() *BodyDef {
 
 // A rigid body. These are created via B2World::CreateBody.
 type Body struct {
-	itype BodyType
+	xtype BodyType
 
 	flags uint16
 
@@ -187,9 +187,9 @@ func NewBody(bd *BodyDef, world *World) *Body {
 
 	this.sleepTime = 0.0
 
-	this.itype = bd.Type
+	this.xtype = bd.Type
 
-	if this.itype == DynamicBody {
+	if this.xtype == DynamicBody {
 		this.mass = 1.0
 		this.invMass = 1.0
 	} else {
@@ -386,7 +386,7 @@ func (this *Body) GetLocalCenter() Vec2 {
 // Set the linear velocity of the center of mass.
 // @param v the new linear velocity of the center of mass.
 func (this *Body) SetLinearVelocity(v Vec2) {
-	if this.itype == StaticBody {
+	if this.xtype == StaticBody {
 		return
 	}
 
@@ -406,7 +406,7 @@ func (this *Body) GetLinearVelocity() Vec2 {
 /// Set the angular velocity.
 /// @param omega the new angular velocity in radians/second.
 func (this *Body) SetAngularVelocity(w float64) {
-	if this.itype == StaticBody {
+	if this.xtype == StaticBody {
 		return
 	}
 
@@ -429,7 +429,7 @@ func (this *Body) GetAngularVelocity() float64 {
 /// @param force the world force vector, usually in Newtons (N).
 /// @param point the world position of the point of application.
 func (this *Body) ApplyForce(force, point Vec2) {
-	if this.itype != DynamicBody {
+	if this.xtype != DynamicBody {
 		return
 	}
 
@@ -444,7 +444,7 @@ func (this *Body) ApplyForce(force, point Vec2) {
 /// Apply a force to the center of mass. This wakes up the body.
 /// @param force the world force vector, usually in Newtons (N).
 func (this *Body) ApplyForceToCenter(force Vec2) {
-	if this.itype != DynamicBody {
+	if this.xtype != DynamicBody {
 		return
 	}
 
@@ -460,7 +460,7 @@ func (this *Body) ApplyForceToCenter(force Vec2) {
 /// This wakes up the body.
 /// @param torque about the z-axis (out of the screen), usually in N-m.
 func (this *Body) ApplyTorque(torque float64) {
-	if this.itype != DynamicBody {
+	if this.xtype != DynamicBody {
 		return
 	}
 
@@ -477,7 +477,7 @@ func (this *Body) ApplyTorque(torque float64) {
 /// @param impulse the world impulse vector, usually in N-seconds or kg-m/s.
 /// @param point the world position of the point of application.
 func (this *Body) ApplyLinearImpulse(impulse Vec2, point Vec2) {
-	if this.itype != DynamicBody {
+	if this.xtype != DynamicBody {
 		return
 	}
 
@@ -492,7 +492,7 @@ func (this *Body) ApplyLinearImpulse(impulse Vec2, point Vec2) {
 /// Apply an angular impulse.
 /// @param impulse the angular impulse in units of kg*m*m/s
 func (this *Body) ApplyAngularImpulse(impulse float64) {
-	if this.itype != DynamicBody {
+	if this.xtype != DynamicBody {
 		return
 	}
 
@@ -532,7 +532,7 @@ func (this *Body) SetMassData(massData *MassData) {
 		return
 	}
 
-	if this.itype != DynamicBody {
+	if this.xtype != DynamicBody {
 		return
 	}
 
@@ -574,7 +574,7 @@ func (this *Body) ResetMassData() {
 	this.sweep.LocalCenter.SetZero()
 
 	// Static and kinematic bodies have zero mass.
-	if this.itype == StaticBody || this.itype == KinematicBody {
+	if this.xtype == StaticBody || this.xtype == KinematicBody {
 		this.sweep.C0 = this.xf.P
 		this.sweep.C = this.xf.P
 		this.sweep.A0 = this.sweep.A
@@ -697,20 +697,20 @@ func (this *Body) SetGravityScale(scale float64) {
 }
 
 // Set the type of this body. This may alter the mass and velocity.
-func (this *Body) SetType(itype BodyType) {
+func (this *Body) SetType(xtype BodyType) {
 	if this.world.IsLocked() {
 		return
 	}
 
-	if this.itype == itype {
+	if this.xtype == xtype {
 		return
 	}
 
-	this.itype = itype
+	this.xtype = xtype
 
 	this.ResetMassData()
 
-	if this.itype == StaticBody {
+	if this.xtype == StaticBody {
 		this.linearVelocity.SetZero()
 		this.angularVelocity = 0.0
 		this.sweep.A0 = this.sweep.A
@@ -731,7 +731,7 @@ func (this *Body) SetType(itype BodyType) {
 
 // Get the type of this body.
 func (this *Body) GetType() BodyType {
-	return this.itype
+	return this.xtype
 }
 
 /// Should this body be treated like a bullet for continuous collision detection?
@@ -903,7 +903,7 @@ func (this *Body) Dump() {
 
 	Log("{\n")
 	Log("  b2BodyDef bd;\n")
-	Log("  bd.type = b2BodyType(%d);\n", this.itype)
+	Log("  bd.type = b2BodyType(%d);\n", this.xtype)
 	Log("  bd.position.Set(%.15f, %.15f);\n", this.xf.P.X, this.xf.P.Y)
 	Log("  bd.angle = %.15f;\n", this.sweep.A)
 	Log("  bd.linearVelocity.Set(%.15f, %.15f);\n", this.linearVelocity.X, this.linearVelocity.Y)
@@ -946,7 +946,7 @@ func (this *Body) synchronizeTransform() {
 // It may lie, depending on the collideConnected flag.
 func (this *Body) ShouldCollide(other *Body) bool {
 	// At least one body should be dynamic.
-	if this.itype != DynamicBody && other.itype != DynamicBody {
+	if this.xtype != DynamicBody && other.xtype != DynamicBody {
 		return false
 	}
 

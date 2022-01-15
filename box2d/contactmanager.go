@@ -217,8 +217,8 @@ func (this *ContactManager) Collide() {
 			c.SetFlags(c.GetFlags() & ^Contact_e_filterFlag)
 		}
 
-		activeA := bodyA.IsAwake() && bodyA.itype != StaticBody
-		activeB := bodyB.IsAwake() && bodyB.itype != StaticBody
+		activeA := bodyA.IsAwake() && bodyA.xtype != StaticBody
+		activeB := bodyB.IsAwake() && bodyB.xtype != StaticBody
 
 		// At least one body must be awake and it must be dynamic or kinematic.
 		if !activeA && !activeB {

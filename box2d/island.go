@@ -61,7 +61,7 @@ func (this *Island) Solve(profile *Profile, step *timeStep, gravity Vec2, allowS
 		b.sweep.C0 = b.sweep.C
 		b.sweep.A0 = b.sweep.A
 
-		if b.itype == DynamicBody {
+		if b.xtype == DynamicBody {
 
 			// Integrate velocities.
 			v.Add(MulFV(h, AddVV(MulFV(b.gravityScale, gravity), MulFV(b.invMass, b.force))))

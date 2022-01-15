@@ -2,11 +2,23 @@ package box2d
 
 // Color for debug drawing. Each value has the range [0,1].
 type Color struct {
-	R, G, B float64
+	R, G, B, A float64
 }
 
-func (this *Color) Set(r, g, b float64) {
-	this.R, this.G, this.B = r, g, b
+func MakeColor(r, g, b float64) Color {
+	return MakeColor2(r, g, b, 1.0)
+}
+
+func MakeColor2(r, g, b, a float64) Color {
+	return Color{R: r, G: g, B: b, A: a}
+}
+
+func (c *Color) Set(r, g, b float64) {
+	c.Set2(r, g, b, 1.0)
+}
+
+func (c *Color) Set2(r, g, b, a float64) {
+	c.R, c.G, c.B, c.A = r, g, b, a
 }
 
 // Implement and register this class with a b2World to provide debug drawing of physics
@@ -50,6 +62,9 @@ type IDraw interface {
 	// Draw a transform. Choose your own length scale.
 	// @param xf a transform.
 	DrawTransform(xf Transform)
+
+	// Draw a point.
+	DrawPoint(p Vec2, size float64, color Color)
 }
 
 type Draw struct {

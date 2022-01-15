@@ -181,7 +181,7 @@ func (t *Test) step(settings *Settings) {
 	t.world.Step(timeStep, settings.velocityIterations, settings.positionIterations)
 
 	t.world.DebugDraw()
-	g_debugDraw.Flush()
+	g_debugDraw.flush()
 
 	if timeStep > 0.0 {
 		t.stepCount += 1

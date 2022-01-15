@@ -455,7 +455,7 @@ func (this *World) drawJoint(joint IJoint) {
 	p1 := joint.GetAnchorA()
 	p2 := joint.GetAnchorB()
 
-	color := Color{0.5, 0.8, 0.8}
+	color := MakeColor(0.5, 0.8, 0.8)
 
 	switch joint.GetType() {
 	case Joint_e_distanceJoint:
@@ -489,15 +489,15 @@ func (this *World) DebugDraw() {
 			xf := b.GetTransform()
 			for f := b.GetFixtureList(); f != nil; f = f.GetNext() {
 				if !b.IsActive() {
-					this.DrawShape(f, xf, Color{0.5, 0.5, 0.3})
+					this.DrawShape(f, xf, MakeColor(0.5, 0.5, 0.3))
 				} else if b.GetType() == StaticBody {
-					this.DrawShape(f, xf, Color{0.5, 0.9, 0.5})
+					this.DrawShape(f, xf, MakeColor(0.5, 0.9, 0.5))
 				} else if b.GetType() == KinematicBody {
-					this.DrawShape(f, xf, Color{0.5, 0.5, 0.9})
+					this.DrawShape(f, xf, MakeColor(0.5, 0.5, 0.9))
 				} else if !b.IsAwake() {
-					this.DrawShape(f, xf, Color{0.6, 0.6, 0.6})
+					this.DrawShape(f, xf, MakeColor(0.6, 0.6, 0.6))
 				} else {
-					this.DrawShape(f, xf, Color{0.9, 0.7, 0.7})
+					this.DrawShape(f, xf, MakeColor(0.9, 0.7, 0.7))
 				}
 			}
 		}
@@ -517,7 +517,7 @@ func (this *World) DebugDraw() {
 	}
 
 	if (flags & Draw_e_aabbBit) != 0 {
-		color := Color{0.9, 0.3, 0.9}
+		color := MakeColor(0.9, 0.3, 0.9)
 		bp := this.contactManager.BroadPhase
 
 		for b := this.bodyList; b != nil; b = b.GetNext() {
@@ -998,8 +998,8 @@ func (this *World) solveTOI(step *timeStep) {
 				bA := fA.GetBody()
 				bB := fB.GetBody()
 
-				typeA := bA.itype
-				typeB := bB.itype
+				typeA := bA.xtype
+				typeB := bB.xtype
 
 				activeA := bA.IsAwake() && typeA != StaticBody
 				activeB := bB.IsAwake() && typeB != StaticBody
@@ -1113,7 +1113,7 @@ func (this *World) solveTOI(step *timeStep) {
 		bodies := [2]*Body{bA, bB}
 		for i := 0; i < 2; i++ {
 			body := bodies[i]
-			if body.itype == DynamicBody {
+			if body.xtype == DynamicBody {
 				for ce := body.contactList; ce != nil; ce = ce.Next {
 					if island.BodyCount == island.BodyCapacity {
 						break
@@ -1132,7 +1132,7 @@ func (this *World) solveTOI(step *timeStep) {
 
 					// Only add static, kinematic, or bullet bodies.
 					other := ce.Other
-					if other.itype == DynamicBody && !body.IsBullet() && !other.IsBullet() {
+					if other.xtype == DynamicBody && !body.IsBullet() && !other.IsBullet() {
 						continue
 					}
 
@@ -1178,7 +1178,7 @@ func (this *World) solveTOI(step *timeStep) {
 					// Add the other body to the island.
 					other.flags |= body_e_islandFlag
 
-					if other.itype != StaticBody {
+					if other.xtype != StaticBody {
 						other.SetAwake(true)
 					}
 
@@ -1201,7 +1201,7 @@ func (this *World) solveTOI(step *timeStep) {
 			body := island.Bodies[i]
 			body.flags &= ^body_e_islandFlag
 
-			if body.itype != DynamicBody {
+			if body.xtype != DynamicBody {
 				continue
 			}
 
