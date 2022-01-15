@@ -71,14 +71,19 @@ type BodyDef struct {
 	GravityScale float64
 }
 
+func MakeBodyDef() BodyDef {
+	return BodyDef{
+		AllowSleep:   true,
+		Awake:        true,
+		Type:         StaticBody,
+		Active:       true,
+		GravityScale: 1.0,
+	}
+}
+
 func NewBodyDef() *BodyDef {
-	this := new(BodyDef)
-	this.AllowSleep = true
-	this.Awake = true
-	this.Type = StaticBody
-	this.Active = true
-	this.GravityScale = 1.0
-	return this
+	bd := MakeBodyDef()
+	return &bd
 }
 
 // A rigid body. These are created via B2World::CreateBody.

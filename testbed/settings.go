@@ -25,6 +25,12 @@ type Settings struct {
 	singleStep          bool
 }
 
+func MakeSettings() Settings {
+	s := Settings{}
+	s.Reset()
+	return s
+}
+
 func (s *Settings) Reset() {
 	s.testIndex = 0
 	s.windowWidth = 1600

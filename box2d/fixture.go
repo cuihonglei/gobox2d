@@ -16,12 +16,17 @@ type Filter struct {
 	GroupIndex int16
 }
 
+func MakeFilter() Filter {
+	return Filter{
+		CategoryBits: 0x0001,
+		MaskBits:     0xFFFF,
+		GroupIndex:   0,
+	}
+}
+
 func NewFilter() *Filter {
-	this := new(Filter)
-	this.CategoryBits = 0x0001
-	this.MaskBits = 0xFFFF
-	this.GroupIndex = 0
-	return this
+	f := MakeFilter()
+	return &f
 }
 
 // A fixture definition is used to create a fixture. This class defines an
@@ -51,11 +56,16 @@ type FixtureDef struct {
 	Filter Filter
 }
 
+func MakeFixtureDef() FixtureDef {
+	return FixtureDef{
+		Filter:   MakeFilter(),
+		Friction: 0.2,
+	}
+}
+
 func NewFixtureDef() *FixtureDef {
-	this := new(FixtureDef)
-	this.Filter = *NewFilter()
-	this.Friction = 0.2
-	return this
+	fd := MakeFixtureDef()
+	return &fd
 }
 
 // This proxy is used internally to connect fixtures to the broad-phase.

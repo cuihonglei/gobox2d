@@ -189,11 +189,16 @@ type EdgeShape struct {
 	HasVertex0, HasVertex3 bool
 }
 
+func MakeEdgeShape() EdgeShape {
+	es := EdgeShape{}
+	es.Type = Shape_e_edge
+	es.Radius = PolygonRadius
+	return es
+}
+
 func NewEdgeShape() *EdgeShape {
-	this := new(EdgeShape)
-	this.Type = Shape_e_edge
-	this.Radius = PolygonRadius
-	return this
+	es := MakeEdgeShape()
+	return &es
 }
 
 func (this *EdgeShape) Set(v1, v2 Vec2) {
