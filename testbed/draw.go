@@ -252,6 +252,7 @@ func (rl *GLRenderLines) destroy() {
 }
 
 func (rl *GLRenderLines) vertex(v box2d.Vec2, c box2d.Color) {
+
 	if rl.count == GLRenderLines_e_maxVertices {
 		rl.flush()
 	}
@@ -277,10 +278,10 @@ func (rl *GLRenderLines) flush() {
 	gl.BindVertexArray(rl.vaoId)
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, rl.vboIds[0])
-	gl.BufferSubData(gl.ARRAY_BUFFER, 0, 16, unsafe.Pointer(&rl.vertices[0]))
+	gl.BufferSubData(gl.ARRAY_BUFFER, 0, rl.count*16, unsafe.Pointer(&rl.vertices[0]))
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, rl.vboIds[1])
-	gl.BufferSubData(gl.ARRAY_BUFFER, 0, 32, unsafe.Pointer(&rl.colors[0]))
+	gl.BufferSubData(gl.ARRAY_BUFFER, 0, rl.count*32, unsafe.Pointer(&rl.colors[0]))
 
 	gl.DrawArrays(gl.LINES, 0, int32(rl.count))
 
