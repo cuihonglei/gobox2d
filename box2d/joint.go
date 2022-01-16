@@ -881,20 +881,25 @@ type PrismaticJointDef struct {
 	MotorSpeed float64
 }
 
+func MakePrismaticJointDef() PrismaticJointDef {
+	pjd := PrismaticJointDef{}
+	pjd.Type = Joint_e_prismaticJoint
+	pjd.LocalAnchorA.SetZero()
+	pjd.LocalAnchorB.SetZero()
+	pjd.LocalAxisA.Set(1.0, 0.0)
+	pjd.ReferenceAngle = 0.0
+	pjd.EnableLimit = false
+	pjd.LowerTranslation = 0.0
+	pjd.UpperTranslation = 0.0
+	pjd.EnableMotor = false
+	pjd.MaxMotorForce = 0.0
+	pjd.MotorSpeed = 0.0
+	return pjd
+}
+
 func NewPrismaticJointDef() *PrismaticJointDef {
-	this := new(PrismaticJointDef)
-	this.Type = Joint_e_prismaticJoint
-	this.LocalAnchorA.SetZero()
-	this.LocalAnchorB.SetZero()
-	this.LocalAxisA.Set(1.0, 0.0)
-	this.ReferenceAngle = 0.0
-	this.EnableLimit = false
-	this.LowerTranslation = 0.0
-	this.UpperTranslation = 0.0
-	this.EnableMotor = false
-	this.MaxMotorForce = 0.0
-	this.MotorSpeed = 0.0
-	return this
+	pjd := MakePrismaticJointDef()
+	return &pjd
 }
 
 // Initialize the bodies, anchors, axis, and reference angle using the world
@@ -1604,10 +1609,15 @@ type RevoluteJointDef struct {
 // Cdot = w2 - w1
 // J = [0 0 -1 0 0 1]
 // K = invI1 + invI2
+func MakeRevoluteJointDef() RevoluteJointDef {
+	rjd := RevoluteJointDef{}
+	rjd.Type = Joint_e_revoluteJoint
+	return rjd
+}
+
 func NewRevoluteJointDef() *RevoluteJointDef {
-	this := new(RevoluteJointDef)
-	this.Type = Joint_e_revoluteJoint
-	return this
+	rjd := MakeRevoluteJointDef()
+	return &rjd
 }
 
 /// Initialize the bodies, anchors, and reference angle using a world

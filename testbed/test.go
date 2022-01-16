@@ -6,11 +6,6 @@ import (
 	"github.com/cuihonglei/gobox2d/box2d"
 )
 
-const MAX_TESTS = 256
-
-var g_testEntries [MAX_TESTS]TestEntry
-var g_testCount = 0
-
 const RAND_LIMIT = 32767
 
 /// Random number in range [-1,1]
@@ -27,26 +22,6 @@ func RandomFloat2(lo float64, hi float64) float64 {
 	r := rand.Float64()
 	r = (hi-lo)*r + lo
 	return r
-}
-
-type TestEntry struct {
-	category  string
-	name      string
-	createFcn TestCreateFcn
-}
-
-type TestCreateFcn func() ITest
-
-func RegisterTest(category string, name string, fcn TestCreateFcn) int {
-
-	index := g_testCount
-	if index < MAX_TESTS {
-		g_testEntries[index] = TestEntry{category, name, fcn}
-		g_testCount += 1
-		return index
-	}
-
-	return -1
 }
 
 type ITest interface {
@@ -148,6 +123,13 @@ func (t *Test) PostSolve(contact box2d.IContact, impulse *box2d.ContactImpulse) 
 
 func (t *Test) step(settings *Settings) {
 
+	b2i := func(b bool) uint {
+		if b {
+			return 1
+		}
+		return 0
+	}
+
 	timeStep := 0.0
 	if settings.hertz > 0.0 {
 		timeStep = 1.0 / settings.hertz
@@ -165,10 +147,10 @@ func (t *Test) step(settings *Settings) {
 	}
 
 	flags := uint(0)
-	flags += b2ui(settings.drawShapes) * box2d.Draw_e_shapeBit
-	flags += b2ui(settings.drawJoints) * box2d.Draw_e_jointBit
-	flags += b2ui(settings.drawAABBs) * box2d.Draw_e_aabbBit
-	flags += b2ui(settings.drawCOMs) * box2d.Draw_e_centerOfMassBit
+	flags += b2i(settings.drawShapes) * box2d.Draw_e_shapeBit
+	flags += b2i(settings.drawJoints) * box2d.Draw_e_jointBit
+	flags += b2i(settings.drawAABBs) * box2d.Draw_e_aabbBit
+	flags += b2i(settings.drawCOMs) * box2d.Draw_e_centerOfMassBit
 	g_debugDraw.SetFlags(flags)
 
 	t.world.SetAllowSleeping(settings.enableSleep)
@@ -209,9 +191,32 @@ func (t *Test) step(settings *Settings) {
 	}
 }
 
-func b2ui(b bool) uint {
-	if b {
-		return 1
+func (t *Test) shiftOrigin(newOrigin box2d.Vec2) {
+	// TODO
+	//t.world.ShiftOrigin(newOrigin)
+}
+
+const MAX_TESTS = 256
+
+var g_testEntries [MAX_TESTS]TestEntry
+var g_testCount = 0
+
+type TestEntry struct {
+	category  string
+	name      string
+	createFcn TestCreateFcn
+}
+
+type TestCreateFcn func() ITest
+
+func RegisterTest(category string, name string, fcn TestCreateFcn) int {
+
+	index := g_testCount
+	if index < MAX_TESTS {
+		g_testEntries[index] = TestEntry{category, name, fcn}
+		g_testCount += 1
+		return index
 	}
-	return 0
+
+	return -1
 }

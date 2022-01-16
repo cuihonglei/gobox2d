@@ -9,6 +9,7 @@ import (
 	"github.com/cuihonglei/gobox2d/box2d"
 	"github.com/go-gl/gl/v2.1/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/inkyblackness/imgui-go/v4"
 )
 
 var g_mainWindow *glfw.Window = nil
@@ -20,6 +21,11 @@ var s_clickPointWS = box2d.Vec2_zero
 
 func sortTests() {
 	// TODO
+}
+
+func createUI(window *glfw.Window) {
+
+	imgui.CreateContext(nil)
 }
 
 func updateUI() {
