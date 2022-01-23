@@ -640,7 +640,7 @@ func (dd *DebugDraw) DrawPoint(p box2d.Vec2, size float64, color box2d.Color) {
 
 //
 func (dd *DebugDraw) DrawString(x, y int, xstring string, a ...interface{}) {
-	fmt.Println("DebugDraw.DrawString")
+	//fmt.Println("DebugDraw.DrawString")
 
 	if !dd.showUI {
 		return
@@ -649,7 +649,7 @@ func (dd *DebugDraw) DrawString(x, y int, xstring string, a ...interface{}) {
 
 //
 func (dd *DebugDraw) DrawString2(pw *box2d.Vec2, xstring string, a ...interface{}) {
-	fmt.Println("DebugDraw.DrawString2")
+	//fmt.Println("DebugDraw.DrawString2")
 }
 
 //

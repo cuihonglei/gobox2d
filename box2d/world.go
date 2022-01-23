@@ -70,50 +70,69 @@ func NewWorld(gravity Vec2) *World {
 	return this
 }
 
+func (w *World) Destroy() {
+
+	// Some shapes allocate using b2Alloc.
+	b := w.bodyList
+	for b != nil {
+		bNext := b.next
+
+		f := b.fixtureList
+		for f != nil {
+			fNext := f.Next
+			f.ProxyCount = 0
+			f.Destroy()
+			f = fNext
+		}
+
+		b = bNext
+	}
+}
+
 // Register a destruction listener. The listener is owned by you and must
 // remain in scope.
-func (this *World) SetDestructionListener(listener IDestructionListener) {
-	this.destructionListener = listener
+func (w *World) SetDestructionListener(listener IDestructionListener) {
+	w.destructionListener = listener
 }
 
 // Register a contact filter to provide specific control over collision.
 // Otherwise the default filter is used (b2_defaultFilter). The listener is
 // owned by you and must remain in scope.
-func (this *World) SetContactFilter(filter IContactFilter) {
-	this.contactManager.ContactFilter = filter
+func (w *World) SetContactFilter(filter IContactFilter) {
+	w.contactManager.ContactFilter = filter
 }
 
 // Register a contact event listener. The listener is owned by you and must
 // remain in scope.
-func (this *World) SetContactListener(listener IContactListener) {
-	this.contactManager.ContactListener = listener
+func (w *World) SetContactListener(listener IContactListener) {
+	w.contactManager.ContactListener = listener
 }
 
 // Register a routine for debug drawing. The debug draw functions are called
 // inside with b2World::DrawDebugData method. The debug draw object is owned
 // by you and must remain in scope.
-func (this *World) SetDebugDraw(debugDraw IDraw) {
-	this.debugDraw = debugDraw
+func (w *World) SetDebugDraw(debugDraw IDraw) {
+	w.debugDraw = debugDraw
 }
 
 // Create a rigid body given a definition. No reference to the definition
 // is retained.
 // @warning This function is locked during callbacks.
-func (this *World) CreateBody(def *BodyDef) *Body {
-	if this.IsLocked() {
+func (w *World) CreateBody(def *BodyDef) *Body {
+	if w.IsLocked() {
 		return nil
 	}
 
-	b := NewBody(def, this)
+	b := NewBody(def, w)
 
 	// Add to world doubly linked list.
 	b.prev = nil
-	b.next = this.bodyList
-	if this.bodyList != nil {
-		this.bodyList.prev = b
+	b.next = w.bodyList
+	if w.bodyList != nil {
+		w.bodyList.prev = b
 	}
-	this.bodyList = b
-	this.bodyCount++
+	w.bodyList = b
+	w.bodyCount++
 
 	return b
 }
@@ -122,8 +141,8 @@ func (this *World) CreateBody(def *BodyDef) *Body {
 // is retained. This function is locked during callbacks.
 // @warning This automatically deletes all associated shapes and joints.
 // @warning This function is locked during callbacks.
-func (this *World) DestroyBody(b *Body) {
-	if this.IsLocked() {
+func (w *World) DestroyBody(b *Body) {
+	if w.IsLocked() {
 		return
 	}
 
@@ -133,11 +152,11 @@ func (this *World) DestroyBody(b *Body) {
 		je0 := je
 		je = je.Next
 
-		if this.destructionListener != nil {
-			this.destructionListener.SayGoodbyeJoint(je0.Joint)
+		if w.destructionListener != nil {
+			w.destructionListener.SayGoodbyeJoint(je0.Joint)
 		}
 
-		this.DestroyJoint(je0.Joint)
+		w.DestroyJoint(je0.Joint)
 
 		b.jointList = je
 	}
@@ -148,7 +167,7 @@ func (this *World) DestroyBody(b *Body) {
 	for ce != nil {
 		ce0 := ce
 		ce = ce.Next
-		this.contactManager.Destroy(ce0.Contact)
+		w.contactManager.Destroy(ce0.Contact)
 	}
 	b.contactList = nil
 
@@ -158,11 +177,11 @@ func (this *World) DestroyBody(b *Body) {
 		f0 := f
 		f = f.Next
 
-		if this.destructionListener != nil {
-			this.destructionListener.SayGoodbyeFixture(f0)
+		if w.destructionListener != nil {
+			w.destructionListener.SayGoodbyeFixture(f0)
 		}
 
-		f0.DestroyProxies(this.contactManager.BroadPhase)
+		f0.DestroyProxies(w.contactManager.BroadPhase)
 		f0.Destroy()
 
 		b.fixtureList = f
@@ -180,11 +199,11 @@ func (this *World) DestroyBody(b *Body) {
 		b.next.prev = b.prev
 	}
 
-	if b == this.bodyList {
-		this.bodyList = b.next
+	if b == w.bodyList {
+		w.bodyList = b.next
 	}
 
-	this.bodyCount--
+	w.bodyCount--
 }
 
 // Create a joint to constrain bodies together. No reference to the definition

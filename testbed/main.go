@@ -26,6 +26,98 @@ func sortTests() {
 func createUI(window *glfw.Window) {
 
 	imgui.CreateContext(nil)
+
+	// Search for font file
+	// fontPath1 := "data/droid_sans.ttf"
+	// fontPath2 := "../data/droid_sans.ttf"
+	// fontPath := ""
+}
+
+func resizeWindowCallback(window *glfw.Window, width int, height int) {
+	g_camera.width = width
+	g_camera.height = height
+	s_settings.windowWidth = width
+	s_settings.windowHeight = height
+}
+
+func keyCallback(window *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
+	// TODO
+
+	if imgui.CurrentIO().WantCaptureKeyboard() {
+		return
+	}
+	if action == glfw.Press {
+		switch key {
+		case glfw.KeyHome:
+			// Reset view
+			g_camera.zoom = 1.0
+			g_camera.center.Set(0.0, 20.0)
+
+		case glfw.KeyZ:
+			// Zoom out
+			g_camera.zoom = box2d.MinF(1.1*g_camera.zoom, 20.0)
+
+		case glfw.KeyX:
+			// Zoom in
+			g_camera.zoom = box2d.MaxF(0.9*g_camera.zoom, 0.02)
+
+		case glfw.KeyR:
+			// Reset test
+			s_test.destroy()
+			s_test = g_testEntries[s_settings.testIndex].createFcn()
+
+		case glfw.KeyO:
+			s_settings.singleStep = true
+
+		case glfw.KeyP:
+			s_settings.pause = !s_settings.pause
+
+		case glfw.KeyLeftBracket:
+			// Switch to previous test
+			s_testSelection--
+			if s_testSelection < 0 {
+				s_testSelection = g_testCount - 1
+			}
+
+		case glfw.KeyRightBracket:
+			// Switch to next test
+			s_testSelection++
+			if s_testSelection == g_testCount {
+				s_testSelection = 0
+			}
+
+		case glfw.KeyTab:
+			g_debugDraw.showUI = !g_debugDraw.showUI
+
+		default:
+			if s_test != nil {
+				s_test.keyboard(key)
+			}
+		}
+	} else if action == glfw.Release {
+		s_test.keyboardUp(key)
+	}
+}
+
+func charCallback(window *glfw.Window, char rune) {
+	// TODO
+}
+
+func mouseButtonCallback(window *glfw.Window, button glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
+
+}
+
+func mouseMotionCallback(window *glfw.Window, xpos float64, ypos float64) {
+
+}
+
+func scrollCallback(window *glfw.Window, xoff float64, yoff float64) {
+	// TODO
+}
+
+func restartTest() {
+	s_test.destroy()
+	s_test = g_testEntries[s_settings.testIndex].createFcn()
 }
 
 func updateUI() {
@@ -66,6 +158,15 @@ func main() {
 		return
 	}
 
+	// TODO Why call this twice?
+	//g_mainWindow.SetScrollCallback(scrollCallback)
+	g_mainWindow.SetSizeCallback(resizeWindowCallback)
+	g_mainWindow.SetKeyCallback(keyCallback)
+	g_mainWindow.SetCharCallback(charCallback)
+	g_mainWindow.SetMouseButtonCallback(mouseButtonCallback)
+	g_mainWindow.SetCursorPosCallback(mouseMotionCallback)
+	g_mainWindow.SetScrollCallback(scrollCallback)
+
 	g_mainWindow.MakeContextCurrent()
 
 	// Load OpenGL functions using glad
@@ -85,6 +186,8 @@ func main() {
 	//}
 
 	g_debugDraw.create()
+
+	createUI(g_mainWindow)
 
 	s_settings.testIndex = box2d.ClampI(s_settings.testIndex, 0, g_testCount-1)
 	s_testSelection = s_settings.testIndex
@@ -116,9 +219,10 @@ func main() {
 
 		if s_testSelection != s_settings.testIndex {
 			s_settings.testIndex = s_testSelection
+			s_test.destroy()
 			s_test = g_testEntries[s_settings.testIndex].createFcn()
 			g_camera.zoom = 1.0
-			g_camera.center.Set(0.0, 0.0)
+			g_camera.center.Set(0.0, 20.0)
 		}
 
 		glfw.PollEvents()

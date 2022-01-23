@@ -4,6 +4,7 @@ import (
 	"math/rand"
 
 	"github.com/cuihonglei/gobox2d/box2d"
+	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
 const RAND_LIMIT = 32767
@@ -26,7 +27,15 @@ func RandomFloat2(lo float64, hi float64) float64 {
 
 type ITest interface {
 	step(*Settings)
+	destroy()
+	updateUI()
+	keyboard(key glfw.Key)
+	keyboardUp(key glfw.Key)
+	mouseDown(p box2d.Vec2)
+	mouseUp(p box2d.Vec2)
+	mouseMove(p box2d.Vec2)
 
+	// Callbacks for derived classes.
 	BeginContact(contact box2d.IContact)
 	EndContact(contact box2d.IContact)
 	PreSolve(contact box2d.IContact, oldManifold *box2d.Manifold)
@@ -102,6 +111,35 @@ func (t *Test) init(test ITest) {
 
 	bodyDef := box2d.MakeBodyDef()
 	t.groundBody = t.world.CreateBody(&bodyDef)
+}
+
+func (t *Test) destroy() {
+	t.world.Destroy()
+	t.world = nil
+}
+
+func (t *Test) updateUI() {
+
+}
+
+func (t *Test) keyboard(key glfw.Key) {
+
+}
+
+func (t *Test) keyboardUp(key glfw.Key) {
+
+}
+
+func (t *Test) mouseDown(p box2d.Vec2) {
+
+}
+
+func (t *Test) mouseUp(p box2d.Vec2) {
+
+}
+
+func (t *Test) mouseMove(p box2d.Vec2) {
+
 }
 
 // Callbacks for derived classes.
