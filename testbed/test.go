@@ -34,12 +34,16 @@ type ITest interface {
 	mouseDown(p box2d.Vec2)
 	mouseUp(p box2d.Vec2)
 	mouseMove(p box2d.Vec2)
+	launchBomb()
+	launchBomb2(position box2d.Vec2, velocity box2d.Vec2)
 
 	// Callbacks for derived classes.
 	BeginContact(contact box2d.IContact)
 	EndContact(contact box2d.IContact)
 	PreSolve(contact box2d.IContact, oldManifold *box2d.Manifold)
 	PostSolve(contact box2d.IContact, impulse *box2d.ContactImpulse)
+
+	shiftOrigin(newOrigin box2d.Vec2)
 }
 
 const k_maxContactPoints = 2048
@@ -140,6 +144,43 @@ func (t *Test) mouseUp(p box2d.Vec2) {
 
 func (t *Test) mouseMove(p box2d.Vec2) {
 
+}
+
+func (t *Test) launchBomb() {
+	p := box2d.MakeVec2(RandomFloat2(-15.0, 15.0), 30.0)
+	v := box2d.MulFV(-0.5, p)
+	t.launchBomb2(p, v)
+}
+
+func (t *Test) launchBomb2(position box2d.Vec2, velocity box2d.Vec2) {
+	if t.bomb != nil {
+		t.world.DestroyBody(t.bomb)
+		t.bomb = nil
+	}
+
+	bd := box2d.MakeBodyDef()
+	bd.Type = box2d.DynamicBody
+	bd.Position = position
+	bd.Bullet = true
+	t.bomb = t.world.CreateBody(&bd)
+	t.bomb.SetLinearVelocity(velocity)
+
+	circle := box2d.MakeCircleShape()
+	circle.Radius = 0.3
+
+	fd := box2d.MakeFixtureDef()
+	fd.Shape = &circle
+	fd.Density = 20.0
+	fd.Restitution = 0.0
+
+	minV := box2d.SubVV(position, box2d.MakeVec2(0.3, 0.3))
+	maxV := box2d.AddVV(position, box2d.MakeVec2(0.3, 0.3))
+
+	aabb := box2d.MakeAABB()
+	aabb.LowerBound = minV
+	aabb.UpperBound = maxV
+
+	t.bomb.CreateFixture(&fd)
 }
 
 // Callbacks for derived classes.

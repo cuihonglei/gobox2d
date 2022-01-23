@@ -48,6 +48,46 @@ func keyCallback(window *glfw.Window, key glfw.Key, scancode int, action glfw.Ac
 	}
 	if action == glfw.Press {
 		switch key {
+		case glfw.KeyEscape:
+			// Quit
+			g_mainWindow.SetShouldClose(true)
+
+		case glfw.KeyLeft:
+			// Pan left
+			if mods == glfw.ModControl {
+				newOrigin := box2d.MakeVec2(2.0, 0.0)
+				s_test.shiftOrigin(newOrigin)
+			} else {
+				g_camera.center.X -= 0.5
+			}
+
+		case glfw.KeyRight:
+			// Pan right
+			if mods == glfw.ModControl {
+				newOrigin := box2d.MakeVec2(-2.0, 0.0)
+				s_test.shiftOrigin(newOrigin)
+			} else {
+				g_camera.center.X += 0.5
+			}
+
+		case glfw.KeyDown:
+			// Pan down
+			if mods == glfw.ModControl {
+				newOrigin := box2d.MakeVec2(0.0, 2.0)
+				s_test.shiftOrigin(newOrigin)
+			} else {
+				g_camera.center.Y -= 0.5
+			}
+
+		case glfw.KeyUp:
+			// Pan  up
+			if mods == glfw.ModControl {
+				newOrigin := box2d.MakeVec2(0.0, -2.0)
+				s_test.shiftOrigin(newOrigin)
+			} else {
+				g_camera.center.Y += 0.5
+			}
+
 		case glfw.KeyHome:
 			// Reset view
 			g_camera.zoom = 1.0
@@ -65,6 +105,12 @@ func keyCallback(window *glfw.Window, key glfw.Key, scancode int, action glfw.Ac
 			// Reset test
 			s_test.destroy()
 			s_test = g_testEntries[s_settings.testIndex].createFcn()
+
+		case glfw.KeySpace:
+			// Launch a bomb.
+			if s_test != nil {
+				s_test.launchBomb()
+			}
 
 		case glfw.KeyO:
 			s_settings.singleStep = true
@@ -97,6 +143,7 @@ func keyCallback(window *glfw.Window, key glfw.Key, scancode int, action glfw.Ac
 	} else if action == glfw.Release {
 		s_test.keyboardUp(key)
 	}
+	// else GLFW_REPEAT
 }
 
 func charCallback(window *glfw.Window, char rune) {

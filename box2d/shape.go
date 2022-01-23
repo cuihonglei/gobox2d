@@ -82,10 +82,15 @@ type CircleShape struct {
 	P Vec2
 }
 
+func MakeCircleShape() CircleShape {
+	cs := CircleShape{}
+	cs.Type = Shape_e_circle
+	return cs
+}
+
 func NewCircleShape() *CircleShape {
-	this := new(CircleShape)
-	this.Type = Shape_e_circle
-	return this
+	cs := MakeCircleShape()
+	return &cs
 }
 
 func (this *CircleShape) Clone() IShape {

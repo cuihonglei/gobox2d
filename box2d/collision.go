@@ -209,6 +209,14 @@ type AABB struct {
 	UpperBound Vec2
 }
 
+func MakeAABB() AABB {
+	return AABB{}
+}
+
+func NewAABB() *AABB {
+	return &AABB{}
+}
+
 // Verify that the bounds are sorted.
 func (this *AABB) IsValid() bool {
 	d := SubVV(this.UpperBound, this.LowerBound)

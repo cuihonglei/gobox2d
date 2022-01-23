@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"unsafe"
 
@@ -612,17 +613,74 @@ func (dd *DebugDraw) DrawSolidPolygon(vertices []box2d.Vec2, color box2d.Color) 
 
 //
 func (dd *DebugDraw) DrawCircle(center box2d.Vec2, radius float64, color box2d.Color) {
-	fmt.Println("DebugDraw.DrawCircle")
+
+	const k_segments = 16.0
+	const k_increment = 2.0 * box2d.Pi / k_segments
+	sinInc := math.Sin(k_increment)
+	cosInc := math.Cos(k_increment)
+	r1 := box2d.MakeVec2(1.0, 0.0)
+	v1 := box2d.AddVV(center, box2d.MulFV(radius, r1))
+	for i := 0; i < k_segments; i++ {
+
+		// Perform rotation to avoid additional trigonometry.
+		r2 := box2d.Vec2{}
+		r2.X = cosInc*r1.X - sinInc*r1.Y
+		r2.Y = sinInc*r1.X + cosInc*r1.Y
+		v2 := box2d.AddVV(center, box2d.MulFV(radius, r2))
+		dd.lines.vertex(v1, color)
+		dd.lines.vertex(v2, color)
+		r1 = r2
+		v1 = v2
+	}
 }
 
 //
 func (dd *DebugDraw) DrawSolidCircle(center box2d.Vec2, radius float64, axis box2d.Vec2, color box2d.Color) {
-	fmt.Println("DebugDraw.DrawSolidCircle")
+
+	const k_segments = 16.0
+	const k_increment = 2.0 * box2d.Pi / k_segments
+	sinInc := math.Sin(k_increment)
+	cosInc := math.Cos(k_increment)
+	v0 := center
+	r1 := box2d.MakeVec2(cosInc, sinInc)
+	v1 := box2d.AddVV(center, box2d.MulFV(radius, r1))
+	fillColor := box2d.MakeColor2(0.5*color.R, 0.5*color.G, 0.5*color.B, 0.5)
+	for i := 0; i < k_segments; i++ {
+
+		// Perform rotation to avoid additional trigonometry.
+		r2 := box2d.Vec2{}
+		r2.X = cosInc*r1.X - sinInc*r1.Y
+		r2.Y = sinInc*r1.X + cosInc*r1.Y
+		v2 := box2d.AddVV(center, box2d.MulFV(radius, r2))
+		dd.triangles.vertex(v0, fillColor)
+		dd.triangles.vertex(v1, fillColor)
+		dd.triangles.vertex(v2, fillColor)
+		r1 = r2
+		v1 = v2
+	}
+
+	r1.Set(1.0, 0.0)
+	v1 = box2d.AddVV(center, box2d.MulFV(radius, r1))
+	for i := 0; i < k_segments; i++ {
+
+		r2 := box2d.Vec2{}
+		r2.X = cosInc*r1.X - sinInc*r1.Y
+		r2.Y = sinInc*r1.X + cosInc*r1.Y
+		v2 := box2d.AddVV(center, box2d.MulFV(radius, r2))
+		dd.lines.vertex(v1, color)
+		dd.lines.vertex(v2, color)
+		r1 = r2
+		v1 = v2
+	}
+
+	// Draw a line fixed in the circle to animate rotation.
+	p := box2d.AddVV(center, box2d.MulFV(radius, axis))
+	dd.lines.vertex(center, color)
+	dd.lines.vertex(p, color)
 }
 
 //
 func (dd *DebugDraw) DrawSegment(p1 box2d.Vec2, p2 box2d.Vec2, color box2d.Color) {
-
 	dd.lines.vertex(p1, color)
 	dd.lines.vertex(p2, color)
 }
@@ -634,7 +692,6 @@ func (dd *DebugDraw) DrawTransform(xf box2d.Transform) {
 
 //
 func (dd *DebugDraw) DrawPoint(p box2d.Vec2, size float64, color box2d.Color) {
-
 	dd.points.vertex(p, color, size)
 }
 
@@ -645,11 +702,15 @@ func (dd *DebugDraw) DrawString(x, y int, xstring string, a ...interface{}) {
 	if !dd.showUI {
 		return
 	}
+
+	// TODO
 }
 
 //
 func (dd *DebugDraw) DrawString2(pw *box2d.Vec2, xstring string, a ...interface{}) {
 	//fmt.Println("DebugDraw.DrawString2")
+
+	// TODO
 }
 
 //

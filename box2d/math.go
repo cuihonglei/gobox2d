@@ -39,23 +39,31 @@ type Vec2 struct {
 	X, Y float64
 }
 
-func (this *Vec2) GetI(i int) float64 {
-	if i == 0 {
-		return this.X
-	}
-	return this.Y
+func MakeVec2(x, y float64) Vec2 {
+	return Vec2{X: x, Y: y}
 }
 
-func (this *Vec2) SetI(i int) *float64 {
+func NewVec2(x, y float64) *Vec2 {
+	return &Vec2{X: x, Y: y}
+}
+
+func (v *Vec2) GetI(i int) float64 {
 	if i == 0 {
-		return &this.X
+		return v.X
 	}
-	return &this.Y
+	return v.Y
+}
+
+func (v *Vec2) SetI(i int) *float64 {
+	if i == 0 {
+		return &v.X
+	}
+	return &v.Y
 }
 
 // Set this vector to all zeros.
-func (this *Vec2) SetZero() {
-	this.X, this.Y = 0.0, 0.0
+func (v *Vec2) SetZero() {
+	v.X, v.Y = 0.0, 0.0
 }
 
 // Set this vector to some specified coordinates.
