@@ -41,11 +41,13 @@ func resizeWindowCallback(window *glfw.Window, width int, height int) {
 }
 
 func keyCallback(window *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
-	// TODO
 
+	// TODO
+	//ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods)
 	if imgui.CurrentIO().WantCaptureKeyboard() {
 		return
 	}
+
 	if action == glfw.Press {
 		switch key {
 		case glfw.KeyEscape:
@@ -152,14 +154,69 @@ func charCallback(window *glfw.Window, char rune) {
 
 func mouseButtonCallback(window *glfw.Window, button glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
 
-}
-
-func mouseMotionCallback(window *glfw.Window, xpos float64, ypos float64) {
-
-}
-
-func scrollCallback(window *glfw.Window, xoff float64, yoff float64) {
 	// TODO
+	//ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
+
+	xd, yd := g_mainWindow.GetCursorPos()
+	ps := box2d.MakeVec2(xd, yd)
+
+	// Use the mouse to move things around.
+	if button == glfw.MouseButton1 {
+
+		//
+		//ps.Set(0, 0)
+		pw := g_camera.convertScreenToWorld(ps)
+		if action == glfw.Press {
+			if mods == glfw.ModShift {
+				s_test.shiftMouseDown(pw)
+			} else {
+				s_test.mouseDown(pw)
+			}
+		}
+
+		if action == glfw.Release {
+			s_test.mouseUp(pw)
+		}
+
+	} else if button == glfw.MouseButton2 {
+		if action == glfw.Press {
+			s_clickPointWS = g_camera.convertScreenToWorld(ps)
+			s_rightMouseDown = true
+		}
+
+		if action == glfw.Release {
+			s_rightMouseDown = false
+		}
+	}
+}
+
+func mouseMotionCallback(window *glfw.Window, xd float64, yd float64) {
+
+	ps := box2d.MakeVec2(xd, yd)
+
+	pw := g_camera.convertScreenToWorld(ps)
+	s_test.mouseMove(pw)
+
+	if s_rightMouseDown {
+		diff := box2d.SubVV(pw, s_clickPointWS)
+		g_camera.center.X -= diff.X
+		g_camera.center.Y -= diff.Y
+		s_clickPointWS = g_camera.convertScreenToWorld(ps)
+	}
+}
+
+func scrollCallback(window *glfw.Window, dx float64, dy float64) {
+	// TODO
+	//ImGui_ImplGlfw_ScrollCallback(window, dx, dy);
+	if imgui.CurrentIO().WantCaptureMouse() {
+		return
+	}
+
+	if dy > 0 {
+		g_camera.zoom /= 1.1
+	} else {
+		g_camera.zoom *= 1.1
+	}
 }
 
 func restartTest() {

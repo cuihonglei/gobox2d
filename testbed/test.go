@@ -31,6 +31,7 @@ type ITest interface {
 	updateUI()
 	keyboard(key glfw.Key)
 	keyboardUp(key glfw.Key)
+	shiftMouseDown(p box2d.Vec2)
 	mouseDown(p box2d.Vec2)
 	mouseUp(p box2d.Vec2)
 	mouseMove(p box2d.Vec2)
@@ -134,16 +135,55 @@ func (t *Test) keyboardUp(key glfw.Key) {
 
 }
 
+func (t *Test) shiftMouseDown(p box2d.Vec2) {
+	t.mouseWorld = p
+
+	if t.mouseJoint != nil {
+		return
+	}
+
+	t.spawnBomb(p)
+}
+
 func (t *Test) mouseDown(p box2d.Vec2) {
 
 }
 
+func (t *Test) spawnBomb(worldPt box2d.Vec2) {
+	t.bombSpawnPoint = worldPt
+	t.bombSpawning = true
+}
+
+func (t *Test) completeBombSpawn(p box2d.Vec2) {
+	if !t.bombSpawning {
+		return
+	}
+
+	multiplier := 30.0
+	vel := box2d.SubVV(t.bombSpawnPoint, p)
+	vel.Mul(multiplier)
+	t.launchBomb2(t.bombSpawnPoint, vel)
+	t.bombSpawning = false
+}
+
 func (t *Test) mouseUp(p box2d.Vec2) {
 
+	if t.mouseJoint != nil {
+		t.world.DestroyJoint(t.mouseJoint)
+		t.mouseJoint = nil
+	}
+
+	if t.bombSpawning {
+		t.completeBombSpawn(p)
+	}
 }
 
 func (t *Test) mouseMove(p box2d.Vec2) {
+	t.mouseWorld = p
 
+	if t.mouseJoint != nil {
+		t.mouseJoint.SetTarget(p)
+	}
 }
 
 func (t *Test) launchBomb() {
