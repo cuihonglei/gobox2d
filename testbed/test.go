@@ -145,8 +145,71 @@ func (t *Test) shiftMouseDown(p box2d.Vec2) {
 	t.spawnBomb(p)
 }
 
+type QueryCallback struct {
+	point   box2d.Vec2
+	fixture *box2d.Fixture
+}
+
+func MakeQueryCallback(point box2d.Vec2) QueryCallback {
+	cb := QueryCallback{}
+	cb.point = point
+	cb.fixture = nil
+	return cb
+}
+
+func (cb *QueryCallback) ReportFixture(fixture *box2d.Fixture) bool {
+
+	body := fixture.GetBody()
+	if body.GetType() == box2d.DynamicBody {
+		inside := fixture.TestPoint(cb.point)
+		if inside {
+			cb.fixture = fixture
+
+			// We are done, terminate the query.
+			return false
+		}
+	}
+
+	// Continue the query.
+	return true
+}
+
 func (t *Test) mouseDown(p box2d.Vec2) {
 
+	t.mouseWorld = p
+
+	if t.mouseJoint != nil {
+		return
+	}
+
+	// Make a small box.
+	aabb := box2d.MakeAABB()
+	d := box2d.Vec2{}
+	d.Set(0.001, 0.001)
+	aabb.LowerBound = box2d.SubVV(p, d)
+	aabb.UpperBound = box2d.AddVV(p, d)
+
+	// Query the world for overlapping shapes.
+	callback := MakeQueryCallback(p)
+	t.world.QueryAABB(&callback, aabb)
+
+	if callback.fixture != nil {
+		// TODO
+		//frequencyHz := 5.0
+		//dampingRatio := 0.7
+
+		body := callback.fixture.GetBody()
+		jd := box2d.MakeMouseJointDef()
+		jd.BodyA = t.groundBody
+		jd.BodyB = body
+		jd.Target = p
+		jd.MaxForce = 1000.0 * body.GetMass()
+		// TODO
+		//box2d.LinearStiffness(jd.stiffness, jd.damping, frequencyHz, dampingRatio, jd.bodyA, jd.bodyB)
+
+		t.mouseJoint = t.world.CreateJoint(&jd).(*box2d.MouseJoint)
+		body.SetAwake(true)
+	}
 }
 
 func (t *Test) spawnBomb(worldPt box2d.Vec2) {

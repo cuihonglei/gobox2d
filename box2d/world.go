@@ -575,19 +575,19 @@ func (this *World) DebugDraw() {
 /// @param aabb the query box.
 type WorldQueryAABBWrapper struct {
 	broadPhase *BroadPhase
-	callback   func(*Fixture) bool
+	callback   IQueryCallback
 }
 
-func (this *WorldQueryAABBWrapper) QueryCallback(proxyId int) bool {
-	proxy := this.broadPhase.GetUserData(proxyId).(*FixtureProxy)
-	return this.callback(proxy.Fixture)
+func (w *WorldQueryAABBWrapper) QueryCallback(proxyId int) bool {
+	proxy := w.broadPhase.GetUserData(proxyId).(*FixtureProxy)
+	return w.callback.ReportFixture(proxy.Fixture)
 }
 
-func (this *World) QueryAABB(callback func(*Fixture) bool, aabb AABB) {
+func (w *World) QueryAABB(callback IQueryCallback, aabb AABB) {
 	var wrapper WorldQueryAABBWrapper
-	wrapper.broadPhase = this.contactManager.BroadPhase
+	wrapper.broadPhase = w.contactManager.BroadPhase
 	wrapper.callback = callback
-	this.contactManager.BroadPhase.Query(wrapper.QueryCallback, aabb)
+	w.contactManager.BroadPhase.Query(wrapper.QueryCallback, aabb)
 }
 
 /// Query the world for all fixtures that potentially overlap the

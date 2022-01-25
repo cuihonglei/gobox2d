@@ -623,14 +623,19 @@ type MouseJointDef struct {
 	DampingRatio float64
 }
 
+func MakeMouseJointDef() MouseJointDef {
+	jd := MouseJointDef{}
+	jd.Type = Joint_e_mouseJoint
+	jd.Target.Set(0.0, 0.0)
+	jd.MaxForce = 0.0
+	jd.FrequencyHz = 5.0
+	jd.DampingRatio = 0.7
+	return jd
+}
+
 func NewMouseJointDef() *MouseJointDef {
-	this := new(MouseJointDef)
-	this.Type = Joint_e_mouseJoint
-	this.Target.Set(0.0, 0.0)
-	this.MaxForce = 0.0
-	this.FrequencyHz = 5.0
-	this.DampingRatio = 0.7
-	return this
+	jd := MakeMouseJointDef()
+	return &jd
 }
 
 /// A mouse joint is used to make a point on a body track a

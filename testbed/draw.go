@@ -27,14 +27,44 @@ func MakeCamera() Camera {
 	return c
 }
 
-func (c *Camera) convertScreenToWorld(screenPoint box2d.Vec2) box2d.Vec2 {
-	// TODO
-	return screenPoint
+func (c *Camera) convertScreenToWorld(ps box2d.Vec2) box2d.Vec2 {
+
+	w := float64(c.width)
+	h := float64(c.height)
+	u := ps.X / w
+	v := (h - ps.Y) / h
+
+	ratio := w / h
+	extents := box2d.MakeVec2(ratio*25.0, 25.0)
+	extents.Mul(c.zoom)
+
+	lower := box2d.SubVV(c.center, extents)
+	upper := box2d.AddVV(c.center, extents)
+
+	pw := box2d.Vec2{}
+	pw.X = (1.0-u)*lower.X + u*upper.X
+	pw.Y = (1.0-v)*lower.Y + v*upper.Y
+	return pw
 }
 
-func (c *Camera) convertWorldToScreen(worldPoint box2d.Vec2) box2d.Vec2 {
-	// TODO
-	return worldPoint
+func (c *Camera) convertWorldToScreen(pw box2d.Vec2) box2d.Vec2 {
+
+	w := float64(c.width)
+	h := float64(c.height)
+	ratio := w / h
+	extents := box2d.MakeVec2(ratio*25.0, 25.0)
+	extents.Mul(c.zoom)
+
+	lower := box2d.SubVV(c.center, extents)
+	upper := box2d.AddVV(c.center, extents)
+
+	u := (pw.X - lower.X) / (upper.X - lower.X)
+	v := (pw.Y - lower.Y) / (upper.Y - lower.Y)
+
+	ps := box2d.Vec2{}
+	ps.X = u * w
+	ps.Y = (1.0 - v) * h
+	return ps
 }
 
 func (c *Camera) buildProjectionMatrix(m []float32, zBias float32) {
@@ -709,6 +739,7 @@ func (dd *DebugDraw) DrawString(x, y int, xstring string, a ...interface{}) {
 //
 func (dd *DebugDraw) DrawString2(pw *box2d.Vec2, xstring string, a ...interface{}) {
 	//fmt.Println("DebugDraw.DrawString2")
+	//ps := g_camera.convertWorldToScreen(*pw)
 
 	// TODO
 }

@@ -18,8 +18,8 @@ type ContactFilter struct {
 }
 
 func NewContactFilter() *ContactFilter {
-	this := new(ContactFilter)
-	return this
+	cf := new(ContactFilter)
+	return cf
 }
 
 // Return true if contact calculations should be performed between these two shapes.
@@ -85,11 +85,17 @@ type ContactListener struct {
 }
 
 func NewContactListener() *ContactListener {
-	this := new(ContactListener)
-	return this
+	cl := new(ContactListener)
+	return cl
 }
 
-func (this *ContactListener) BeginContact(contact IContact)                       {}
-func (this *ContactListener) EndContact(contact IContact)                         {}
-func (this *ContactListener) PreSolve(contact IContact, oldManifold *Manifold)    {}
-func (this *ContactListener) PostSolve(contact IContact, impulse *ContactImpulse) {}
+func (cl *ContactListener) BeginContact(contact IContact)                       {}
+func (cl *ContactListener) EndContact(contact IContact)                         {}
+func (cl *ContactListener) PreSolve(contact IContact, oldManifold *Manifold)    {}
+func (cl *ContactListener) PostSolve(contact IContact, impulse *ContactImpulse) {}
+
+// Callback class for AABB queries.
+// See b2World::Query
+type IQueryCallback interface {
+	ReportFixture(fixture *Fixture) bool
+}
