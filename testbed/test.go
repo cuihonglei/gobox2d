@@ -314,7 +314,7 @@ func (t *Test) step(settings *Settings) {
 
 	timeStep := 0.0
 	if settings.hertz > 0.0 {
-		timeStep = 1.0 / settings.hertz
+		timeStep = 1.0 / float64(settings.hertz)
 	}
 
 	if settings.pause {
@@ -342,7 +342,7 @@ func (t *Test) step(settings *Settings) {
 
 	t.pointCount = 0
 
-	t.world.Step(timeStep, settings.velocityIterations, settings.positionIterations)
+	t.world.Step(timeStep, int(settings.velocityIterations), int(settings.positionIterations))
 
 	t.world.DebugDraw()
 	g_debugDraw.flush()

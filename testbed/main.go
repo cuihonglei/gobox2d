@@ -7,7 +7,7 @@ import (
 	"runtime"
 
 	"github.com/cuihonglei/gobox2d/box2d"
-	"github.com/go-gl/gl/v2.1/gl"
+	"github.com/go-gl/gl/v3.2-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/inkyblackness/imgui-go/v4"
 )
@@ -23,14 +23,40 @@ func sortTests() {
 	// TODO
 }
 
-func createUI(window *glfw.Window) {
+func createUI(window *glfw.Window, glslVersion string) {
 
 	imgui.CreateContext(nil)
 
+	var success bool
+	success = ImGui_ImplGlfw_InitForOpenGL(window, false)
+	if !success {
+		fmt.Printf("ImGui_ImplGlfw_InitForOpenGL failed\n")
+	}
+
+	success = ImGui_ImplOpenGL3_Init(glslVersion)
+	if !success {
+		fmt.Printf("ImGui_ImplOpenGL3_Init failed\n")
+	}
+
 	// Search for font file
-	// fontPath1 := "data/droid_sans.ttf"
-	// fontPath2 := "../data/droid_sans.ttf"
-	// fontPath := ""
+	fontPath1 := "data/droid_sans.ttf"
+	fontPath2 := "../data/droid_sans.ttf"
+	fontPath := ""
+	file1, err1 := os.Open(fontPath1)
+	file2, err2 := os.Open(fontPath2)
+	if err1 == nil {
+		fontPath = fontPath1
+		file1.Close()
+	}
+
+	if err2 == nil {
+		fontPath = fontPath2
+		file2.Close()
+	}
+
+	if len(fontPath) > 0 {
+		imgui.CurrentIO().Fonts().AddFontFromFileTTF(fontPath, 13.0)
+	}
 }
 
 func resizeWindowCallback(window *glfw.Window, width int, height int) {
@@ -225,7 +251,29 @@ func restartTest() {
 }
 
 func updateUI() {
-	// TODO
+	menuWidth := 180
+	if g_debugDraw.showUI {
+
+		imgui.SetNextWindowPos(imgui.Vec2{X: float32(g_camera.width - menuWidth - 10), Y: 10})
+		imgui.SetNextWindowSize(imgui.Vec2{X: float32(menuWidth), Y: float32(g_camera.height - 20)})
+
+		imgui.BeginV("Tools", &g_debugDraw.showUI, imgui.WindowFlagsNoMove|imgui.WindowFlagsNoResize|imgui.WindowFlagsNoCollapse)
+
+		if imgui.BeginTabBarV("ControlTabs", imgui.TabBarFlagsNone) {
+			if imgui.BeginTabItem("Controls") {
+
+				imgui.SliderInt("Vel Iters", &s_settings.velocityIterations, 0, 50)
+				imgui.SliderInt("Pos Iters", &s_settings.positionIterations, 0, 50)
+				imgui.SliderFloatV("Hertz", &s_settings.hertz, 5.0, 120.0, "%.0f hz", imgui.SliderFlagsNone)
+
+				imgui.Separator()
+			}
+		}
+
+		imgui.End()
+
+		s_test.updateUI()
+	}
 }
 
 func main() {
@@ -243,6 +291,8 @@ func main() {
 		return
 	}
 	defer glfw.Terminate()
+
+	glslVersion := "#version 150"
 
 	glfw.WindowHint(glfw.ContextVersionMajor, 3)
 	glfw.WindowHint(glfw.ContextVersionMinor, 3)
@@ -262,6 +312,18 @@ func main() {
 		return
 	}
 
+	g_mainWindow.MakeContextCurrent()
+
+	// Load OpenGL functions using glad
+	err = gl.Init()
+	if err != nil {
+		log.Fatalf("Error initializing GL: %v", err)
+	}
+	// TODO glad?
+	// int version = gladLoadGL(glfwGetProcAddress);
+	// printf("GL %d.%d\n", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
+	// printf("OpenGL %s, GLSL %s\n", glGetString(GL_VERSION), glGetString(GL_SHADING_LANGUAGE_VERSION));
+
 	// TODO Why call this twice?
 	//g_mainWindow.SetScrollCallback(scrollCallback)
 	g_mainWindow.SetSizeCallback(resizeWindowCallback)
@@ -271,36 +333,22 @@ func main() {
 	g_mainWindow.SetCursorPosCallback(mouseMotionCallback)
 	g_mainWindow.SetScrollCallback(scrollCallback)
 
-	g_mainWindow.MakeContextCurrent()
-
-	// Load OpenGL functions using glad
-	err = gl.Init()
-	if err != nil {
-		log.Fatalf("Error initializing GL: %v", err)
-	}
-
-	// set vsync on, enable multisample (if available)
-	//glfw.SwapInterval(1)
-	gl.Enable(gl.MULTISAMPLE)
-
-	// load GL backend
-	//backend, err := goglbackend.New(0, 0, 0, 0, nil)
-	//if err != nil {
-	//	log.Fatalf("Error loading canvas GL assets: %v", err)
-	//}
-
 	g_debugDraw.create()
 
-	createUI(g_mainWindow)
+	createUI(g_mainWindow, glslVersion)
 
 	s_settings.testIndex = box2d.ClampI(s_settings.testIndex, 0, g_testCount-1)
 	s_testSelection = s_settings.testIndex
 	s_test = g_testEntries[s_settings.testIndex].createFcn()
 
+	// Control the frame rate. One draw per monitor refresh.
+	//glfw.SwapInterval(1)
+
 	gl.ClearColor(0.2, 0.2, 0.2, 1.0)
 
-	// initialize canvas with zero size, since size is set in main loop
-	//cv := canvas.New(backend)
+	// TODO
+	//std::chrono::duration<double> frameTime(0.0);
+	//std::chrono::duration<double> sleepAdjust(0.0);
 
 	for !g_mainWindow.ShouldClose() {
 		g_mainWindow.MakeContextCurrent()
@@ -312,12 +360,29 @@ func main() {
 
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-		//fbw, fbh := g_mainWindow.GetFramebufferSize()
-		//backend.SetBounds(0, 0, fbw, fbh)
+		ImGui_ImplOpenGL3_NewFrame()
+		ImGui_ImplGlfw_NewFrame()
+
+		imgui.NewFrame()
+
+		if g_debugDraw.showUI {
+			// TODO
+		}
 
 		s_test.step(&s_settings)
 
-		updateUI()
+		//updateUI()
+
+		// ImGui::ShowDemoWindow();
+
+		if g_debugDraw.showUI {
+			// TODO
+			//buffer := fmt.Sprintf("%.1f ms", 1000.0 * frameTime.count())
+			//g_debugDraw.DrawString(5, g_camera.height -20, buffer)
+		}
+
+		imgui.Render()
+		ImGui_ImplOpenGL3_RenderDrawData(imgui.RenderedDrawData())
 
 		g_mainWindow.SwapBuffers()
 
@@ -330,9 +395,17 @@ func main() {
 		}
 
 		glfw.PollEvents()
+
+		// TODO
 	}
 
+	s_test.destroy()
 	s_test = nil
+
 	g_debugDraw.destroy()
+	ImGui_ImplOpenGL3_Shutdown()
+	ImGui_ImplGlfw_Shutdown()
+	//glfw.Terminate()
+
 	s_settings.save()
 }

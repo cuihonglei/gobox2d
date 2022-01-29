@@ -4,9 +4,9 @@ type Settings struct {
 	testIndex           int
 	windowWidth         int
 	windowHeight        int
-	hertz               float64
-	velocityIterations  int
-	positionIterations  int
+	hertz               float32
+	velocityIterations  int32
+	positionIterations  int32
 	drawShapes          bool
 	drawJoints          bool
 	drawAABBs           bool

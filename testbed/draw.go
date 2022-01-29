@@ -7,7 +7,7 @@ import (
 	"unsafe"
 
 	"github.com/cuihonglei/gobox2d/box2d"
-	"github.com/go-gl/gl/v2.1/gl"
+	"github.com/go-gl/gl/v3.2-core/gl"
 )
 
 //
@@ -144,7 +144,7 @@ func sCreateShaderProgram(vs, fs string) uint32 {
 	programId := gl.CreateProgram()
 	gl.AttachShader(programId, vsId)
 	gl.AttachShader(programId, fsId)
-	gl.BindFragDataLocationEXT(programId, 0, gl.Str("color\x00"))
+	gl.BindFragDataLocation(programId, 0, gl.Str("color\x00"))
 	gl.LinkProgram(programId)
 
 	gl.DeleteShader(vsId)
@@ -290,9 +290,9 @@ func (rp *GLRenderPoints) flush() {
 	gl.BindBuffer(gl.ARRAY_BUFFER, rp.vboIds[2])
 	gl.BufferSubData(gl.ARRAY_BUFFER, 0, rp.count*int(unsafe.Sizeof(float64(0))), unsafe.Pointer(&rp.sizes[0]))
 
-	gl.Enable(gl.PROGRAM_POINT_SIZE_EXT)
+	gl.Enable(gl.PROGRAM_POINT_SIZE)
 	gl.DrawArrays(gl.POINTS, 0, int32(rp.count))
-	gl.Disable(gl.PROGRAM_POINT_SIZE_EXT)
+	gl.Disable(gl.PROGRAM_POINT_SIZE)
 
 	sCheckGLError()
 
