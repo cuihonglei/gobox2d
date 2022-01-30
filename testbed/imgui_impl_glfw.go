@@ -1,6 +1,8 @@
 package main
 
 import (
+	"math"
+
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/inkyblackness/imgui-go/v4"
 )
@@ -47,7 +49,28 @@ func ImGui_ImplGlfw_Shutdown() {
 }
 
 func ImGui_ImplGlfw_UpdateMousePosAndButtons() {
+	// Update buttons
+	io := imgui.CurrentIO()
+	for i := 0; i < 5; /* TODO IM_ARRAYSIZE(io.MouseDown) */ i++ {
+		// If a mouse press event came, always pass it as "mouse held this frame", so we don't miss click-release events that are shorter than 1 frame.
+		io.SetMouseButtonDown(i, g_MouseJustPressed[i] || g_Window.GetMouseButton(glfw.MouseButton(i)) != glfw.Action(0))
+		g_MouseJustPressed[i] = false
+	}
 
+	// Update mouse position
+	// TODO
+	//mouse_pos_backup := io.GetMousePosition()
+	io.SetMousePosition(imgui.Vec2{X: -math.MaxFloat32, Y: -math.MaxFloat32})
+	// TODO
+	focused := g_Window.GetAttrib(glfw.Focused) != 0
+	if focused {
+		//if io.WantSetMousePos {
+		//g_Window.SetCursorPos()
+		//} else {
+		mouse_x, mouse_y := g_Window.GetCursorPos()
+		io.SetMousePosition(imgui.Vec2{X: float32(mouse_x), Y: float32(mouse_y)})
+		//}
+	}
 }
 
 func ImGui_ImplGlfw_UpdateMouseCursor() {
