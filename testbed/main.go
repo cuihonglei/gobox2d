@@ -267,7 +267,12 @@ func updateUI() {
 				imgui.SliderFloatV("Hertz", &s_settings.hertz, 5.0, 120.0, "%.0f hz", imgui.SliderFlagsNone)
 
 				imgui.Separator()
+
+				// TODO
+
+				imgui.EndTabItem()
 			}
+			imgui.EndTabBar()
 		}
 
 		imgui.End()
@@ -371,7 +376,7 @@ func main() {
 
 		s_test.step(&s_settings)
 
-		//updateUI()
+		updateUI()
 
 		// ImGui::ShowDemoWindow();
 
