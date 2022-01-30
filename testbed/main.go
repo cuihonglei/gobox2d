@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"runtime"
+	"strconv"
 
 	"github.com/cuihonglei/gobox2d/box2d"
 	"github.com/go-gl/gl/v3.2-core/gl"
@@ -68,8 +69,7 @@ func resizeWindowCallback(window *glfw.Window, width int, height int) {
 
 func keyCallback(window *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
 
-	// TODO
-	//ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods)
+	ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods)
 	if imgui.CurrentIO().WantCaptureKeyboard() {
 		return
 	}
@@ -174,14 +174,13 @@ func keyCallback(window *glfw.Window, key glfw.Key, scancode int, action glfw.Ac
 	// else GLFW_REPEAT
 }
 
-func charCallback(window *glfw.Window, char rune) {
-	// TODO
+func charCallback(window *glfw.Window, c rune) {
+	ImGui_ImplGlfw_CharCallback(window, c)
 }
 
 func mouseButtonCallback(window *glfw.Window, button glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
 
-	// TODO
-	//ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
+	ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods)
 
 	xd, yd := g_mainWindow.GetCursorPos()
 	ps := box2d.MakeVec2(xd, yd)
@@ -232,8 +231,7 @@ func mouseMotionCallback(window *glfw.Window, xd float64, yd float64) {
 }
 
 func scrollCallback(window *glfw.Window, dx float64, dy float64) {
-	// TODO
-	//ImGui_ImplGlfw_ScrollCallback(window, dx, dy);
+	ImGui_ImplGlfw_ScrollCallback(window, dx, dy)
 	if imgui.CurrentIO().WantCaptureMouse() {
 		return
 	}
@@ -268,7 +266,91 @@ func updateUI() {
 
 				imgui.Separator()
 
-				// TODO
+				imgui.Checkbox("Sleep", &s_settings.enableSleep)
+				imgui.Checkbox("Warm Starting", &s_settings.enableWarmStarting)
+				imgui.Checkbox("Time of Impact", &s_settings.enableContinuous)
+				imgui.Checkbox("Sub-Stepping", &s_settings.enableSubStepping)
+
+				imgui.Separator()
+
+				imgui.Checkbox("Shapes", &s_settings.drawShapes)
+				imgui.Checkbox("Joints", &s_settings.drawJoints)
+				imgui.Checkbox("AABBs", &s_settings.drawAABBs)
+				imgui.Checkbox("Contact Points", &s_settings.drawContactPoints)
+				imgui.Checkbox("Contact Normals", &s_settings.drawContactNormals)
+				imgui.Checkbox("Contact Impulses", &s_settings.drawContactImpulse)
+				imgui.Checkbox("Friction Impulses", &s_settings.drawFrictionImpulse)
+				imgui.Checkbox("Center of Masses", &s_settings.drawCOMs)
+				imgui.Checkbox("Statistics", &s_settings.drawStats)
+				imgui.Checkbox("Profile", &s_settings.drawProfile)
+
+				button_sz := imgui.Vec2{X: -1, Y: 0}
+				if imgui.ButtonV("Pause (P)", button_sz) {
+					s_settings.pause = !s_settings.pause
+				}
+
+				if imgui.ButtonV("Single Step (O)", button_sz) {
+					s_settings.singleStep = !s_settings.singleStep
+				}
+
+				if imgui.ButtonV("Restart (R)", button_sz) {
+					restartTest()
+				}
+
+				if imgui.ButtonV("Quit", button_sz) {
+					g_Window.SetShouldClose(true)
+				}
+
+				imgui.EndTabItem()
+			}
+
+			leafNodeFlags := imgui.TreeNodeFlagsOpenOnArrow | imgui.TreeNodeFlagsOpenOnDoubleClick
+			leafNodeFlags |= imgui.TreeNodeFlagsLeaf | imgui.TreeNodeFlagsNoTreePushOnOpen
+
+			nodeFlags := imgui.TreeNodeFlagsOpenOnArrow | imgui.TreeNodeFlagsOpenOnDoubleClick
+
+			if imgui.BeginTabItem("Tests") {
+
+				categoryIndex := 0
+				category := g_testEntries[categoryIndex].category
+				for i := 0; i < g_testCount; {
+					categorySelected := category == g_testEntries[s_settings.testIndex].category
+					var nodeSelectionFlags imgui.TreeNodeFlags
+					if categorySelected {
+						nodeSelectionFlags = imgui.TreeNodeFlagsSelected
+					}
+					nodeOpen := imgui.TreeNodeV(category, nodeFlags|nodeSelectionFlags)
+
+					if nodeOpen {
+						for i < g_testCount && category == g_testEntries[i].category {
+
+							var selectionFlags imgui.TreeNodeFlags
+							if s_settings.testIndex == i {
+								selectionFlags = imgui.TreeNodeFlagsSelected
+							}
+							// TODO
+							//ImGui::TreeNodeEx((void*)(intptr_t)i, leafNodeFlags | selectionFlags, "%s", g_testEntries[i].name);
+							imgui.TreeNodeV(strconv.Itoa(i), leafNodeFlags|selectionFlags)
+							if imgui.IsItemClicked() {
+								s_test.destroy()
+								s_settings.testIndex = i
+								s_test = g_testEntries[i].createFcn()
+								s_testSelection = i
+							}
+							i++
+						}
+						imgui.TreePop()
+					} else {
+						for i < g_testCount && category == g_testEntries[i].category {
+							i++
+						}
+					}
+
+					if i < g_testCount {
+						category = g_testEntries[i].category
+						categoryIndex = i
+					}
+				}
 
 				imgui.EndTabItem()
 			}
