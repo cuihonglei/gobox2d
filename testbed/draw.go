@@ -717,7 +717,19 @@ func (dd *DebugDraw) DrawSegment(p1 box2d.Vec2, p2 box2d.Vec2, color box2d.Color
 
 //
 func (dd *DebugDraw) DrawTransform(xf box2d.Transform) {
-	fmt.Println("DebugDraw.DrawTransform")
+
+	const k_axisScale = 0.4
+	red := box2d.MakeColor(1.0, 0.0, 0.0)
+	green := box2d.MakeColor(0.0, 1.0, 0.0)
+	p1, p2 := xf.P, box2d.Vec2{}
+
+	dd.lines.vertex(p1, red)
+	p2 = box2d.AddVV(p1, box2d.MulFV(k_axisScale, xf.Q.GetXAxis()))
+	dd.lines.vertex(p2, red)
+
+	dd.lines.vertex(p1, green)
+	p2 = box2d.AddVV(p1, box2d.MulFV(k_axisScale, xf.Q.GetYAxis()))
+	dd.lines.vertex(p2, green)
 }
 
 //

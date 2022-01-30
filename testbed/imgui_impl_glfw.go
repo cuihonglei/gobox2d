@@ -45,7 +45,12 @@ func ImGui_ImplGlfw_InitForOpenGL(window *glfw.Window, install_callbacks bool) b
 }
 
 func ImGui_ImplGlfw_Shutdown() {
+	for cursor_n := 0; cursor_n < int(imgui.MouseCursorCount); cursor_n++ {
+		g_MouseCursors[cursor_n].Destroy()
+		g_MouseCursors[cursor_n] = nil
+	}
 	// TODO
+	//g_ClientApi = GlfwClientApi_Unknown;
 }
 
 func ImGui_ImplGlfw_UpdateMousePosAndButtons() {
@@ -74,7 +79,7 @@ func ImGui_ImplGlfw_UpdateMousePosAndButtons() {
 }
 
 func ImGui_ImplGlfw_UpdateMouseCursor() {
-
+	// TODO
 }
 
 func ImGui_ImplGlfw_Init(window *glfw.Window, install_callbacks bool) bool {
