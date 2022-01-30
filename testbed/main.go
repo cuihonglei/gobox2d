@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 	"runtime"
-	"strconv"
 
 	"github.com/cuihonglei/gobox2d/box2d"
 	"github.com/go-gl/gl/v3.2-core/gl"
@@ -330,7 +329,7 @@ func updateUI() {
 							}
 							// TODO
 							//ImGui::TreeNodeEx((void*)(intptr_t)i, leafNodeFlags | selectionFlags, "%s", g_testEntries[i].name);
-							imgui.TreeNodeV(strconv.Itoa(i), leafNodeFlags|selectionFlags)
+							imgui.TreeNodeV(g_testEntries[i].name, leafNodeFlags|selectionFlags)
 							if imgui.IsItemClicked() {
 								s_test.destroy()
 								s_settings.testIndex = i
