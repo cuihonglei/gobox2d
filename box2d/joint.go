@@ -3004,28 +3004,33 @@ type WheelJointDef struct {
 	DampingRatio float64
 }
 
+func MakeWheelJointDef() WheelJointDef {
+	jd := WheelJointDef{}
+	jd.Type = Joint_e_wheelJoint
+	jd.LocalAnchorA.SetZero()
+	jd.LocalAnchorB.SetZero()
+	jd.LocalAxisA.Set(1.0, 0.0)
+	jd.EnableMotor = false
+	jd.MaxMotorTorque = 0.0
+	jd.MotorSpeed = 0.0
+	jd.FrequencyHz = 2.0
+	jd.DampingRatio = 0.7
+	return jd
+}
+
 func NewWheelJointDef() *WheelJointDef {
-	this := new(WheelJointDef)
-	this.Type = Joint_e_wheelJoint
-	this.LocalAnchorA.SetZero()
-	this.LocalAnchorB.SetZero()
-	this.LocalAxisA.Set(1.0, 0.0)
-	this.EnableMotor = false
-	this.MaxMotorTorque = 0.0
-	this.MotorSpeed = 0.0
-	this.FrequencyHz = 2.0
-	this.DampingRatio = 0.7
-	return this
+	jd := MakeWheelJointDef()
+	return &jd
 }
 
 /// Initialize the bodies, anchors, axis, and reference angle using the world
 /// anchor and world axis.
-func (this *WheelJointDef) Initialize(bodyA *Body, bodyB *Body, anchor Vec2, axis Vec2) {
-	this.BodyA = bodyA
-	this.BodyB = bodyB
-	this.LocalAnchorA = bodyA.GetLocalPoint(anchor)
-	this.LocalAnchorB = bodyB.GetLocalPoint(anchor)
-	this.LocalAxisA = bodyA.GetLocalVector(axis)
+func (jd *WheelJointDef) Initialize(bodyA *Body, bodyB *Body, anchor Vec2, axis Vec2) {
+	jd.BodyA = bodyA
+	jd.BodyB = bodyB
+	jd.LocalAnchorA = bodyA.GetLocalPoint(anchor)
+	jd.LocalAnchorB = bodyB.GetLocalPoint(anchor)
+	jd.LocalAxisA = bodyA.GetLocalVector(axis)
 }
 
 /// A wheel joint. This joint provides two degrees of freedom: translation

@@ -253,12 +253,12 @@ func (this *Body) CreateFixture(def *FixtureDef) *Fixture {
 /// @param shape the shape to be cloned.
 /// @param density the shape density (set to zero for static bodies).
 /// @warning This function is locked during callbacks.
-func (this *Body) CreateFixture2(shape IShape, density float64) *Fixture {
-	def := NewFixtureDef()
+func (b *Body) CreateFixture2(shape IShape, density float64) *Fixture {
+	def := MakeFixtureDef()
 	def.Shape = shape
 	def.Density = density
 
-	return this.CreateFixture(def)
+	return b.CreateFixture(&def)
 }
 
 // Destroy a fixture. This removes the fixture from the broad-phase and
