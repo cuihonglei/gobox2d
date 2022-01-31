@@ -8,6 +8,7 @@ import (
 
 	"github.com/cuihonglei/gobox2d/box2d"
 	"github.com/go-gl/gl/v3.2-core/gl"
+	"github.com/inkyblackness/imgui-go/v4"
 )
 
 //
@@ -739,13 +740,16 @@ func (dd *DebugDraw) DrawPoint(p box2d.Vec2, size float64, color box2d.Color) {
 
 //
 func (dd *DebugDraw) DrawString(x, y int, xstring string, a ...interface{}) {
-	//fmt.Println("DebugDraw.DrawString")
-
 	if !dd.showUI {
 		return
 	}
 
+	imgui.BeginV("Overlay", nil, imgui.WindowFlagsNoTitleBar|imgui.WindowFlagsNoInputs|imgui.WindowFlagsAlwaysAutoResize|imgui.WindowFlagsNoScrollbar)
+	imgui.SetCursorPos(imgui.Vec2{X: float32(x), Y: float32(y)})
 	// TODO
+	//ImGui::TextColoredV(ImColor(230, 153, 153, 255), string, arg);
+	imgui.Text(fmt.Sprintf(xstring, a...))
+	imgui.End()
 }
 
 //

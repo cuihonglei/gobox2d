@@ -28,6 +28,7 @@ func RandomFloat2(lo float64, hi float64) float64 {
 type ITest interface {
 	step(*Settings)
 	destroy()
+	drawTitle(xstring string)
 	updateUI()
 	keyboard(key glfw.Key)
 	keyboardUp(key glfw.Key)
@@ -143,6 +144,11 @@ func (t *Test) shiftMouseDown(p box2d.Vec2) {
 	}
 
 	t.spawnBomb(p)
+}
+
+func (t *Test) drawTitle(xstring string) {
+	g_debugDraw.DrawString(5, 5, xstring)
+	t.textLine = 26
 }
 
 type QueryCallback struct {

@@ -21,6 +21,7 @@
 Thumbs.db
 
 # testbed - settings.ini
+settings.ini
 testbed/settings.ini
 
 # bugs.txt - todos and bugs

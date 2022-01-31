@@ -40,7 +40,7 @@ func createUI(window *glfw.Window, glslVersion string) {
 
 	// Search for font file
 	fontPath1 := "data/droid_sans.ttf"
-	fontPath2 := "../data/droid_sans.ttf"
+	fontPath2 := "testbed/data/droid_sans.ttf"
 	fontPath := ""
 	file1, err1 := os.Open(fontPath1)
 	file2, err2 := os.Open(fontPath2)
@@ -452,7 +452,16 @@ func main() {
 		imgui.NewFrame()
 
 		if g_debugDraw.showUI {
-			// TODO
+
+			imgui.SetNextWindowPos(imgui.Vec2{})
+			imgui.SetNextWindowSize(imgui.Vec2{X: float32(g_camera.width), Y: float32(g_camera.height)})
+			imgui.SetNextWindowBgAlpha(0.0)
+			imgui.BeginV("Overlay", nil, imgui.WindowFlagsNoTitleBar|imgui.WindowFlagsNoInputs|imgui.WindowFlagsAlwaysAutoResize|imgui.WindowFlagsNoScrollbar)
+			imgui.End()
+
+			entry := g_testEntries[s_settings.testIndex]
+			buffer = fmt.Sprintf("%s : %s", entry.category, entry.name)
+			s_test.drawTitle(buffer)
 		}
 
 		s_test.step(&s_settings)
@@ -462,9 +471,8 @@ func main() {
 		// ImGui::ShowDemoWindow();
 
 		if g_debugDraw.showUI {
-			// TODO
-			//buffer := fmt.Sprintf("%.1f ms", 1000.0 * frameTime.count())
-			//g_debugDraw.DrawString(5, g_camera.height -20, buffer)
+			//buffer = fmt.Sprintf("%.1f ms", 1000.0*frameTime.count())
+			//g_debugDraw.DrawString(5, g_camera.height-20, buffer)
 		}
 
 		imgui.Render()

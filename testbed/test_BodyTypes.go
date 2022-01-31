@@ -115,7 +115,8 @@ func (bt *BodyTypes) step(settings *Settings) {
 
 	bt.Test.step(settings)
 
-	// TODO
+	g_debugDraw.DrawString(5, bt.textLine, "Keys: (d) dynamic, (s) static, (k) kinematic")
+	bt.textLine += bt.textIncrement
 }
 
 var _ = RegisterTest("Examples", "Body Types", CreateBodyTypes)
