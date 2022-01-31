@@ -40,34 +40,21 @@ const (
 	world_e_clearForces = 0x0004
 )
 
+func MakeWorld(gravity Vec2) World {
+	return World{
+		warmStarting:      true,
+		continuousPhysics: true,
+		stepComplete:      true,
+		allowSleep:        true,
+		gravity:           gravity,
+		flags:             world_e_clearForces,
+		contactManager:    NewContactManager(),
+	}
+}
+
 func NewWorld(gravity Vec2) *World {
-	this := new(World)
-
-	this.destructionListener = nil
-	this.debugDraw = nil
-
-	this.bodyList = nil
-	this.jointList = nil
-
-	this.bodyCount = 0
-	this.jointCount = 0
-
-	this.warmStarting = true
-	this.continuousPhysics = true
-	this.subStepping = false
-
-	this.stepComplete = true
-
-	this.allowSleep = true
-	this.gravity = gravity
-
-	this.flags = world_e_clearForces
-
-	this.inv_dt0 = 0.0
-
-	this.contactManager = NewContactManager()
-
-	return this
+	w := MakeWorld(gravity)
+	return &w
 }
 
 func (w *World) Destroy() {
