@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"runtime"
+	"time"
 
 	"github.com/cuihonglei/gobox2d/box2d"
 	"github.com/go-gl/gl/v3.2-core/gl"
@@ -432,12 +433,12 @@ func main() {
 
 	gl.ClearColor(0.2, 0.2, 0.2, 1.0)
 
-	// TODO
-	//std::chrono::duration<double> frameTime(0.0);
-	//std::chrono::duration<double> sleepAdjust(0.0);
+	var frameTime time.Duration
+	var sleepAdjust time.Duration
 
 	for !g_mainWindow.ShouldClose() {
-		g_mainWindow.MakeContextCurrent()
+
+		t1 := time.Now()
 
 		g_camera.width, g_camera.height = g_mainWindow.GetSize()
 
@@ -471,8 +472,8 @@ func main() {
 		// ImGui::ShowDemoWindow();
 
 		if g_debugDraw.showUI {
-			//buffer = fmt.Sprintf("%.1f ms", 1000.0*frameTime.count())
-			//g_debugDraw.DrawString(5, g_camera.height-20, buffer)
+			buffer = fmt.Sprintf("%.1f ms", 1000.0*frameTime.Seconds())
+			g_debugDraw.DrawString(5, g_camera.height-20, buffer)
 		}
 
 		imgui.Render()
@@ -490,7 +491,21 @@ func main() {
 
 		glfw.PollEvents()
 
-		// TODO
+		// Throttle to cap at 60Hz. This adaptive using a sleep adjustment. This could be improved by
+		// using mm_pause or equivalent for the last millisecond.
+		t2 := time.Now()
+		target := time.Duration(time.Second / 60)
+		timeUsed := t2.Sub(t1)
+		sleepTime := target - timeUsed + sleepAdjust
+		if sleepTime > 0 {
+			time.Sleep(sleepTime)
+		}
+
+		t3 := time.Now()
+		frameTime = t3.Sub(t1)
+
+		// Compute the sleep adjustment using a low pass filter
+		sleepAdjust = time.Duration(0.9*float64(sleepAdjust) + 0.9*float64(target-frameTime))
 	}
 
 	s_test.destroy()
