@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"runtime"
+	"sort"
 	"time"
 
 	"github.com/cuihonglei/gobox2d/box2d"
@@ -20,8 +21,19 @@ var s_test ITest = nil
 var s_rightMouseDown = false
 var s_clickPointWS = box2d.Vec2_zero
 
+func compareTests(i, j int) bool {
+	a, b := g_testEntries[i], g_testEntries[j]
+
+	result := a.category <= b.category
+	if a.category == b.category {
+		result = a.name <= b.name
+	}
+
+	return result
+}
+
 func sortTests() {
-	// TODO
+	sort.Slice(g_testEntries[:g_testCount], compareTests)
 }
 
 func createUI(window *glfw.Window, glslVersion string) {
