@@ -21,6 +21,7 @@ func CreateCircleStack() ITest {
 		ground := cs.world.CreateBody(&bd)
 
 		shape := box2d.MakeEdgeShape()
+		// TODO
 		shape.Set(box2d.Vec2{X: -40.0, Y: 0.0}, box2d.Vec2{X: 40.0, Y: 0.0})
 		ground.CreateFixture2(&shape, 0.0)
 	}
@@ -47,7 +48,6 @@ func CreateCircleStack() ITest {
 }
 
 func (cs *CircleStack) step(settings *Settings) {
-
 	cs.Test.step(settings)
 }
 
