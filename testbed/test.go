@@ -11,7 +11,6 @@ const RAND_LIMIT = 32767
 
 /// Random number in range [-1,1]
 func RandomFloat() float64 {
-	// TODO
 	r := rand.Float64()
 	r = 2.0*r - 1.0
 	return r
@@ -19,7 +18,6 @@ func RandomFloat() float64 {
 
 /// Random floating point number in range [lo, hi]
 func RandomFloat2(lo float64, hi float64) float64 {
-	// TODO
 	r := rand.Float64()
 	r = (hi-lo)*r + lo
 	return r
