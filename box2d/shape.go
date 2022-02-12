@@ -68,12 +68,12 @@ type Shape struct {
 
 // Get the type of this shape. You can use this to down cast to the concrete shape.
 // @return the shape type.
-func (this *Shape) GetType() ShapeType {
-	return this.Type
+func (s *Shape) GetType() ShapeType {
+	return s.Type
 }
 
-func (this *Shape) GetRadius() float64 {
-	return this.Radius
+func (s *Shape) GetRadius() float64 {
+	return s.Radius
 }
 
 // A circle shape.
@@ -93,29 +93,29 @@ func NewCircleShape() *CircleShape {
 	return &cs
 }
 
-func (this *CircleShape) Clone() IShape {
+func (cs *CircleShape) Clone() IShape {
 	clone := NewCircleShape()
-	*clone = *this
+	*clone = *cs
 	return clone
 }
 
 // @see b2Shape::GetChildCount
-func (this *CircleShape) GetChildCount() int {
+func (cs *CircleShape) GetChildCount() int {
 	return 1
 }
 
 // Implement b2Shape.
-func (this *CircleShape) TestPoint(transform Transform, p Vec2) bool {
-	center := AddVV(transform.P, MulRV(transform.Q, this.P))
+func (cs *CircleShape) TestPoint(transform Transform, p Vec2) bool {
+	center := AddVV(transform.P, MulRV(transform.Q, cs.P))
 	d := SubVV(p, center)
-	return DotVV(d, d) <= this.Radius*this.Radius
+	return DotVV(d, d) <= cs.Radius*cs.Radius
 }
 
 // Implement b2Shape.
-func (this *CircleShape) RayCast(input RayCastInput, transform Transform, childIndex int) (output RayCastOutput, ret bool) {
-	position := AddVV(transform.P, MulRV(transform.Q, this.P))
+func (cs *CircleShape) RayCast(input RayCastInput, transform Transform, childIndex int) (output RayCastOutput, ret bool) {
+	position := AddVV(transform.P, MulRV(transform.Q, cs.P))
 	s := SubVV(input.P1, position)
-	b := DotVV(s, s) - this.Radius*this.Radius
+	b := DotVV(s, s) - cs.Radius*cs.Radius
 
 	// Solve quadratic equation.
 	r := SubVV(input.P2, input.P1)
@@ -145,39 +145,39 @@ func (this *CircleShape) RayCast(input RayCastInput, transform Transform, childI
 }
 
 // @see b2Shape::ComputeAABB
-func (this *CircleShape) ComputeAABB(aabb *AABB, transform Transform, childIndex int) {
-	p := AddVV(transform.P, MulRV(transform.Q, this.P))
-	aabb.LowerBound.Set(p.X-this.Radius, p.Y-this.Radius)
-	aabb.UpperBound.Set(p.X+this.Radius, p.Y+this.Radius)
+func (cs *CircleShape) ComputeAABB(aabb *AABB, transform Transform, childIndex int) {
+	p := AddVV(transform.P, MulRV(transform.Q, cs.P))
+	aabb.LowerBound.Set(p.X-cs.Radius, p.Y-cs.Radius)
+	aabb.UpperBound.Set(p.X+cs.Radius, p.Y+cs.Radius)
 }
 
 // @see b2Shape::ComputeMass
-func (this *CircleShape) ComputeMass(massData *MassData, density float64) {
-	massData.Mass = density * Pi * this.Radius * this.Radius
-	massData.Center = this.P
+func (cs *CircleShape) ComputeMass(massData *MassData, density float64) {
+	massData.Mass = density * Pi * cs.Radius * cs.Radius
+	massData.Center = cs.P
 
 	// inertia about the local origin
-	massData.I = massData.Mass * (0.5*this.Radius*this.Radius + DotVV(this.P, this.P))
+	massData.I = massData.Mass * (0.5*cs.Radius*cs.Radius + DotVV(cs.P, cs.P))
 }
 
 // Get the supporting vertex index in the given direction.
-func (this *CircleShape) GetSupport(d *Vec2) int {
+func (cs *CircleShape) GetSupport(d *Vec2) int {
 	return 0
 }
 
 // Get the supporting vertex in the given direction.
-func (this *CircleShape) GetSupportVertex(d Vec2) Vec2 {
-	return this.P
+func (cs *CircleShape) GetSupportVertex(d Vec2) Vec2 {
+	return cs.P
 }
 
 // Get the vertex count.
-func (this *CircleShape) GetVertexCount() int {
+func (cs *CircleShape) GetVertexCount() int {
 	return 1
 }
 
 // Get a vertex by index. Used by b2Distance.
-func (this *CircleShape) GetVertex(index int) Vec2 {
-	return this.P
+func (cs *CircleShape) GetVertex(index int) Vec2 {
+	return cs.P
 }
 
 // A line segment (edge) shape. These can be connected in chains or loops
@@ -206,38 +206,38 @@ func NewEdgeShape() *EdgeShape {
 	return &es
 }
 
-func (this *EdgeShape) Set(v1, v2 Vec2) {
-	this.Vertex1 = v1
-	this.Vertex2 = v2
-	this.HasVertex0 = false
-	this.HasVertex3 = false
+func (es *EdgeShape) Set(v1, v2 Vec2) {
+	es.Vertex1 = v1
+	es.Vertex2 = v2
+	es.HasVertex0 = false
+	es.HasVertex3 = false
 }
 
-func (this *EdgeShape) Clone() IShape {
+func (es *EdgeShape) Clone() IShape {
 	clone := NewEdgeShape()
-	*clone = *this
+	*clone = *es
 	return clone
 }
 
 // @see b2Shape::GetChildCount
-func (this *EdgeShape) GetChildCount() int {
+func (es *EdgeShape) GetChildCount() int {
 	return 1
 }
 
 // @see b2Shape::TestPoint
-func (this *EdgeShape) TestPoint(xf Transform, p Vec2) bool {
+func (es *EdgeShape) TestPoint(xf Transform, p Vec2) bool {
 	return false
 }
 
 // Implement b2Shape.
-func (this *EdgeShape) RayCast(input RayCastInput, xf Transform, childIndex int) (output RayCastOutput, ret bool) {
+func (es *EdgeShape) RayCast(input RayCastInput, xf Transform, childIndex int) (output RayCastOutput, ret bool) {
 	// Put the ray into the edge's frame of reference.
 	p1 := MulTRV(xf.Q, SubVV(input.P1, xf.P))
 	p2 := MulTRV(xf.Q, SubVV(input.P2, xf.P))
 	d := SubVV(p2, p1)
 
-	v1 := this.Vertex1
-	v2 := this.Vertex2
+	v1 := es.Vertex1
+	v2 := es.Vertex2
 	e := SubVV(v2, v1)
 	normal := Vec2{e.Y, -e.X}
 	normal.Normalize()
@@ -283,22 +283,22 @@ func (this *EdgeShape) RayCast(input RayCastInput, xf Transform, childIndex int)
 }
 
 // @see b2Shape::ComputeAABB
-func (this *EdgeShape) ComputeAABB(aabb *AABB, xf Transform, childIndex int) {
-	v1 := MulX(xf, this.Vertex1)
-	v2 := MulX(xf, this.Vertex2)
+func (es *EdgeShape) ComputeAABB(aabb *AABB, xf Transform, childIndex int) {
+	v1 := MulX(xf, es.Vertex1)
+	v2 := MulX(xf, es.Vertex2)
 
 	lower := MinV(v1, v2)
 	upper := MaxV(v1, v2)
 
-	r := Vec2{this.Radius, this.Radius}
+	r := Vec2{es.Radius, es.Radius}
 	aabb.LowerBound = SubVV(lower, r)
 	aabb.UpperBound = AddVV(upper, r)
 }
 
 // @see b2Shape::ComputeMass
-func (this *EdgeShape) ComputeMass(massData *MassData, density float64) {
+func (es *EdgeShape) ComputeMass(massData *MassData, density float64) {
 	massData.Mass = 0.0
-	massData.Center = MulFV(0.5, AddVV(this.Vertex1, this.Vertex2))
+	massData.Center = MulFV(0.5, AddVV(es.Vertex1, es.Vertex2))
 	massData.I = 0.0
 }
 
@@ -326,14 +326,14 @@ func NewPolygonShape() *PolygonShape {
 	return &ps
 }
 
-func (this *PolygonShape) Clone() IShape {
+func (ps *PolygonShape) Clone() IShape {
 	clone := NewPolygonShape()
-	*clone = *this
+	*clone = *ps
 	return clone
 }
 
 // @see b2Shape::GetChildCount
-func (this *PolygonShape) GetChildCount() int {
+func (ps *PolygonShape) GetChildCount() int {
 	return 1
 }
 
@@ -387,24 +387,24 @@ func computeCentroid(vs []Vec2, count int) Vec2 {
 // Copy vertices. This assumes the vertices define a convex polygon.
 // It is assumed that the exterior is the the right of each edge.
 // The count must be in the range [3, b2_maxPolygonVertices].
-func (this *PolygonShape) Set(vertices []Vec2) {
-	this.VertexCount = len(vertices)
+func (ps *PolygonShape) Set(vertices []Vec2) {
+	ps.VertexCount = len(vertices)
 
 	// Copy vertices.
 	for i, v := range vertices {
-		this.Vertices[i] = v
+		ps.Vertices[i] = v
 	}
 
 	// Compute normals. Ensure the edges have non-zero length.
-	for i := 0; i < this.VertexCount; i++ {
+	for i := 0; i < ps.VertexCount; i++ {
 		i1 := i
 		i2 := 0
-		if i+1 < this.VertexCount {
+		if i+1 < ps.VertexCount {
 			i2 = i + 1
 		}
-		edge := SubVV(this.Vertices[i2], this.Vertices[i1])
-		this.Normals[i] = CrossVF(edge, 1.0)
-		this.Normals[i].Normalize()
+		edge := SubVV(ps.Vertices[i2], ps.Vertices[i1])
+		ps.Normals[i] = CrossVF(edge, 1.0)
+		ps.Normals[i].Normalize()
 	}
 	/*
 	   #ifdef _DEBUG
@@ -436,23 +436,23 @@ func (this *PolygonShape) Set(vertices []Vec2) {
 	*/
 
 	// Compute the polygon centroid.
-	this.Centroid = computeCentroid(this.Vertices[:], this.VertexCount)
+	ps.Centroid = computeCentroid(ps.Vertices[:], ps.VertexCount)
 }
 
 // Build vertices to represent an axis-aligned box.
 // @param hx the half-width.
 // @param hy the half-height.
-func (this *PolygonShape) SetAsBox(hx float64, hy float64) {
-	this.VertexCount = 4
-	this.Vertices[0].Set(-hx, -hy)
-	this.Vertices[1].Set(hx, -hy)
-	this.Vertices[2].Set(hx, hy)
-	this.Vertices[3].Set(-hx, hy)
-	this.Normals[0].Set(0.0, -1.0)
-	this.Normals[1].Set(1.0, 0.0)
-	this.Normals[2].Set(0.0, 1.0)
-	this.Normals[3].Set(-1.0, 0.0)
-	this.Centroid.SetZero()
+func (ps *PolygonShape) SetAsBox(hx float64, hy float64) {
+	ps.VertexCount = 4
+	ps.Vertices[0].Set(-hx, -hy)
+	ps.Vertices[1].Set(hx, -hy)
+	ps.Vertices[2].Set(hx, hy)
+	ps.Vertices[3].Set(-hx, hy)
+	ps.Normals[0].Set(0.0, -1.0)
+	ps.Normals[1].Set(1.0, 0.0)
+	ps.Normals[2].Set(0.0, 1.0)
+	ps.Normals[3].Set(-1.0, 0.0)
+	ps.Centroid.SetZero()
 }
 
 // Build vertices to represent an oriented box.
@@ -460,35 +460,35 @@ func (this *PolygonShape) SetAsBox(hx float64, hy float64) {
 // @param hy the half-height.
 // @param center the center of the box in local coordinates.
 // @param angle the rotation of the box in local coordinates.
-func (this *PolygonShape) SetAsOrientedBox(hx float64, hy float64, center Vec2, angle float64) {
-	this.VertexCount = 4
-	this.Vertices[0].Set(-hx, -hy)
-	this.Vertices[1].Set(hx, -hy)
-	this.Vertices[2].Set(hx, hy)
-	this.Vertices[3].Set(-hx, hy)
-	this.Normals[0].Set(0.0, -1.0)
-	this.Normals[1].Set(1.0, 0.0)
-	this.Normals[2].Set(0.0, 1.0)
-	this.Normals[3].Set(-1.0, 0.0)
-	this.Centroid = center
+func (ps *PolygonShape) SetAsOrientedBox(hx float64, hy float64, center Vec2, angle float64) {
+	ps.VertexCount = 4
+	ps.Vertices[0].Set(-hx, -hy)
+	ps.Vertices[1].Set(hx, -hy)
+	ps.Vertices[2].Set(hx, hy)
+	ps.Vertices[3].Set(-hx, hy)
+	ps.Normals[0].Set(0.0, -1.0)
+	ps.Normals[1].Set(1.0, 0.0)
+	ps.Normals[2].Set(0.0, 1.0)
+	ps.Normals[3].Set(-1.0, 0.0)
+	ps.Centroid = center
 
 	var xf Transform
 	xf.P = center
 	xf.Q.Set(angle)
 
 	// Transform vertices and normals.
-	for i := 0; i < this.VertexCount; i++ {
-		this.Vertices[i] = MulX(xf, this.Vertices[i])
-		this.Normals[i] = MulRV(xf.Q, this.Normals[i])
+	for i := 0; i < ps.VertexCount; i++ {
+		ps.Vertices[i] = MulX(xf, ps.Vertices[i])
+		ps.Normals[i] = MulRV(xf.Q, ps.Normals[i])
 	}
 }
 
 // @see b2Shape::TestPoint
-func (this *PolygonShape) TestPoint(xf Transform, p Vec2) bool {
+func (ps *PolygonShape) TestPoint(xf Transform, p Vec2) bool {
 	pLocal := MulTRV(xf.Q, SubVV(p, xf.P))
 
-	for i := 0; i < this.VertexCount; i++ {
-		dot := DotVV(this.Normals[i], SubVV(pLocal, this.Vertices[i]))
+	for i := 0; i < ps.VertexCount; i++ {
+		dot := DotVV(ps.Normals[i], SubVV(pLocal, ps.Vertices[i]))
 		if dot > 0.0 {
 			return false
 		}
@@ -498,7 +498,7 @@ func (this *PolygonShape) TestPoint(xf Transform, p Vec2) bool {
 }
 
 // Implement b2Shape.
-func (this *PolygonShape) RayCast(input RayCastInput, xf Transform, childIndex int) (output RayCastOutput, ret bool) {
+func (ps *PolygonShape) RayCast(input RayCastInput, xf Transform, childIndex int) (output RayCastOutput, ret bool) {
 	// Put the ray into the polygon's frame of reference.
 	p1 := MulTRV(xf.Q, SubVV(input.P1, xf.P))
 	p2 := MulTRV(xf.Q, SubVV(input.P2, xf.P))
@@ -508,12 +508,12 @@ func (this *PolygonShape) RayCast(input RayCastInput, xf Transform, childIndex i
 
 	index := -1
 
-	for i := 0; i < this.VertexCount; i++ {
+	for i := 0; i < ps.VertexCount; i++ {
 		// p = p1 + a * d
 		// dot(normal, p - v) = 0
 		// dot(normal, p1 - v) + a * dot(normal, d) = 0
-		numerator := DotVV(this.Normals[i], SubVV(this.Vertices[i], p1))
-		denominator := DotVV(this.Normals[i], d)
+		numerator := DotVV(ps.Normals[i], SubVV(ps.Vertices[i], p1))
+		denominator := DotVV(ps.Normals[i], d)
 
 		if denominator == 0.0 {
 			if numerator < 0.0 {
@@ -547,7 +547,7 @@ func (this *PolygonShape) RayCast(input RayCastInput, xf Transform, childIndex i
 
 	if index >= 0 {
 		output.Fraction = lower
-		output.Normal = MulRV(xf.Q, this.Normals[index])
+		output.Normal = MulRV(xf.Q, ps.Normals[index])
 		ret = true
 		return
 	}
@@ -556,24 +556,24 @@ func (this *PolygonShape) RayCast(input RayCastInput, xf Transform, childIndex i
 }
 
 // @see b2Shape::ComputeAABB
-func (this *PolygonShape) ComputeAABB(aabb *AABB, xf Transform, childIndex int) {
+func (ps *PolygonShape) ComputeAABB(aabb *AABB, xf Transform, childIndex int) {
 
-	lower := MulX(xf, this.Vertices[0])
+	lower := MulX(xf, ps.Vertices[0])
 	upper := lower
 
-	for i := 1; i < this.VertexCount; i++ {
-		v := MulX(xf, this.Vertices[i])
+	for i := 1; i < ps.VertexCount; i++ {
+		v := MulX(xf, ps.Vertices[i])
 		lower = MinV(lower, v)
 		upper = MaxV(upper, v)
 	}
 
-	r := Vec2{this.Radius, this.Radius}
+	r := Vec2{ps.Radius, ps.Radius}
 	aabb.LowerBound = SubVV(lower, r)
 	aabb.UpperBound = AddVV(upper, r)
 }
 
 // @see b2Shape::ComputeMass
-func (this *PolygonShape) ComputeMass(massData *MassData, density float64) {
+func (ps *PolygonShape) ComputeMass(massData *MassData, density float64) {
 	// Polygon mass, centroid, and inertia.
 	// Let rho be the polygon density in mass per unit area.
 	// Then:
@@ -608,21 +608,21 @@ func (this *PolygonShape) ComputeMass(massData *MassData, density float64) {
 	s := Vec2{0.0, 0.0}
 
 	// This code would put the reference point inside the polygon.
-	for i := 0; i < this.VertexCount; i++ {
-		s.Add(this.Vertices[i])
+	for i := 0; i < ps.VertexCount; i++ {
+		s.Add(ps.Vertices[i])
 	}
-	s.Mul(1.0 / float64(this.VertexCount))
+	s.Mul(1.0 / float64(ps.VertexCount))
 
 	k_inv3 := 1.0 / 3.0
 
-	for i := 0; i < this.VertexCount; i++ {
+	for i := 0; i < ps.VertexCount; i++ {
 		// Triangle vertices.
-		e1 := SubVV(this.Vertices[i], s)
+		e1 := SubVV(ps.Vertices[i], s)
 		var e2 Vec2
-		if i+1 < this.VertexCount {
-			e2 = SubVV(this.Vertices[i+1], s)
+		if i+1 < ps.VertexCount {
+			e2 = SubVV(ps.Vertices[i+1], s)
 		} else {
-			e2 = SubVV(this.Vertices[0], s)
+			e2 = SubVV(ps.Vertices[0], s)
 		}
 
 		D := CrossVV(e1, e2)
@@ -657,13 +657,13 @@ func (this *PolygonShape) ComputeMass(massData *MassData, density float64) {
 }
 
 // Get the vertex count.
-func (this *PolygonShape) GetVertexCount() int {
-	return this.VertexCount
+func (ps *PolygonShape) GetVertexCount() int {
+	return ps.VertexCount
 }
 
 // Get a vertex by index.
-func (this *PolygonShape) GetVertex(index int) Vec2 {
-	return this.Vertices[index]
+func (ps *PolygonShape) GetVertex(index int) Vec2 {
+	return ps.Vertices[index]
 }
 
 // A chain shape is a free form sequence of line segments.
@@ -697,85 +697,85 @@ func NewChainShape() *ChainShape {
 	return &cs
 }
 
-func (this *ChainShape) Clone() IShape {
+func (cs *ChainShape) Clone() IShape {
 	clone := NewChainShape()
-	clone.CreateChain(this.Vertices[:this.Count])
-	clone.PrevVertex = this.PrevVertex
-	clone.NextVertex = this.NextVertex
-	clone.HasPrevVertex = this.HasPrevVertex
-	clone.HasNextVertex = this.HasNextVertex
+	clone.CreateChain(cs.Vertices[:cs.Count])
+	clone.PrevVertex = cs.PrevVertex
+	clone.NextVertex = cs.NextVertex
+	clone.HasPrevVertex = cs.HasPrevVertex
+	clone.HasNextVertex = cs.HasNextVertex
 	return clone
 }
 
 // Create a loop. This automatically adjusts connectivity.
 // @param vertices an array of vertices, these are copied
 // @param count the vertex count
-func (this *ChainShape) CreateLoop(vertices []Vec2) {
+func (cs *ChainShape) CreateLoop(vertices []Vec2) {
 	count := len(vertices)
-	this.Count = count + 1
-	this.Vertices = make([]Vec2, this.Count, this.Count)
-	copy(this.Vertices, vertices)
-	this.Vertices[count] = this.Vertices[0]
-	this.PrevVertex = this.Vertices[this.Count-2]
-	this.NextVertex = this.Vertices[1]
-	this.HasPrevVertex = true
-	this.HasNextVertex = true
+	cs.Count = count + 1
+	cs.Vertices = make([]Vec2, cs.Count)
+	copy(cs.Vertices, vertices)
+	cs.Vertices[count] = cs.Vertices[0]
+	cs.PrevVertex = cs.Vertices[cs.Count-2]
+	cs.NextVertex = cs.Vertices[1]
+	cs.HasPrevVertex = true
+	cs.HasNextVertex = true
 }
 
 // Create a chain with isolated end vertices.
 // @param vertices an array of vertices, these are copied
 // @param count the vertex count
-func (this *ChainShape) CreateChain(vertices []Vec2) {
-	this.Count = len(vertices)
-	this.Vertices = make([]Vec2, this.Count, this.Count)
-	copy(this.Vertices, vertices)
-	this.HasPrevVertex = false
-	this.HasNextVertex = false
+func (cs *ChainShape) CreateChain(vertices []Vec2) {
+	cs.Count = len(vertices)
+	cs.Vertices = make([]Vec2, cs.Count)
+	copy(cs.Vertices, vertices)
+	cs.HasPrevVertex = false
+	cs.HasNextVertex = false
 }
 
 // Establish connectivity to a vertex that precedes the first vertex.
 // Don't call this for loops.
-func (this *ChainShape) SetPrevVertex(prevVertex Vec2) {
-	this.PrevVertex = prevVertex
-	this.HasPrevVertex = true
+func (cs *ChainShape) SetPrevVertex(prevVertex Vec2) {
+	cs.PrevVertex = prevVertex
+	cs.HasPrevVertex = true
 }
 
 // Establish connectivity to a vertex that follows the last vertex.
 // Don't call this for loops.
-func (this *ChainShape) SetNextVertex(nextVertex Vec2) {
-	this.NextVertex = nextVertex
-	this.HasNextVertex = true
+func (cs *ChainShape) SetNextVertex(nextVertex Vec2) {
+	cs.NextVertex = nextVertex
+	cs.HasNextVertex = true
 }
 
 // @see b2Shape::GetChildCount
-func (this *ChainShape) GetChildCount() int {
-	return this.Count - 1
+func (cs *ChainShape) GetChildCount() int {
+	return cs.Count - 1
 }
 
 // Get a child edge.
-func (this *ChainShape) GetChildEdge(index int) *EdgeShape {
+func (cs *ChainShape) GetChildEdge(index int) *EdgeShape {
 	edge := NewEdgeShape()
 
 	edge.Type = Shape_e_edge
-	edge.Radius = this.Radius
+	edge.Radius = cs.Radius
 
-	edge.Vertex1 = this.Vertices[index+0]
-	edge.Vertex2 = this.Vertices[index+1]
+	edge.Vertex1 = cs.Vertices[index+0]
+	edge.Vertex2 = cs.Vertices[index+1]
 
 	if index > 0 {
-		edge.Vertex0 = this.Vertices[index-1]
+		edge.Vertex0 = cs.Vertices[index-1]
 		edge.HasVertex0 = true
 	} else {
-		edge.Vertex0 = this.PrevVertex
-		edge.HasVertex0 = this.HasPrevVertex
+		edge.Vertex0 = cs.PrevVertex
+		edge.HasVertex0 = cs.HasPrevVertex
 	}
 
-	if index < this.Count-2 {
-		edge.Vertex3 = this.Vertices[index+2]
+	if index < cs.Count-2 {
+		edge.Vertex3 = cs.Vertices[index+2]
 		edge.HasVertex3 = true
 	} else {
-		edge.Vertex3 = this.NextVertex
-		edge.HasVertex3 = this.HasNextVertex
+		edge.Vertex3 = cs.NextVertex
+		edge.HasVertex3 = cs.HasNextVertex
 	}
 
 	return edge
@@ -783,36 +783,36 @@ func (this *ChainShape) GetChildEdge(index int) *EdgeShape {
 
 // This always return false.
 // @see b2Shape::TestPoint
-func (this *ChainShape) TestPoint(xf Transform, p Vec2) bool {
+func (cs *ChainShape) TestPoint(xf Transform, p Vec2) bool {
 	return false
 }
 
 // Implement b2Shape.
-func (this *ChainShape) RayCast(input RayCastInput, xf Transform, childIndex int) (output RayCastOutput, ret bool) {
+func (cs *ChainShape) RayCast(input RayCastInput, xf Transform, childIndex int) (output RayCastOutput, ret bool) {
 	edgeShape := NewEdgeShape()
 
 	i1 := childIndex
 	i2 := childIndex + 1
-	if i2 == this.Count {
+	if i2 == cs.Count {
 		i2 = 0
 	}
 
-	edgeShape.Vertex1 = this.Vertices[i1]
-	edgeShape.Vertex2 = this.Vertices[i2]
+	edgeShape.Vertex1 = cs.Vertices[i1]
+	edgeShape.Vertex2 = cs.Vertices[i2]
 
 	return edgeShape.RayCast(input, xf, 0)
 }
 
 // @see b2Shape::ComputeAABB
-func (this *ChainShape) ComputeAABB(aabb *AABB, xf Transform, childIndex int) {
+func (cs *ChainShape) ComputeAABB(aabb *AABB, xf Transform, childIndex int) {
 	i1 := childIndex
 	i2 := childIndex + 1
-	if i2 == this.Count {
+	if i2 == cs.Count {
 		i2 = 0
 	}
 
-	v1 := MulX(xf, this.Vertices[i1])
-	v2 := MulX(xf, this.Vertices[i2])
+	v1 := MulX(xf, cs.Vertices[i1])
+	v2 := MulX(xf, cs.Vertices[i2])
 
 	aabb.LowerBound = MinV(v1, v2)
 	aabb.UpperBound = MaxV(v1, v2)
@@ -820,7 +820,7 @@ func (this *ChainShape) ComputeAABB(aabb *AABB, xf Transform, childIndex int) {
 
 // Chains have zero mass.
 // @see b2Shape::ComputeMass
-func (this *ChainShape) ComputeMass(massData *MassData, density float64) {
+func (cs *ChainShape) ComputeMass(massData *MassData, density float64) {
 	massData.Mass = 0.0
 	massData.Center.SetZero()
 	massData.I = 0.0
