@@ -90,7 +90,7 @@ type WorldManifold struct {
 // modest motion from the original state. This does not change the
 // point count, impulses, etc. The radii must come from the shapes
 // that generated the manifold.
-func (this *WorldManifold) Initialize(manifold *Manifold,
+func (wm *WorldManifold) Initialize(manifold *Manifold,
 	xfA Transform, radiusA float64,
 	xfB Transform, radiusB float64) {
 	if manifold.PointCount == 0 {
@@ -99,40 +99,40 @@ func (this *WorldManifold) Initialize(manifold *Manifold,
 
 	switch manifold.Type {
 	case Manifold_e_circles:
-		this.Normal.Set(1.0, 0.0)
+		wm.Normal.Set(1.0, 0.0)
 		pointA := MulX(xfA, manifold.LocalPoint)
 		pointB := MulX(xfB, manifold.Points[0].LocalPoint)
 		if DistanceSquaredVV(pointA, pointB) > Epsilon*Epsilon {
-			this.Normal = SubVV(pointB, pointA)
-			this.Normal.Normalize()
+			wm.Normal = SubVV(pointB, pointA)
+			wm.Normal.Normalize()
 		}
 
-		cA := AddVV(pointA, MulFV(radiusA, this.Normal))
-		cB := SubVV(pointB, MulFV(radiusB, this.Normal))
-		this.Points[0] = MulFV(0.5, AddVV(cA, cB))
+		cA := AddVV(pointA, MulFV(radiusA, wm.Normal))
+		cB := SubVV(pointB, MulFV(radiusB, wm.Normal))
+		wm.Points[0] = MulFV(0.5, AddVV(cA, cB))
 	case Manifold_e_faceA:
-		this.Normal = MulRV(xfA.Q, manifold.LocalNormal)
+		wm.Normal = MulRV(xfA.Q, manifold.LocalNormal)
 		planePoint := MulX(xfA, manifold.LocalPoint)
 
 		for i := 0; i < manifold.PointCount; i++ {
 			clipPoint := MulX(xfB, manifold.Points[i].LocalPoint)
-			cA := AddVV(clipPoint, MulFV(radiusA-DotVV(SubVV(clipPoint, planePoint), this.Normal), this.Normal))
-			cB := SubVV(clipPoint, MulFV(radiusB, this.Normal))
-			this.Points[i] = MulFV(0.5, AddVV(cA, cB))
+			cA := AddVV(clipPoint, MulFV(radiusA-DotVV(SubVV(clipPoint, planePoint), wm.Normal), wm.Normal))
+			cB := SubVV(clipPoint, MulFV(radiusB, wm.Normal))
+			wm.Points[i] = MulFV(0.5, AddVV(cA, cB))
 		}
 	case Manifold_e_faceB:
-		this.Normal = MulRV(xfB.Q, manifold.LocalNormal)
+		wm.Normal = MulRV(xfB.Q, manifold.LocalNormal)
 		planePoint := MulX(xfB, manifold.LocalPoint)
 
 		for i := 0; i < manifold.PointCount; i++ {
 			clipPoint := MulX(xfA, manifold.Points[i].LocalPoint)
-			cB := AddVV(clipPoint, MulFV(radiusB-DotVV(SubVV(clipPoint, planePoint), this.Normal), this.Normal))
-			cA := SubVV(clipPoint, MulFV(radiusA, this.Normal))
-			this.Points[i] = MulFV(0.5, AddVV(cA, cB))
+			cB := AddVV(clipPoint, MulFV(radiusB-DotVV(SubVV(clipPoint, planePoint), wm.Normal), wm.Normal))
+			cA := SubVV(clipPoint, MulFV(radiusA, wm.Normal))
+			wm.Points[i] = MulFV(0.5, AddVV(cA, cB))
 		}
 
 		// Ensure normal points from A to B.
-		this.Normal = this.Normal.Minus()
+		wm.Normal = wm.Normal.Minus()
 	}
 }
 
@@ -218,53 +218,53 @@ func NewAABB() *AABB {
 }
 
 // Verify that the bounds are sorted.
-func (this *AABB) IsValid() bool {
-	d := SubVV(this.UpperBound, this.LowerBound)
+func (ab *AABB) IsValid() bool {
+	d := SubVV(ab.UpperBound, ab.LowerBound)
 	valid := d.X >= 0.0 && d.Y >= 0.0
-	valid = valid && this.LowerBound.IsValid() && this.UpperBound.IsValid()
+	valid = valid && ab.LowerBound.IsValid() && ab.UpperBound.IsValid()
 	return valid
 }
 
 // Get the center of the AABB.
-func (this *AABB) GetCenter() Vec2 {
-	return MulFV(0.5, AddVV(this.LowerBound, this.UpperBound))
+func (ab *AABB) GetCenter() Vec2 {
+	return MulFV(0.5, AddVV(ab.LowerBound, ab.UpperBound))
 }
 
 // Get the extents of the AABB (half-widths).
-func (this *AABB) GetExtents() Vec2 {
-	return MulFV(0.5, SubVV(this.UpperBound, this.LowerBound))
+func (ab *AABB) GetExtents() Vec2 {
+	return MulFV(0.5, SubVV(ab.UpperBound, ab.LowerBound))
 }
 
 // Get the perimeter length
-func (this *AABB) GetPerimeter() float64 {
-	wx := this.UpperBound.X - this.LowerBound.X
-	wy := this.UpperBound.Y - this.LowerBound.Y
+func (ab *AABB) GetPerimeter() float64 {
+	wx := ab.UpperBound.X - ab.LowerBound.X
+	wy := ab.UpperBound.Y - ab.LowerBound.Y
 	return 2.0 * (wx + wy)
 }
 
 // Combine an AABB into this one.
-func (this *AABB) Combine(aabb AABB) {
-	this.LowerBound = MinV(this.LowerBound, aabb.LowerBound)
-	this.UpperBound = MaxV(this.UpperBound, aabb.UpperBound)
+func (ab *AABB) Combine(aabb AABB) {
+	ab.LowerBound = MinV(ab.LowerBound, aabb.LowerBound)
+	ab.UpperBound = MaxV(ab.UpperBound, aabb.UpperBound)
 }
 
 // Combine two AABBs into this one.
-func (this *AABB) Combine2(aabb1 AABB, aabb2 AABB) {
-	this.LowerBound = MinV(aabb1.LowerBound, aabb2.LowerBound)
-	this.UpperBound = MaxV(aabb1.UpperBound, aabb2.UpperBound)
+func (ab *AABB) Combine2(aabb1 AABB, aabb2 AABB) {
+	ab.LowerBound = MinV(aabb1.LowerBound, aabb2.LowerBound)
+	ab.UpperBound = MaxV(aabb1.UpperBound, aabb2.UpperBound)
 }
 
 // Does this aabb contain the provided AABB.
-func (this *AABB) Contains(aabb AABB) bool {
+func (ab *AABB) Contains(aabb AABB) bool {
 	result := true
-	result = result && this.LowerBound.X <= aabb.LowerBound.X
-	result = result && this.LowerBound.Y <= aabb.LowerBound.Y
-	result = result && aabb.UpperBound.X <= this.UpperBound.X
-	result = result && aabb.UpperBound.Y <= this.UpperBound.Y
+	result = result && ab.LowerBound.X <= aabb.LowerBound.X
+	result = result && ab.LowerBound.Y <= aabb.LowerBound.Y
+	result = result && aabb.UpperBound.X <= ab.UpperBound.X
+	result = result && aabb.UpperBound.Y <= ab.UpperBound.Y
 	return result
 }
 
-func (this *AABB) RayCast(input RayCastInput) (output RayCastOutput, ret bool) {
+func (ab *AABB) RayCast(input RayCastInput) (output RayCastOutput, ret bool) {
 	tmin := -MaxFloat
 	tmax := MaxFloat
 
@@ -277,13 +277,13 @@ func (this *AABB) RayCast(input RayCastInput) (output RayCastOutput, ret bool) {
 	for i := 0; i < 2; i++ {
 		if absD.GetI(i) < Epsilon {
 			// Parallel.
-			if p.GetI(i) < this.LowerBound.GetI(i) || this.UpperBound.GetI(i) < p.GetI(i) {
+			if p.GetI(i) < ab.LowerBound.GetI(i) || ab.UpperBound.GetI(i) < p.GetI(i) {
 				return
 			}
 		} else {
 			inv_d := 1.0 / d.GetI(i)
-			t1 := (this.LowerBound.GetI(i) - p.GetI(i)) * inv_d
-			t2 := (this.UpperBound.GetI(i) - p.GetI(i)) * inv_d
+			t1 := (ab.LowerBound.GetI(i) - p.GetI(i)) * inv_d
+			t2 := (ab.UpperBound.GetI(i) - p.GetI(i)) * inv_d
 
 			// Sign of the normal vector.
 			s := -1.0
@@ -635,7 +635,7 @@ func CollidePolygons(manifold *Manifold, polyA *PolygonShape, xfA Transform, pol
 		flip = 0
 	}
 
-	incidentEdge := make([]ClipVertex, 2, 2)
+	incidentEdge := make([]ClipVertex, 2)
 	FindIncidentEdge(incidentEdge, poly1, xf1, edge1, poly2, xf2)
 
 	count1 := poly1.VertexCount
@@ -670,8 +670,8 @@ func CollidePolygons(manifold *Manifold, polyA *PolygonShape, xfA Transform, pol
 	sideOffset2 := DotVV(tangent, v12) + totalRadius
 
 	// Clip incident edge against extruded edge1 side edges.
-	clipPoints1 := make([]ClipVertex, 2, 2)
-	clipPoints2 := make([]ClipVertex, 2, 2)
+	clipPoints1 := make([]ClipVertex, 2)
+	clipPoints2 := make([]ClipVertex, 2)
 	var np int
 
 	// Clip to box side 1
@@ -871,7 +871,7 @@ type ReferenceFace struct {
 type EPColliderType byte
 
 const (
-	EPCollider_e_isolated = iota
+	EPCollider_e_isolated EPColliderType = iota
 	EPCollider_e_concave
 	EPCollider_e_convex
 )
@@ -899,176 +899,176 @@ type EPCollider struct {
 // 6. Visit each separating axes, only accept axes within the range
 // 7. Return if _any_ axis indicates separation
 // 8. Clip
-func (this *EPCollider) Collide(manifold *Manifold, edgeA *EdgeShape, xfA Transform, polygonB *PolygonShape, xfB Transform) {
-	this.Xf = MulTTT(xfA, xfB)
+func (epc *EPCollider) Collide(manifold *Manifold, edgeA *EdgeShape, xfA Transform, polygonB *PolygonShape, xfB Transform) {
+	epc.Xf = MulTTT(xfA, xfB)
 
-	this.CentroidB = MulX(this.Xf, polygonB.Centroid)
+	epc.CentroidB = MulX(epc.Xf, polygonB.Centroid)
 
-	this.V0 = edgeA.Vertex0
-	this.V1 = edgeA.Vertex1
-	this.V2 = edgeA.Vertex2
-	this.V3 = edgeA.Vertex3
+	epc.V0 = edgeA.Vertex0
+	epc.V1 = edgeA.Vertex1
+	epc.V2 = edgeA.Vertex2
+	epc.V3 = edgeA.Vertex3
 
 	hasVertex0 := edgeA.HasVertex0
 	hasVertex3 := edgeA.HasVertex3
 
-	edge1 := SubVV(this.V2, this.V1)
+	edge1 := SubVV(epc.V2, epc.V1)
 	edge1.Normalize()
-	this.Normal1.Set(edge1.Y, -edge1.X)
-	offset1 := DotVV(this.Normal1, SubVV(this.CentroidB, this.V1))
+	epc.Normal1.Set(edge1.Y, -edge1.X)
+	offset1 := DotVV(epc.Normal1, SubVV(epc.CentroidB, epc.V1))
 	offset0, offset2 := 0.0, 0.0
 	convex1, convex2 := false, false
 
 	// Is there a preceding edge?
 	if hasVertex0 {
-		edge0 := SubVV(this.V1, this.V0)
+		edge0 := SubVV(epc.V1, epc.V0)
 		edge0.Normalize()
-		this.Normal0.Set(edge0.Y, -edge0.X)
+		epc.Normal0.Set(edge0.Y, -edge0.X)
 		convex1 = CrossVV(edge0, edge1) >= 0.0
-		offset0 = DotVV(this.Normal0, SubVV(this.CentroidB, this.V0))
+		offset0 = DotVV(epc.Normal0, SubVV(epc.CentroidB, epc.V0))
 	}
 
 	// Is there a following edge?
 	if hasVertex3 {
-		edge2 := SubVV(this.V3, this.V2)
+		edge2 := SubVV(epc.V3, epc.V2)
 		edge2.Normalize()
-		this.Normal2.Set(edge2.Y, -edge2.X)
+		epc.Normal2.Set(edge2.Y, -edge2.X)
 		convex2 = CrossVV(edge1, edge2) > 0.0
-		offset2 = DotVV(this.Normal2, SubVV(this.CentroidB, this.V2))
+		offset2 = DotVV(epc.Normal2, SubVV(epc.CentroidB, epc.V2))
 	}
 
 	// Determine front or back collision. Determine collision normal limits.
 	if hasVertex0 && hasVertex3 {
 		if convex1 && convex2 {
-			this.Front = offset0 >= 0.0 || offset1 >= 0.0 || offset2 >= 0.0
-			if this.Front {
-				this.Normal = this.Normal1
-				this.LowerLimit = this.Normal0
-				this.UpperLimit = this.Normal2
+			epc.Front = offset0 >= 0.0 || offset1 >= 0.0 || offset2 >= 0.0
+			if epc.Front {
+				epc.Normal = epc.Normal1
+				epc.LowerLimit = epc.Normal0
+				epc.UpperLimit = epc.Normal2
 			} else {
-				this.Normal = this.Normal1.Minus()
-				this.LowerLimit = this.Normal1.Minus()
-				this.UpperLimit = this.Normal1.Minus()
+				epc.Normal = epc.Normal1.Minus()
+				epc.LowerLimit = epc.Normal1.Minus()
+				epc.UpperLimit = epc.Normal1.Minus()
 			}
 		} else if convex1 {
-			this.Front = offset0 >= 0.0 || (offset1 >= 0.0 && offset2 >= 0.0)
-			if this.Front {
-				this.Normal = this.Normal1
-				this.LowerLimit = this.Normal0
-				this.UpperLimit = this.Normal1
+			epc.Front = offset0 >= 0.0 || (offset1 >= 0.0 && offset2 >= 0.0)
+			if epc.Front {
+				epc.Normal = epc.Normal1
+				epc.LowerLimit = epc.Normal0
+				epc.UpperLimit = epc.Normal1
 			} else {
-				this.Normal = this.Normal1.Minus()
-				this.LowerLimit = this.Normal2.Minus()
-				this.UpperLimit = this.Normal1.Minus()
+				epc.Normal = epc.Normal1.Minus()
+				epc.LowerLimit = epc.Normal2.Minus()
+				epc.UpperLimit = epc.Normal1.Minus()
 			}
 		} else if convex2 {
-			this.Front = offset2 >= 0.0 || (offset0 >= 0.0 && offset1 >= 0.0)
-			if this.Front {
-				this.Normal = this.Normal1
-				this.LowerLimit = this.Normal1
-				this.UpperLimit = this.Normal2
+			epc.Front = offset2 >= 0.0 || (offset0 >= 0.0 && offset1 >= 0.0)
+			if epc.Front {
+				epc.Normal = epc.Normal1
+				epc.LowerLimit = epc.Normal1
+				epc.UpperLimit = epc.Normal2
 			} else {
-				this.Normal = this.Normal1.Minus()
-				this.LowerLimit = this.Normal1.Minus()
-				this.UpperLimit = this.Normal0.Minus()
+				epc.Normal = epc.Normal1.Minus()
+				epc.LowerLimit = epc.Normal1.Minus()
+				epc.UpperLimit = epc.Normal0.Minus()
 			}
 		} else {
-			this.Front = offset0 >= 0.0 && offset1 >= 0.0 && offset2 >= 0.0
-			if this.Front {
-				this.Normal = this.Normal1
-				this.LowerLimit = this.Normal1
-				this.UpperLimit = this.Normal1
+			epc.Front = offset0 >= 0.0 && offset1 >= 0.0 && offset2 >= 0.0
+			if epc.Front {
+				epc.Normal = epc.Normal1
+				epc.LowerLimit = epc.Normal1
+				epc.UpperLimit = epc.Normal1
 			} else {
-				this.Normal = this.Normal1.Minus()
-				this.LowerLimit = this.Normal2.Minus()
-				this.UpperLimit = this.Normal0.Minus()
+				epc.Normal = epc.Normal1.Minus()
+				epc.LowerLimit = epc.Normal2.Minus()
+				epc.UpperLimit = epc.Normal0.Minus()
 			}
 		}
 	} else if hasVertex0 {
 		if convex1 {
-			this.Front = offset0 >= 0.0 || offset1 >= 0.0
-			if this.Front {
-				this.Normal = this.Normal1
-				this.LowerLimit = this.Normal0
-				this.UpperLimit = this.Normal1.Minus()
+			epc.Front = offset0 >= 0.0 || offset1 >= 0.0
+			if epc.Front {
+				epc.Normal = epc.Normal1
+				epc.LowerLimit = epc.Normal0
+				epc.UpperLimit = epc.Normal1.Minus()
 			} else {
-				this.Normal = this.Normal1.Minus()
-				this.LowerLimit = this.Normal1
-				this.UpperLimit = this.Normal1.Minus()
+				epc.Normal = epc.Normal1.Minus()
+				epc.LowerLimit = epc.Normal1
+				epc.UpperLimit = epc.Normal1.Minus()
 			}
 		} else {
-			this.Front = offset0 >= 0.0 && offset1 >= 0.0
-			if this.Front {
-				this.Normal = this.Normal1
-				this.LowerLimit = this.Normal1
-				this.UpperLimit = this.Normal1.Minus()
+			epc.Front = offset0 >= 0.0 && offset1 >= 0.0
+			if epc.Front {
+				epc.Normal = epc.Normal1
+				epc.LowerLimit = epc.Normal1
+				epc.UpperLimit = epc.Normal1.Minus()
 			} else {
-				this.Normal = this.Normal1.Minus()
-				this.LowerLimit = this.Normal1
-				this.UpperLimit = this.Normal0.Minus()
+				epc.Normal = epc.Normal1.Minus()
+				epc.LowerLimit = epc.Normal1
+				epc.UpperLimit = epc.Normal0.Minus()
 			}
 		}
 	} else if hasVertex3 {
 		if convex2 {
-			this.Front = offset1 >= 0.0 || offset2 >= 0.0
-			if this.Front {
-				this.Normal = this.Normal1
-				this.LowerLimit = this.Normal1.Minus()
-				this.UpperLimit = this.Normal2
+			epc.Front = offset1 >= 0.0 || offset2 >= 0.0
+			if epc.Front {
+				epc.Normal = epc.Normal1
+				epc.LowerLimit = epc.Normal1.Minus()
+				epc.UpperLimit = epc.Normal2
 			} else {
-				this.Normal = this.Normal1.Minus()
-				this.LowerLimit = this.Normal1.Minus()
-				this.UpperLimit = this.Normal1
+				epc.Normal = epc.Normal1.Minus()
+				epc.LowerLimit = epc.Normal1.Minus()
+				epc.UpperLimit = epc.Normal1
 			}
 		} else {
-			this.Front = offset1 >= 0.0 && offset2 >= 0.0
-			if this.Front {
-				this.Normal = this.Normal1
-				this.LowerLimit = this.Normal1.Minus()
-				this.UpperLimit = this.Normal1
+			epc.Front = offset1 >= 0.0 && offset2 >= 0.0
+			if epc.Front {
+				epc.Normal = epc.Normal1
+				epc.LowerLimit = epc.Normal1.Minus()
+				epc.UpperLimit = epc.Normal1
 			} else {
-				this.Normal = this.Normal1.Minus()
-				this.LowerLimit = this.Normal2.Minus()
-				this.UpperLimit = this.Normal1
+				epc.Normal = epc.Normal1.Minus()
+				epc.LowerLimit = epc.Normal2.Minus()
+				epc.UpperLimit = epc.Normal1
 			}
 		}
 	} else {
-		this.Front = offset1 >= 0.0
-		if this.Front {
-			this.Normal = this.Normal1
-			this.LowerLimit = this.Normal1.Minus()
-			this.UpperLimit = this.Normal1.Minus()
+		epc.Front = offset1 >= 0.0
+		if epc.Front {
+			epc.Normal = epc.Normal1
+			epc.LowerLimit = epc.Normal1.Minus()
+			epc.UpperLimit = epc.Normal1.Minus()
 		} else {
-			this.Normal = this.Normal1.Minus()
-			this.LowerLimit = this.Normal1
-			this.UpperLimit = this.Normal1
+			epc.Normal = epc.Normal1.Minus()
+			epc.LowerLimit = epc.Normal1
+			epc.UpperLimit = epc.Normal1
 		}
 	}
 
 	// Get polygonB in frameA
-	this.PolygonB.Count = polygonB.VertexCount
+	epc.PolygonB.Count = polygonB.VertexCount
 	for i := 0; i < polygonB.VertexCount; i++ {
-		this.PolygonB.Vertices[i] = MulX(this.Xf, polygonB.Vertices[i])
-		this.PolygonB.Normals[i] = MulRV(this.Xf.Q, polygonB.Normals[i])
+		epc.PolygonB.Vertices[i] = MulX(epc.Xf, polygonB.Vertices[i])
+		epc.PolygonB.Normals[i] = MulRV(epc.Xf.Q, polygonB.Normals[i])
 	}
 
-	this.Radius = 2.0 * PolygonRadius
+	epc.Radius = 2.0 * PolygonRadius
 
 	manifold.PointCount = 0
 
-	edgeAxis := this.ComputeEdgeSeparation()
+	edgeAxis := epc.ComputeEdgeSeparation()
 
 	// If no valid normal can be found than this edge should not collide.
 	if edgeAxis.Type == EPAxis_e_unknown {
 		return
 	}
 
-	if edgeAxis.Separation > this.Radius {
+	if edgeAxis.Separation > epc.Radius {
 		return
 	}
 
-	polygonAxis := this.ComputePolygonSeparation()
-	if polygonAxis.Type != EPAxis_e_unknown && polygonAxis.Separation > this.Radius {
+	polygonAxis := epc.ComputePolygonSeparation()
+	if polygonAxis.Type != EPAxis_e_unknown && polygonAxis.Separation > epc.Radius {
 		return
 	}
 
@@ -1085,16 +1085,16 @@ func (this *EPCollider) Collide(manifold *Manifold, edgeA *EdgeShape, xfA Transf
 		primaryAxis = edgeAxis
 	}
 
-	ie := make([]ClipVertex, 2, 2)
+	ie := make([]ClipVertex, 2)
 	var rf ReferenceFace
 	if primaryAxis.Type == EPAxis_e_edgeA {
 		manifold.Type = Manifold_e_faceA
 
 		// Search for the polygon normal that is most anti-parallel to the edge normal.
 		bestIndex := 0
-		bestValue := DotVV(this.Normal, this.PolygonB.Normals[0])
-		for i := 1; i < this.PolygonB.Count; i++ {
-			value := DotVV(this.Normal, this.PolygonB.Normals[i])
+		bestValue := DotVV(epc.Normal, epc.PolygonB.Normals[0])
+		for i := 1; i < epc.PolygonB.Count; i++ {
+			value := DotVV(epc.Normal, epc.PolygonB.Normals[i])
 			if value < bestValue {
 				bestValue = value
 				bestIndex = i
@@ -1103,45 +1103,45 @@ func (this *EPCollider) Collide(manifold *Manifold, edgeA *EdgeShape, xfA Transf
 
 		i1 := bestIndex
 		i2 := 0
-		if i1+1 < this.PolygonB.Count {
+		if i1+1 < epc.PolygonB.Count {
 			i2 = i1 + 1
 		}
 
-		ie[0].V = this.PolygonB.Vertices[i1]
+		ie[0].V = epc.PolygonB.Vertices[i1]
 		ie[0].Id.Cf.IndexA = uint8(0)
 		ie[0].Id.Cf.IndexB = uint8(i1)
 		ie[0].Id.Cf.TypeA = ContactFeature_e_face
 		ie[0].Id.Cf.TypeB = ContactFeature_e_vertex
 
-		ie[1].V = this.PolygonB.Vertices[i2]
+		ie[1].V = epc.PolygonB.Vertices[i2]
 		ie[1].Id.Cf.IndexA = uint8(0)
 		ie[1].Id.Cf.IndexB = uint8(i2)
 		ie[1].Id.Cf.TypeA = ContactFeature_e_face
 		ie[1].Id.Cf.TypeB = ContactFeature_e_vertex
 
-		if this.Front {
+		if epc.Front {
 			rf.I1 = 0
 			rf.I2 = 1
-			rf.V1 = this.V1
-			rf.V2 = this.V2
-			rf.Normal = this.Normal1
+			rf.V1 = epc.V1
+			rf.V2 = epc.V2
+			rf.Normal = epc.Normal1
 		} else {
 			rf.I1 = 1
 			rf.I2 = 0
-			rf.V1 = this.V2
-			rf.V2 = this.V1
-			rf.Normal = this.Normal1.Minus()
+			rf.V1 = epc.V2
+			rf.V2 = epc.V1
+			rf.Normal = epc.Normal1.Minus()
 		}
 	} else {
 		manifold.Type = Manifold_e_faceB
 
-		ie[0].V = this.V1
+		ie[0].V = epc.V1
 		ie[0].Id.Cf.IndexA = 0
 		ie[0].Id.Cf.IndexB = uint8(primaryAxis.Index)
 		ie[0].Id.Cf.TypeA = ContactFeature_e_vertex
 		ie[0].Id.Cf.TypeB = ContactFeature_e_face
 
-		ie[1].V = this.V2
+		ie[1].V = epc.V2
 		ie[1].Id.Cf.IndexA = 0
 		ie[1].Id.Cf.IndexB = uint8(primaryAxis.Index)
 		ie[1].Id.Cf.TypeA = ContactFeature_e_vertex
@@ -1149,12 +1149,12 @@ func (this *EPCollider) Collide(manifold *Manifold, edgeA *EdgeShape, xfA Transf
 
 		rf.I1 = primaryAxis.Index
 		rf.I2 = 0
-		if rf.I1+1 < this.PolygonB.Count {
+		if rf.I1+1 < epc.PolygonB.Count {
 			rf.I2 = rf.I1 + 1
 		}
-		rf.V1 = this.PolygonB.Vertices[rf.I1]
-		rf.V2 = this.PolygonB.Vertices[rf.I2]
-		rf.Normal = this.PolygonB.Normals[rf.I1]
+		rf.V1 = epc.PolygonB.Vertices[rf.I1]
+		rf.V2 = epc.PolygonB.Vertices[rf.I2]
+		rf.Normal = epc.PolygonB.Normals[rf.I1]
 	}
 
 	rf.SideNormal1.Set(rf.Normal.Y, -rf.Normal.X)
@@ -1163,8 +1163,8 @@ func (this *EPCollider) Collide(manifold *Manifold, edgeA *EdgeShape, xfA Transf
 	rf.SideOffset2 = DotVV(rf.SideNormal2, rf.V2)
 
 	// Clip incident edge against extruded edge1 side edges.
-	clipPoints1 := make([]ClipVertex, 2, 2)
-	clipPoints2 := make([]ClipVertex, 2, 2)
+	clipPoints1 := make([]ClipVertex, 2)
+	clipPoints2 := make([]ClipVertex, 2)
 	var np int
 
 	// Clip to box side 1
@@ -1194,11 +1194,11 @@ func (this *EPCollider) Collide(manifold *Manifold, edgeA *EdgeShape, xfA Transf
 	for i := 0; i < MaxManifoldPoints; i++ {
 		separation := DotVV(rf.Normal, SubVV(clipPoints2[i].V, rf.V1))
 
-		if separation <= this.Radius {
+		if separation <= epc.Radius {
 			cp := &manifold.Points[pointCount]
 
 			if primaryAxis.Type == EPAxis_e_edgeA {
-				cp.LocalPoint = MulXT(this.Xf, clipPoints2[i].V)
+				cp.LocalPoint = MulXT(epc.Xf, clipPoints2[i].V)
 				cp.Id = clipPoints2[i].Id
 			} else {
 				cp.LocalPoint = clipPoints2[i].V
@@ -1215,17 +1215,17 @@ func (this *EPCollider) Collide(manifold *Manifold, edgeA *EdgeShape, xfA Transf
 	manifold.PointCount = pointCount
 }
 
-func (this *EPCollider) ComputeEdgeSeparation() EPAxis {
+func (epc *EPCollider) ComputeEdgeSeparation() EPAxis {
 	var axis EPAxis
 	axis.Type = EPAxis_e_edgeA
 	axis.Index = 1
-	if this.Front {
+	if epc.Front {
 		axis.Index = 0
 	}
 	axis.Separation = math.MaxFloat64
 
-	for i := 0; i < this.PolygonB.Count; i++ {
-		s := DotVV(this.Normal, SubVV(this.PolygonB.Vertices[i], this.V1))
+	for i := 0; i < epc.PolygonB.Count; i++ {
+		s := DotVV(epc.Normal, SubVV(epc.PolygonB.Vertices[i], epc.V1))
 		if s < axis.Separation {
 			axis.Separation = s
 		}
@@ -1234,22 +1234,22 @@ func (this *EPCollider) ComputeEdgeSeparation() EPAxis {
 	return axis
 }
 
-func (this *EPCollider) ComputePolygonSeparation() EPAxis {
+func (epc *EPCollider) ComputePolygonSeparation() EPAxis {
 	var axis EPAxis
 	axis.Type = EPAxis_e_unknown
 	axis.Index = -1
 	axis.Separation = -math.MaxFloat64
 
-	perp := Vec2{-this.Normal.Y, this.Normal.X}
+	perp := Vec2{-epc.Normal.Y, epc.Normal.X}
 
-	for i := 0; i < this.PolygonB.Count; i++ {
-		n := this.PolygonB.Normals[i].Minus()
+	for i := 0; i < epc.PolygonB.Count; i++ {
+		n := epc.PolygonB.Normals[i].Minus()
 
-		s1 := DotVV(n, SubVV(this.PolygonB.Vertices[i], this.V1))
-		s2 := DotVV(n, SubVV(this.PolygonB.Vertices[i], this.V2))
+		s1 := DotVV(n, SubVV(epc.PolygonB.Vertices[i], epc.V1))
+		s2 := DotVV(n, SubVV(epc.PolygonB.Vertices[i], epc.V2))
 		s := MinF(s1, s2)
 
-		if s > this.Radius {
+		if s > epc.Radius {
 			// No collision
 			axis.Type = EPAxis_e_edgeB
 			axis.Index = i
@@ -1259,11 +1259,11 @@ func (this *EPCollider) ComputePolygonSeparation() EPAxis {
 
 		// Adjacency
 		if DotVV(n, perp) >= 0.0 {
-			if DotVV(SubVV(n, this.UpperLimit), this.Normal) < -AngularSlop {
+			if DotVV(SubVV(n, epc.UpperLimit), epc.Normal) < -AngularSlop {
 				continue
 			}
 		} else {
-			if DotVV(SubVV(n, this.LowerLimit), this.Normal) < -AngularSlop {
+			if DotVV(SubVV(n, epc.LowerLimit), epc.Normal) < -AngularSlop {
 				continue
 			}
 		}

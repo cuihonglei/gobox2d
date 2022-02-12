@@ -31,111 +31,111 @@ type BroadPhase struct {
 const BroadPhase_e_nullProxy = -1
 
 func NewBroadPhase() *BroadPhase {
-	this := new(BroadPhase)
-	this.tree = NewDynamicTree()
+	bp := new(BroadPhase)
+	bp.tree = NewDynamicTree()
 
-	this.pairCapacity = 16
-	this.pairBuffer = make([]Pair, this.pairCapacity, this.pairCapacity)
+	bp.pairCapacity = 16
+	bp.pairBuffer = make([]Pair, bp.pairCapacity)
 
-	this.moveCapacity = 16
-	this.moveBuffer = make([]int, this.moveCapacity, this.moveCapacity)
+	bp.moveCapacity = 16
+	bp.moveBuffer = make([]int, bp.moveCapacity)
 
-	return this
+	return bp
 }
 
 // Create a proxy with an initial AABB. Pairs are not reported until
 // UpdatePairs is called.
-func (this *BroadPhase) CreateProxy(aabb AABB, userData interface{}) int {
-	proxyId := this.tree.CreateProxy(aabb, userData)
-	this.proxyCount++
-	this.BufferMove(proxyId)
+func (bp *BroadPhase) CreateProxy(aabb AABB, userData interface{}) int {
+	proxyId := bp.tree.CreateProxy(aabb, userData)
+	bp.proxyCount++
+	bp.BufferMove(proxyId)
 	return proxyId
 }
 
 // Destroy a proxy. It is up to the client to remove any pairs.
-func (this *BroadPhase) DestroyProxy(proxyId int) {
-	this.UnBufferMove(proxyId)
-	this.proxyCount--
-	this.tree.DestroyProxy(proxyId)
+func (bp *BroadPhase) DestroyProxy(proxyId int) {
+	bp.UnBufferMove(proxyId)
+	bp.proxyCount--
+	bp.tree.DestroyProxy(proxyId)
 }
 
 // Call MoveProxy as many times as you like, then when you are done
 // call UpdatePairs to finalized the proxy pairs (for your time step).
-func (this *BroadPhase) MoveProxy(proxyId int, aabb AABB, displacement Vec2) {
-	buffer := this.tree.MoveProxy(proxyId, aabb, displacement)
+func (bp *BroadPhase) MoveProxy(proxyId int, aabb AABB, displacement Vec2) {
+	buffer := bp.tree.MoveProxy(proxyId, aabb, displacement)
 	if buffer {
-		this.BufferMove(proxyId)
+		bp.BufferMove(proxyId)
 	}
 }
 
 // Call to trigger a re-processing of it's pairs on the next call to UpdatePairs.
-func (this *BroadPhase) TouchProxy(proxyId int) {
-	this.BufferMove(proxyId)
+func (bp *BroadPhase) TouchProxy(proxyId int) {
+	bp.BufferMove(proxyId)
 }
 
-func (this *BroadPhase) BufferMove(proxyId int) {
-	if this.moveCount == this.moveCapacity {
-		oldBuffer := this.moveBuffer
-		this.moveCapacity *= 2
-		this.moveBuffer = make([]int, this.moveCapacity, this.moveCapacity)
-		copy(this.moveBuffer, oldBuffer)
+func (bp *BroadPhase) BufferMove(proxyId int) {
+	if bp.moveCount == bp.moveCapacity {
+		oldBuffer := bp.moveBuffer
+		bp.moveCapacity *= 2
+		bp.moveBuffer = make([]int, bp.moveCapacity)
+		copy(bp.moveBuffer, oldBuffer)
 	}
 
-	this.moveBuffer[this.moveCount] = proxyId
-	this.moveCount++
+	bp.moveBuffer[bp.moveCount] = proxyId
+	bp.moveCount++
 }
 
-func (this *BroadPhase) UnBufferMove(proxyId int) {
-	for i := 0; i < this.moveCount; i++ {
-		if this.moveBuffer[i] == proxyId {
-			this.moveBuffer[i] = BroadPhase_e_nullProxy
+func (bp *BroadPhase) UnBufferMove(proxyId int) {
+	for i := 0; i < bp.moveCount; i++ {
+		if bp.moveBuffer[i] == proxyId {
+			bp.moveBuffer[i] = BroadPhase_e_nullProxy
 			return
 		}
 	}
 }
 
 // This is called from DynamicTree.Query when we are gathering pairs.
-func (this *BroadPhase) QueryCallback(proxyId int) bool {
+func (bp *BroadPhase) QueryCallback(proxyId int) bool {
 	// A proxy cannot form a pair with itself.
-	if proxyId == this.queryProxyId {
+	if proxyId == bp.queryProxyId {
 		return true
 	}
 
 	// Grow the pair buffer as needed.
-	if this.pairCount == this.pairCapacity {
-		oldBuffer := this.pairBuffer
-		this.pairCapacity *= 2
-		this.pairBuffer = make([]Pair, this.pairCapacity, this.pairCapacity)
-		copy(this.pairBuffer, oldBuffer)
+	if bp.pairCount == bp.pairCapacity {
+		oldBuffer := bp.pairBuffer
+		bp.pairCapacity *= 2
+		bp.pairBuffer = make([]Pair, bp.pairCapacity)
+		copy(bp.pairBuffer, oldBuffer)
 	}
 
-	this.pairBuffer[this.pairCount].ProxyIdA = MinI(proxyId, this.queryProxyId)
-	this.pairBuffer[this.pairCount].ProxyIdB = MaxI(proxyId, this.queryProxyId)
-	this.pairCount++
+	bp.pairBuffer[bp.pairCount].ProxyIdA = MinI(proxyId, bp.queryProxyId)
+	bp.pairBuffer[bp.pairCount].ProxyIdB = MaxI(proxyId, bp.queryProxyId)
+	bp.pairCount++
 
 	return true
 }
 
 // Get the fat AABB for a proxy.
-func (this *BroadPhase) GetFatAABB(proxyId int) AABB {
-	return this.tree.GetFatAABB(proxyId)
+func (bp *BroadPhase) GetFatAABB(proxyId int) AABB {
+	return bp.tree.GetFatAABB(proxyId)
 }
 
 // Get user data from a proxy. Returns NULL if the id is invalid.
-func (this *BroadPhase) GetUserData(proxyId int) interface{} {
-	return this.tree.GetUserData(proxyId)
+func (bp *BroadPhase) GetUserData(proxyId int) interface{} {
+	return bp.tree.GetUserData(proxyId)
 }
 
 // Test overlap of fat AABBs.
-func (this *BroadPhase) TestOverlap(proxyIdA int, proxyIdB int) bool {
-	aabbA := this.tree.GetFatAABB(proxyIdA)
-	aabbB := this.tree.GetFatAABB(proxyIdB)
+func (bp *BroadPhase) TestOverlap(proxyIdA int, proxyIdB int) bool {
+	aabbA := bp.tree.GetFatAABB(proxyIdA)
+	aabbB := bp.tree.GetFatAABB(proxyIdB)
 	return TestOverlapAABB(aabbA, aabbB)
 }
 
 // Get the number of proxies.
-func (this *BroadPhase) GetProxyCount() int {
-	return this.proxyCount
+func (bp *BroadPhase) GetProxyCount() int {
+	return bp.proxyCount
 }
 
 type PairSorter struct {
@@ -144,13 +144,13 @@ type PairSorter struct {
 }
 
 // This is used to sort pairs.
-func (this PairSorter) Len() int {
-	return this.count
+func (bp PairSorter) Len() int {
+	return bp.count
 }
 
-func (this PairSorter) Less(i, j int) bool {
-	pair1 := &this.pair[i]
-	pair2 := &this.pair[j]
+func (bp PairSorter) Less(i, j int) bool {
+	pair1 := &bp.pair[i]
+	pair2 := &bp.pair[j]
 
 	if pair1.ProxyIdA < pair2.ProxyIdA {
 		return true
@@ -163,48 +163,48 @@ func (this PairSorter) Less(i, j int) bool {
 	return false
 }
 
-func (this PairSorter) Swap(i, j int) {
-	this.pair[i], this.pair[j] = this.pair[j], this.pair[i]
+func (bp PairSorter) Swap(i, j int) {
+	bp.pair[i], bp.pair[j] = bp.pair[j], bp.pair[i]
 }
 
 // Update the pairs. This results in pair callbacks. This can only add pairs.
-func (this *BroadPhase) UpdatePairs(callback func(interface{}, interface{})) {
+func (bp *BroadPhase) UpdatePairs(callback func(interface{}, interface{})) {
 	// Reset pair buffer
-	this.pairCount = 0
+	bp.pairCount = 0
 
 	// Perform tree queries for all moving proxies.
-	for i := 0; i < this.moveCount; i++ {
-		this.queryProxyId = this.moveBuffer[i]
-		if this.queryProxyId == BroadPhase_e_nullProxy {
+	for i := 0; i < bp.moveCount; i++ {
+		bp.queryProxyId = bp.moveBuffer[i]
+		if bp.queryProxyId == BroadPhase_e_nullProxy {
 			continue
 		}
 
 		// We have to query the tree with the fat AABB so that
 		// we don't fail to create a pair that may touch later.
-		fatAABB := this.tree.GetFatAABB(this.queryProxyId)
+		fatAABB := bp.tree.GetFatAABB(bp.queryProxyId)
 
 		// Query tree, create pairs and add them pair buffer.
-		this.tree.Query(this.QueryCallback, fatAABB)
+		bp.tree.Query(bp.QueryCallback, fatAABB)
 	}
 
 	// Reset move buffer
-	this.moveCount = 0
+	bp.moveCount = 0
 
 	// Sort the pair buffer to expose duplicates.
-	sort.Sort(PairSorter{this.pairBuffer, this.pairCount})
+	sort.Sort(PairSorter{bp.pairBuffer, bp.pairCount})
 
 	// Send the pairs back to the client.
-	for i := 0; i < this.pairCount; {
-		primaryPair := &this.pairBuffer[i]
-		userDataA := this.tree.GetUserData(primaryPair.ProxyIdA)
-		userDataB := this.tree.GetUserData(primaryPair.ProxyIdB)
+	for i := 0; i < bp.pairCount; {
+		primaryPair := &bp.pairBuffer[i]
+		userDataA := bp.tree.GetUserData(primaryPair.ProxyIdA)
+		userDataB := bp.tree.GetUserData(primaryPair.ProxyIdB)
 
 		callback(userDataA, userDataB)
 		i++
 
 		// Skip any duplicate pairs.
-		for i < this.pairCount {
-			pair := &this.pairBuffer[i]
+		for i < bp.pairCount {
+			pair := &bp.pairBuffer[i]
 			if pair.ProxyIdA != primaryPair.ProxyIdA || pair.ProxyIdB != primaryPair.ProxyIdB {
 				break
 			}
@@ -218,8 +218,8 @@ func (this *BroadPhase) UpdatePairs(callback func(interface{}, interface{})) {
 
 // Query an AABB for overlapping proxies. The callback class
 // is called for each proxy that overlaps the supplied AABB.
-func (this *BroadPhase) Query(callback func(int) bool, aabb AABB) {
-	this.tree.Query(callback, aabb)
+func (bp *BroadPhase) Query(callback func(int) bool, aabb AABB) {
+	bp.tree.Query(callback, aabb)
 }
 
 // Ray-cast against the proxies in the tree. This relies on the callback
@@ -229,21 +229,21 @@ func (this *BroadPhase) Query(callback func(int) bool, aabb AABB) {
 // number of proxies in the tree.
 // @param input the ray-cast input data. The ray extends from p1 to p1 + maxFraction * (p2 - p1).
 // @param callback a callback class that is called for each proxy that is hit by the ray.
-func (this *BroadPhase) RayCast(callback func(RayCastInput, int) float64, input RayCastInput) {
-	this.tree.RayCast(callback, input)
+func (bp *BroadPhase) RayCast(callback func(RayCastInput, int) float64, input RayCastInput) {
+	bp.tree.RayCast(callback, input)
 }
 
 // Get the height of the embedded tree.
-func (this *BroadPhase) GetTreeHeight() int {
-	return this.tree.GetHeight()
+func (bp *BroadPhase) GetTreeHeight() int {
+	return bp.tree.GetHeight()
 }
 
 // Get the balance of the embedded tree.
-func (this *BroadPhase) GetTreeBalance() int {
-	return this.tree.GetMaxBalance()
+func (bp *BroadPhase) GetTreeBalance() int {
+	return bp.tree.GetMaxBalance()
 }
 
 // Get the quality metric of the embedded tree.
-func (this *BroadPhase) GetTreeQuality() float64 {
-	return this.tree.GetAreaRatio()
+func (bp *BroadPhase) GetTreeQuality() float64 {
+	return bp.tree.GetAreaRatio()
 }
