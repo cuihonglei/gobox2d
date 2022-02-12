@@ -4,16 +4,13 @@ package box2d
 // static: zero mass, zero velocity, may be manually moved
 // kinematic: zero mass, non-zero velocity set by user, moved by solver
 // dynamic: positive mass, non-zero velocity determined by forces, moved by solver
+type BodyType byte
+
 const (
-	StaticBody = iota
+	StaticBody BodyType = iota
 	KinematicBody
 	DynamicBody
-
-	// TODO_ERIN
-	//BulletBody
 )
-
-type BodyType byte
 
 // A body definition holds all the data needed to construct a rigid body.
 // You can safely re-use body definitions. Shapes are added to a body after construction.
@@ -138,74 +135,74 @@ const (
 )
 
 func NewBody(bd *BodyDef, world *World) *Body {
-	this := new(Body)
+	b := new(Body)
 
-	this.flags = 0
+	b.flags = 0
 
 	if bd.Bullet {
-		this.flags |= body_e_bulletFlag
+		b.flags |= body_e_bulletFlag
 	}
 	if bd.FixedRotation {
-		this.flags |= body_e_fixedRotationFlag
+		b.flags |= body_e_fixedRotationFlag
 	}
 	if bd.AllowSleep {
-		this.flags |= body_e_autoSleepFlag
+		b.flags |= body_e_autoSleepFlag
 	}
 	if bd.Awake {
-		this.flags |= body_e_awakeFlag
+		b.flags |= body_e_awakeFlag
 	}
 	if bd.Active {
-		this.flags |= body_e_activeFlag
+		b.flags |= body_e_activeFlag
 	}
 
-	this.world = world
+	b.world = world
 
-	this.xf.P = bd.Position
-	this.xf.Q.Set(bd.Angle)
+	b.xf.P = bd.Position
+	b.xf.Q.Set(bd.Angle)
 
-	this.sweep.LocalCenter.SetZero()
-	this.sweep.C0 = this.xf.P
-	this.sweep.C = this.xf.P
-	this.sweep.A0 = bd.Angle
-	this.sweep.A = bd.Angle
-	this.sweep.Alpha0 = 0.0
+	b.sweep.LocalCenter.SetZero()
+	b.sweep.C0 = b.xf.P
+	b.sweep.C = b.xf.P
+	b.sweep.A0 = bd.Angle
+	b.sweep.A = bd.Angle
+	b.sweep.Alpha0 = 0.0
 
-	this.jointList = nil
-	this.contactList = nil
-	this.prev = nil
-	this.next = nil
+	b.jointList = nil
+	b.contactList = nil
+	b.prev = nil
+	b.next = nil
 
-	this.linearVelocity = bd.LinearVelocity
-	this.angularVelocity = bd.AngularVelocity
+	b.linearVelocity = bd.LinearVelocity
+	b.angularVelocity = bd.AngularVelocity
 
-	this.linearDamping = bd.LinearDamping
-	this.angularDamping = bd.AngularDamping
-	this.gravityScale = bd.GravityScale
+	b.linearDamping = bd.LinearDamping
+	b.angularDamping = bd.AngularDamping
+	b.gravityScale = bd.GravityScale
 
-	this.force.SetZero()
-	this.torque = 0.0
+	b.force.SetZero()
+	b.torque = 0.0
 
-	this.sleepTime = 0.0
+	b.sleepTime = 0.0
 
-	this.xtype = bd.Type
+	b.xtype = bd.Type
 
-	if this.xtype == DynamicBody {
-		this.mass = 1.0
-		this.invMass = 1.0
+	if b.xtype == DynamicBody {
+		b.mass = 1.0
+		b.invMass = 1.0
 	} else {
-		this.mass = 0.0
-		this.invMass = 0.0
+		b.mass = 0.0
+		b.invMass = 0.0
 	}
 
-	this.I = 0.0
-	this.invI = 0.0
+	b.I = 0.0
+	b.invI = 0.0
 
-	this.userData = bd.UserData
+	b.userData = bd.UserData
 
-	this.fixtureList = nil
-	this.fixtureCount = 0
+	b.fixtureList = nil
+	b.fixtureCount = 0
 
-	return this
+	return b
 }
 
 // Creates a fixture and attach it to this body. Use this function if you need
@@ -215,33 +212,33 @@ func NewBody(bd *BodyDef, world *World) *Body {
 // Contacts are not created until the next time step.
 // @param def the fixture definition.
 // @warning This function is locked during callbacks.
-func (this *Body) CreateFixture(def *FixtureDef) *Fixture {
-	if this.world.IsLocked() {
+func (b *Body) CreateFixture(def *FixtureDef) *Fixture {
+	if b.world.IsLocked() {
 		return nil
 	}
 
 	fixture := NewFixture()
-	fixture.Create(this, def)
+	fixture.Create(b, def)
 
-	if (this.flags & body_e_activeFlag) != 0 {
-		broadPhase := this.world.contactManager.BroadPhase
-		fixture.CreateProxies(broadPhase, this.xf)
+	if (b.flags & body_e_activeFlag) != 0 {
+		broadPhase := b.world.contactManager.BroadPhase
+		fixture.CreateProxies(broadPhase, b.xf)
 	}
 
-	fixture.Next = this.fixtureList
-	this.fixtureList = fixture
-	this.fixtureCount++
+	fixture.Next = b.fixtureList
+	b.fixtureList = fixture
+	b.fixtureCount++
 
-	fixture.Body = this
+	fixture.Body = b
 
 	// Adjust mass properties if needed.
 	if fixture.Density > 0.0 {
-		this.ResetMassData()
+		b.ResetMassData()
 	}
 
 	// Let the world know we have a new fixture. This will cause new contacts
 	// to be created at the beginning of the next time step.
-	this.world.flags |= world_e_newFixture
+	b.world.flags |= world_e_newFixture
 
 	return fixture
 }
@@ -338,94 +335,94 @@ func (b *Body) DestroyFixture(fixture *Fixture) {
 // Manipulating a body's transform may cause non-physical behavior.
 // @param position the world position of the body's local origin.
 // @param angle the world rotation in radians.
-func (this *Body) SetTransform(position Vec2, angle float64) {
-	if this.world.IsLocked() {
+func (b *Body) SetTransform(position Vec2, angle float64) {
+	if b.world.IsLocked() {
 		return
 	}
 
-	this.xf.Q.Set(angle)
-	this.xf.P = position
+	b.xf.Q.Set(angle)
+	b.xf.P = position
 
-	this.sweep.C = MulX(this.xf, this.sweep.LocalCenter)
-	this.sweep.A = angle
+	b.sweep.C = MulX(b.xf, b.sweep.LocalCenter)
+	b.sweep.A = angle
 
-	this.sweep.C0 = this.sweep.C
-	this.sweep.A0 = angle
+	b.sweep.C0 = b.sweep.C
+	b.sweep.A0 = angle
 
-	broadPhase := this.world.contactManager.BroadPhase
-	for f := this.fixtureList; f != nil; f = f.Next {
-		f.Synchronize(broadPhase, this.xf, this.xf)
+	broadPhase := b.world.contactManager.BroadPhase
+	for f := b.fixtureList; f != nil; f = f.Next {
+		f.Synchronize(broadPhase, b.xf, b.xf)
 	}
 
-	this.world.contactManager.FindNewContacts()
+	b.world.contactManager.FindNewContacts()
 }
 
 // Get the body transform for the body's origin.
 // @return the world transform of the body's origin.
-func (this *Body) GetTransform() Transform {
-	return this.xf
+func (b *Body) GetTransform() Transform {
+	return b.xf
 }
 
 // Get the world body origin position.
 // @return the world position of the body's origin.
-func (this *Body) GetPosition() Vec2 {
-	return this.xf.P
+func (b *Body) GetPosition() Vec2 {
+	return b.xf.P
 }
 
 // Get the angle in radians.
 // @return the current world rotation angle in radians.
-func (this *Body) GetAngle() float64 {
-	return this.sweep.A
+func (b *Body) GetAngle() float64 {
+	return b.sweep.A
 }
 
 // Get the local position of the center of mass.
-func (this *Body) GetWorldCenter() Vec2 {
-	return this.sweep.C
+func (b *Body) GetWorldCenter() Vec2 {
+	return b.sweep.C
 }
 
 // Get the local position of the center of mass.
-func (this *Body) GetLocalCenter() Vec2 {
-	return this.sweep.LocalCenter
+func (b *Body) GetLocalCenter() Vec2 {
+	return b.sweep.LocalCenter
 }
 
 // Set the linear velocity of the center of mass.
 // @param v the new linear velocity of the center of mass.
-func (this *Body) SetLinearVelocity(v Vec2) {
-	if this.xtype == StaticBody {
+func (b *Body) SetLinearVelocity(v Vec2) {
+	if b.xtype == StaticBody {
 		return
 	}
 
 	if DotVV(v, v) > 0.0 {
-		this.SetAwake(true)
+		b.SetAwake(true)
 	}
 
-	this.linearVelocity = v
+	b.linearVelocity = v
 }
 
 // Get the linear velocity of the center of mass.
 // @return the linear velocity of the center of mass.
-func (this *Body) GetLinearVelocity() Vec2 {
-	return this.linearVelocity
+func (b *Body) GetLinearVelocity() Vec2 {
+	return b.linearVelocity
 }
 
 /// Set the angular velocity.
 /// @param omega the new angular velocity in radians/second.
-func (this *Body) SetAngularVelocity(w float64) {
-	if this.xtype == StaticBody {
+func (b *Body) SetAngularVelocity(w float64) {
+	if b.xtype == StaticBody {
 		return
 	}
 
 	if w*w > 0.0 {
-		this.SetAwake(true)
+		b.SetAwake(true)
 	}
 
-	this.angularVelocity = w
+	b.angularVelocity = w
 }
 
 /// Get the angular velocity.
 /// @return the angular velocity in radians/second.
-func (this *Body) GetAngularVelocity() float64 {
-	return this.angularVelocity
+func (b *Body) GetAngularVelocity() float64 {
+	return b.angularVelocity
 }
 
 /// Apply a force at a world point. If the force is not
@@ -433,47 +430,47 @@ func (this *Body) GetAngularVelocity() float64 {
 /// affect the angular velocity. This wakes up the body.
 /// @param force the world force vector, usually in Newtons (N).
 /// @param point the world position of the point of application.
-func (this *Body) ApplyForce(force, point Vec2) {
-	if this.xtype != DynamicBody {
+func (b *Body) ApplyForce(force, point Vec2) {
+	if b.xtype != DynamicBody {
 		return
 	}
 
-	if !this.IsAwake() {
-		this.SetAwake(true)
+	if !b.IsAwake() {
+		b.SetAwake(true)
 	}
 
-	this.force.Add(force)
-	this.torque += CrossVV(SubVV(point, this.sweep.C), force)
+	b.force.Add(force)
+	b.torque += CrossVV(SubVV(point, b.sweep.C), force)
 }
 
 /// Apply a force to the center of mass. This wakes up the body.
 /// @param force the world force vector, usually in Newtons (N).
-func (this *Body) ApplyForceToCenter(force Vec2) {
-	if this.xtype != DynamicBody {
+func (b *Body) ApplyForceToCenter(force Vec2) {
+	if b.xtype != DynamicBody {
 		return
 	}
 
-	if !this.IsAwake() {
-		this.SetAwake(true)
+	if !b.IsAwake() {
+		b.SetAwake(true)
 	}
 
-	this.force.Add(force)
+	b.force.Add(force)
 }
 
 /// Apply a torque. This affects the angular velocity
 /// without affecting the linear velocity of the center of mass.
 /// This wakes up the body.
 /// @param torque about the z-axis (out of the screen), usually in N-m.
-func (this *Body) ApplyTorque(torque float64) {
-	if this.xtype != DynamicBody {
+func (b *Body) ApplyTorque(torque float64) {
+	if b.xtype != DynamicBody {
 		return
 	}
 
-	if !this.IsAwake() {
-		this.SetAwake(true)
+	if !b.IsAwake() {
+		b.SetAwake(true)
 	}
 
-	this.torque += torque
+	b.torque += torque
 }
 
 /// Apply an impulse at a point. This immediately modifies the velocity.
@@ -481,50 +478,50 @@ func (this *Body) ApplyTorque(torque float64) {
 /// is not at the center of mass. This wakes up the body.
 /// @param impulse the world impulse vector, usually in N-seconds or kg-m/s.
 /// @param point the world position of the point of application.
-func (this *Body) ApplyLinearImpulse(impulse Vec2, point Vec2) {
-	if this.xtype != DynamicBody {
+func (b *Body) ApplyLinearImpulse(impulse Vec2, point Vec2) {
+	if b.xtype != DynamicBody {
 		return
 	}
 
-	if !this.IsAwake() {
-		this.SetAwake(true)
+	if !b.IsAwake() {
+		b.SetAwake(true)
 	}
 
-	this.linearVelocity.Add(MulFV(this.invMass, impulse))
-	this.angularVelocity += this.invI * CrossVV(SubVV(point, this.sweep.C), impulse)
+	b.linearVelocity.Add(MulFV(b.invMass, impulse))
+	b.angularVelocity += b.invI * CrossVV(SubVV(point, b.sweep.C), impulse)
 }
 
 /// Apply an angular impulse.
 /// @param impulse the angular impulse in units of kg*m*m/s
-func (this *Body) ApplyAngularImpulse(impulse float64) {
-	if this.xtype != DynamicBody {
+func (b *Body) ApplyAngularImpulse(impulse float64) {
+	if b.xtype != DynamicBody {
 		return
 	}
 
-	if !this.IsAwake() {
-		this.SetAwake(true)
+	if !b.IsAwake() {
+		b.SetAwake(true)
 	}
-	this.angularVelocity += this.invI * impulse
+	b.angularVelocity += b.invI * impulse
 }
 
 /// Get the total mass of the body.
 /// @return the mass, usually in kilograms (kg).
-func (this *Body) GetMass() float64 {
-	return this.mass
+func (b *Body) GetMass() float64 {
+	return b.mass
 }
 
 /// Get the rotational inertia of the body about the local origin.
 /// @return the rotational inertia, usually in kg-m^2.
-func (this *Body) GetInertia() float64 {
-	return this.I + this.mass*DotVV(this.sweep.LocalCenter, this.sweep.LocalCenter)
+func (b *Body) GetInertia() float64 {
+	return b.I + b.mass*DotVV(b.sweep.LocalCenter, b.sweep.LocalCenter)
 }
 
 /// Get the mass data of the body.
 /// @return a struct containing the mass, inertia and center of the body.
-func (this *Body) GetMassData(data *MassData) {
-	data.Mass = this.mass
-	data.I = this.I + this.mass*DotVV(this.sweep.LocalCenter, this.sweep.LocalCenter)
-	data.Center = this.sweep.LocalCenter
+func (b *Body) GetMassData(data *MassData) {
+	data.Mass = b.mass
+	data.I = b.I + b.mass*DotVV(b.sweep.LocalCenter, b.sweep.LocalCenter)
+	data.Center = b.sweep.LocalCenter
 }
 
 /// Set the mass properties to override the mass properties of the fixtures.
@@ -532,266 +529,266 @@ func (this *Body) GetMassData(data *MassData) {
 /// Note that creating or destroying fixtures can also alter the mass.
 /// This function has no effect if the body isn't dynamic.
 /// @param massData the mass properties.
-func (this *Body) SetMassData(massData *MassData) {
-	if this.world.IsLocked() {
+func (b *Body) SetMassData(massData *MassData) {
+	if b.world.IsLocked() {
 		return
 	}
 
-	if this.xtype != DynamicBody {
+	if b.xtype != DynamicBody {
 		return
 	}
 
-	this.invMass = 0.0
-	this.I = 0.0
-	this.invI = 0.0
+	b.invMass = 0.0
+	b.I = 0.0
+	b.invI = 0.0
 
-	this.mass = massData.Mass
-	if this.mass <= 0.0 {
-		this.mass = 1.0
+	b.mass = massData.Mass
+	if b.mass <= 0.0 {
+		b.mass = 1.0
 	}
 
-	this.invMass = 1.0 / this.mass
+	b.invMass = 1.0 / b.mass
 
-	if massData.I > 0.0 && (this.flags&body_e_fixedRotationFlag) == 0 {
-		this.I = massData.I - this.mass*DotVV(massData.Center, massData.Center)
-		this.invI = 1.0 / this.I
+	if massData.I > 0.0 && (b.flags&body_e_fixedRotationFlag) == 0 {
+		b.I = massData.I - b.mass*DotVV(massData.Center, massData.Center)
+		b.invI = 1.0 / b.I
 	}
 
 	// Move center of mass.
-	oldCenter := this.sweep.C
-	this.sweep.LocalCenter = massData.Center
-	this.sweep.C = MulX(this.xf, this.sweep.LocalCenter)
-	this.sweep.C0 = this.sweep.C
+	oldCenter := b.sweep.C
+	b.sweep.LocalCenter = massData.Center
+	b.sweep.C = MulX(b.xf, b.sweep.LocalCenter)
+	b.sweep.C0 = b.sweep.C
 
 	// Update center of mass velocity.
-	this.linearVelocity.Add(CrossFV(this.angularVelocity, SubVV(this.sweep.C, oldCenter)))
+	b.linearVelocity.Add(CrossFV(b.angularVelocity, SubVV(b.sweep.C, oldCenter)))
 }
 
 // This resets the mass properties to the sum of the mass properties of the fixtures.
 // This normally does not need to be called unless you called SetMassData to override
 // the mass and you later want to reset the mass.
-func (this *Body) ResetMassData() {
+func (b *Body) ResetMassData() {
 	// Compute mass data from shapes. Each shape has its own density.
-	this.mass = 0.0
-	this.invMass = 0.0
-	this.I = 0.0
-	this.invI = 0.0
-	this.sweep.LocalCenter.SetZero()
+	b.mass = 0.0
+	b.invMass = 0.0
+	b.I = 0.0
+	b.invI = 0.0
+	b.sweep.LocalCenter.SetZero()
 
 	// Static and kinematic bodies have zero mass.
-	if this.xtype == StaticBody || this.xtype == KinematicBody {
-		this.sweep.C0 = this.xf.P
-		this.sweep.C = this.xf.P
-		this.sweep.A0 = this.sweep.A
+	if b.xtype == StaticBody || b.xtype == KinematicBody {
+		b.sweep.C0 = b.xf.P
+		b.sweep.C = b.xf.P
+		b.sweep.A0 = b.sweep.A
 		return
 	}
 
 	// Accumulate mass over all fixtures.
 	localCenter := Vec2_zero
-	for f := this.fixtureList; f != nil; f = f.Next {
+	for f := b.fixtureList; f != nil; f = f.Next {
 		if f.Density == 0.0 {
 			continue
 		}
 
 		var massData MassData
 		f.GetMassData(&massData)
-		this.mass += massData.Mass
+		b.mass += massData.Mass
 		localCenter.Add(MulFV(massData.Mass, massData.Center))
-		this.I += massData.I
+		b.I += massData.I
 	}
 
 	// Compute center of mass.
-	if this.mass > 0.0 {
-		this.invMass = 1.0 / this.mass
-		localCenter.Mul(this.invMass)
+	if b.mass > 0.0 {
+		b.invMass = 1.0 / b.mass
+		localCenter.Mul(b.invMass)
 	} else {
 		// Force all dynamic bodies to have a positive mass.
-		this.mass = 1.0
-		this.invMass = 1.0
+		b.mass = 1.0
+		b.invMass = 1.0
 	}
 
-	if this.I > 0.0 && (this.flags&body_e_fixedRotationFlag) == 0 {
+	if b.I > 0.0 && (b.flags&body_e_fixedRotationFlag) == 0 {
 		// Center the inertia about the center of mass.
-		this.I -= this.mass * DotVV(localCenter, localCenter)
-		this.invI = 1.0 / this.I
+		b.I -= b.mass * DotVV(localCenter, localCenter)
+		b.invI = 1.0 / b.I
 	} else {
-		this.I = 0.0
-		this.invI = 0.0
+		b.I = 0.0
+		b.invI = 0.0
 	}
 
 	// Move center of mass.
-	oldCenter := this.sweep.C
-	this.sweep.LocalCenter = localCenter
-	this.sweep.C = MulX(this.xf, this.sweep.LocalCenter)
-	this.sweep.C0 = this.sweep.C
+	oldCenter := b.sweep.C
+	b.sweep.LocalCenter = localCenter
+	b.sweep.C = MulX(b.xf, b.sweep.LocalCenter)
+	b.sweep.C0 = b.sweep.C
 
 	// Update center of mass velocity.
-	this.linearVelocity.Add(CrossFV(this.angularVelocity, SubVV(this.sweep.C, oldCenter)))
+	b.linearVelocity.Add(CrossFV(b.angularVelocity, SubVV(b.sweep.C, oldCenter)))
 }
 
 // Get the world coordinates of a point given the local coordinates.
 // @param localPoint a point on the body measured relative the the body's origin.
 // @return the same point expressed in world coordinates.
-func (this *Body) GetWorldPoint(localPoint Vec2) Vec2 {
-	return MulX(this.xf, localPoint)
+func (b *Body) GetWorldPoint(localPoint Vec2) Vec2 {
+	return MulX(b.xf, localPoint)
 }
 
 // Get the world coordinates of a vector given the local coordinates.
 // @param localVector a vector fixed in the body.
 // @return the same vector expressed in world coordinates.
-func (this *Body) GetWorldVector(localVector Vec2) Vec2 {
-	return MulRV(this.xf.Q, localVector)
+func (b *Body) GetWorldVector(localVector Vec2) Vec2 {
+	return MulRV(b.xf.Q, localVector)
 }
 
 // Gets a local point relative to the body's origin given a world point.
 // @param a point in world coordinates.
 // @return the corresponding local point relative to the body's origin.
-func (this *Body) GetLocalPoint(worldPoint Vec2) Vec2 {
-	return MulXT(this.xf, worldPoint)
+func (b *Body) GetLocalPoint(worldPoint Vec2) Vec2 {
+	return MulXT(b.xf, worldPoint)
 }
 
 // Gets a local vector given a world vector.
 // @param a vector in world coordinates.
 // @return the corresponding local vector.
-func (this *Body) GetLocalVector(worldVector Vec2) Vec2 {
-	return MulTRV(this.xf.Q, worldVector)
+func (b *Body) GetLocalVector(worldVector Vec2) Vec2 {
+	return MulTRV(b.xf.Q, worldVector)
 }
 
 // Get the world linear velocity of a world point attached to this body.
 // @param a point in world coordinates.
 // @return the world velocity of a point.
-func (this *Body) GetLinearVelocityFromWorldPoint(worldPoint Vec2) Vec2 {
-	return AddVV(this.linearVelocity, CrossFV(this.angularVelocity, SubVV(worldPoint, this.sweep.C)))
+func (b *Body) GetLinearVelocityFromWorldPoint(worldPoint Vec2) Vec2 {
+	return AddVV(b.linearVelocity, CrossFV(b.angularVelocity, SubVV(worldPoint, b.sweep.C)))
 }
 
 // Get the world velocity of a local point.
 // @param a point in local coordinates.
 // @return the world velocity of a point.
-func (this *Body) GetLinearVelocityFromLocalPoint(localPoint Vec2) Vec2 {
-	return this.GetLinearVelocityFromWorldPoint(this.GetWorldPoint(localPoint))
+func (b *Body) GetLinearVelocityFromLocalPoint(localPoint Vec2) Vec2 {
+	return b.GetLinearVelocityFromWorldPoint(b.GetWorldPoint(localPoint))
 }
 
 // Get the linear damping of the body.
-func (this *Body) GetLinearDamping() float64 {
-	return this.linearDamping
+func (b *Body) GetLinearDamping() float64 {
+	return b.linearDamping
 }
 
 // Set the linear damping of the body.
-func (this *Body) SetLinearDamping(linearDamping float64) {
-	this.linearDamping = linearDamping
+func (b *Body) SetLinearDamping(linearDamping float64) {
+	b.linearDamping = linearDamping
 }
 
 // Get the angular damping of the body.
-func (this *Body) GetAngularDamping() float64 {
-	return this.angularDamping
+func (b *Body) GetAngularDamping() float64 {
+	return b.angularDamping
 }
 
 // Set the angular damping of the body.
-func (this *Body) SetAngularDamping(angularDamping float64) {
-	this.angularDamping = angularDamping
+func (b *Body) SetAngularDamping(angularDamping float64) {
+	b.angularDamping = angularDamping
 }
 
 // Get the gravity scale of the body.
-func (this *Body) GetGravityScale() float64 {
-	return this.gravityScale
+func (b *Body) GetGravityScale() float64 {
+	return b.gravityScale
 }
 
 // Set the gravity scale of the body.
-func (this *Body) SetGravityScale(scale float64) {
-	this.gravityScale = scale
+func (b *Body) SetGravityScale(scale float64) {
+	b.gravityScale = scale
 }
 
 // Set the type of this body. This may alter the mass and velocity.
-func (this *Body) SetType(xtype BodyType) {
-	if this.world.IsLocked() {
+func (b *Body) SetType(xtype BodyType) {
+	if b.world.IsLocked() {
 		return
 	}
 
-	if this.xtype == xtype {
+	if b.xtype == xtype {
 		return
 	}
 
-	this.xtype = xtype
+	b.xtype = xtype
 
-	this.ResetMassData()
+	b.ResetMassData()
 
-	if this.xtype == StaticBody {
-		this.linearVelocity.SetZero()
-		this.angularVelocity = 0.0
-		this.sweep.A0 = this.sweep.A
-		this.sweep.C0 = this.sweep.C
-		this.synchronizeFixtures()
+	if b.xtype == StaticBody {
+		b.linearVelocity.SetZero()
+		b.angularVelocity = 0.0
+		b.sweep.A0 = b.sweep.A
+		b.sweep.C0 = b.sweep.C
+		b.synchronizeFixtures()
 	}
 
-	this.SetAwake(true)
+	b.SetAwake(true)
 
-	this.force.SetZero()
-	this.torque = 0.0
+	b.force.SetZero()
+	b.torque = 0.0
 
 	// Since the body type changed, we need to flag contacts for filtering.
-	for f := this.fixtureList; f != nil; f = f.Next {
+	for f := b.fixtureList; f != nil; f = f.Next {
 		f.Refilter()
 	}
 }
 
 // Get the type of this body.
-func (this *Body) GetType() BodyType {
-	return this.xtype
+func (b *Body) GetType() BodyType {
+	return b.xtype
 }
 
 /// Should this body be treated like a bullet for continuous collision detection?
-func (this *Body) SetBullet(flag bool) {
+func (b *Body) SetBullet(flag bool) {
 	if flag {
-		this.flags |= body_e_bulletFlag
+		b.flags |= body_e_bulletFlag
 	} else {
-		this.flags &= ^body_e_bulletFlag
+		b.flags &= ^body_e_bulletFlag
 	}
 }
 
 // Is this body treated like a bullet for continuous collision detection?
-func (this *Body) IsBullet() bool {
-	return (this.flags & body_e_bulletFlag) == body_e_bulletFlag
+func (b *Body) IsBullet() bool {
+	return (b.flags & body_e_bulletFlag) == body_e_bulletFlag
 }
 
 // You can disable sleeping on this body. If you disable sleeping, the
 // body will be woken.
-func (this *Body) SetSleepingAllowed(flag bool) {
+func (b *Body) SetSleepingAllowed(flag bool) {
 	if flag {
-		this.flags |= body_e_autoSleepFlag
+		b.flags |= body_e_autoSleepFlag
 	} else {
-		this.flags &= ^body_e_autoSleepFlag
-		this.SetAwake(true)
+		b.flags &= ^body_e_autoSleepFlag
+		b.SetAwake(true)
 	}
 }
 
 /// Is this body allowed to sleep
-func (this *Body) IsSleepingAllowed() bool {
-	return (this.flags & body_e_autoSleepFlag) == body_e_autoSleepFlag
+func (b *Body) IsSleepingAllowed() bool {
+	return (b.flags & body_e_autoSleepFlag) == body_e_autoSleepFlag
 }
 
 // Set the sleep state of the body. A sleeping body has very
 // low CPU cost.
 // @param flag set to true to put body to sleep, false to wake it.
-func (this *Body) SetAwake(flag bool) {
+func (b *Body) SetAwake(flag bool) {
 	if flag {
-		if (this.flags & body_e_awakeFlag) == 0 {
-			this.flags |= body_e_awakeFlag
-			this.sleepTime = 0.0
+		if (b.flags & body_e_awakeFlag) == 0 {
+			b.flags |= body_e_awakeFlag
+			b.sleepTime = 0.0
 		}
 	} else {
-		this.flags &= ^body_e_awakeFlag
-		this.sleepTime = 0.0
-		this.linearVelocity.SetZero()
-		this.angularVelocity = 0.0
-		this.force.SetZero()
-		this.torque = 0.0
+		b.flags &= ^body_e_awakeFlag
+		b.sleepTime = 0.0
+		b.linearVelocity.SetZero()
+		b.angularVelocity = 0.0
+		b.force.SetZero()
+		b.torque = 0.0
 	}
 }
 
 // Get the sleeping state of this body.
 // @return true if the body is sleeping.
-func (this *Body) IsAwake() bool {
-	return (this.flags & body_e_awakeFlag) == body_e_awakeFlag
+func (b *Body) IsAwake() bool {
+	return (b.flags & body_e_awakeFlag) == body_e_awakeFlag
 }
 
 // Set the active state of the body. An inactive body is not
@@ -807,123 +804,123 @@ func (this *Body) IsAwake() bool {
 // Joints connected to an inactive body are implicitly inactive.
 // An inactive body is still owned by a b2World object and remains
 // in the body list.
-func (this *Body) SetActive(flag bool) {
-	if flag == this.IsActive() {
+func (b *Body) SetActive(flag bool) {
+	if flag == b.IsActive() {
 		return
 	}
 
 	if flag {
-		this.flags |= body_e_activeFlag
+		b.flags |= body_e_activeFlag
 
 		// Create all proxies.
-		broadPhase := this.world.contactManager.BroadPhase
-		for f := this.fixtureList; f != nil; f = f.Next {
-			f.CreateProxies(broadPhase, this.xf)
+		broadPhase := b.world.contactManager.BroadPhase
+		for f := b.fixtureList; f != nil; f = f.Next {
+			f.CreateProxies(broadPhase, b.xf)
 		}
 
 		// Contacts are created the next time step.
 	} else {
-		this.flags &= ^body_e_activeFlag
+		b.flags &= ^body_e_activeFlag
 
 		// Destroy all proxies.
-		broadPhase := this.world.contactManager.BroadPhase
-		for f := this.fixtureList; f != nil; f = f.Next {
+		broadPhase := b.world.contactManager.BroadPhase
+		for f := b.fixtureList; f != nil; f = f.Next {
 			f.DestroyProxies(broadPhase)
 		}
 
 		// Destroy the attached contacts.
-		ce := this.contactList
+		ce := b.contactList
 		for ce != nil {
 			ce0 := ce
 			ce = ce.Next
-			this.world.contactManager.Destroy(ce0.Contact)
+			b.world.contactManager.Destroy(ce0.Contact)
 		}
 
-		this.contactList = nil
+		b.contactList = nil
 	}
 }
 
 // Get the active state of the body.
-func (this *Body) IsActive() bool {
-	return (this.flags & body_e_activeFlag) == body_e_activeFlag
+func (b *Body) IsActive() bool {
+	return (b.flags & body_e_activeFlag) == body_e_activeFlag
 }
 
 // Set this body to have fixed rotation. This causes the mass
 // to be reset.
-func (this *Body) SetFixedRotation(flag bool) {
+func (b *Body) SetFixedRotation(flag bool) {
 	if flag {
-		this.flags |= body_e_fixedRotationFlag
+		b.flags |= body_e_fixedRotationFlag
 	} else {
-		this.flags &= ^body_e_fixedRotationFlag
+		b.flags &= ^body_e_fixedRotationFlag
 	}
 
-	this.ResetMassData()
+	b.ResetMassData()
 }
 
 // Does this body have fixed rotation?
-func (this *Body) IsFixedRotation() bool {
-	return (this.flags & body_e_fixedRotationFlag) == body_e_fixedRotationFlag
+func (b *Body) IsFixedRotation() bool {
+	return (b.flags & body_e_fixedRotationFlag) == body_e_fixedRotationFlag
 }
 
 // Get the list of all fixtures attached to this body.
-func (this *Body) GetFixtureList() *Fixture {
-	return this.fixtureList
+func (b *Body) GetFixtureList() *Fixture {
+	return b.fixtureList
 }
 
 // Get the list of all joints attached to this body.
-func (this *Body) GetJointList() *JointEdge {
-	return this.jointList
+func (b *Body) GetJointList() *JointEdge {
+	return b.jointList
 }
 
 // Get the list of all contacts attached to this body.
 // @warning this list changes during the time step and you may
 // miss some collisions if you don't use b2ContactListener.
-func (this *Body) GetContactList() *ContactEdge {
-	return this.contactList
+func (b *Body) GetContactList() *ContactEdge {
+	return b.contactList
 }
 
 // Get the next body in the world's body list.
-func (this *Body) GetNext() *Body {
-	return this.next
+func (b *Body) GetNext() *Body {
+	return b.next
 }
 
 // Get the user data pointer that was provided in the body definition.
-func (this *Body) GetUserData() interface{} {
-	return this.userData
+func (b *Body) GetUserData() interface{} {
+	return b.userData
 }
 
 // Set the user data. Use this to store your application specific data.
-func (this *Body) SetUserData(data interface{}) {
-	this.userData = data
+func (b *Body) SetUserData(data interface{}) {
+	b.userData = data
 }
 
 // Get the parent world of this body.
-func (this *Body) GetWorld() *World {
-	return this.world
+func (b *Body) GetWorld() *World {
+	return b.world
 }
 
 // Dump this body to a log file
-func (this *Body) Dump() {
-	bodyIndex := this.islandIndex
+func (b *Body) Dump() {
+	bodyIndex := b.islandIndex
 
 	Log("{\n")
 	Log("  b2BodyDef bd;\n")
-	Log("  bd.type = b2BodyType(%d);\n", this.xtype)
-	Log("  bd.position.Set(%.15f, %.15f);\n", this.xf.P.X, this.xf.P.Y)
-	Log("  bd.angle = %.15f;\n", this.sweep.A)
-	Log("  bd.linearVelocity.Set(%.15f, %.15f);\n", this.linearVelocity.X, this.linearVelocity.Y)
-	Log("  bd.angularVelocity = %.15f;\n", this.angularVelocity)
-	Log("  bd.linearDamping = %.15f;\n", this.linearDamping)
-	Log("  bd.angularDamping = %.15f;\n", this.angularDamping)
-	Log("  bd.allowSleep = bool(%d);\n", this.flags&body_e_autoSleepFlag)
-	Log("  bd.awake = bool(%d);\n", this.flags&body_e_awakeFlag)
-	Log("  bd.fixedRotation = bool(%d);\n", this.flags&body_e_fixedRotationFlag)
-	Log("  bd.bullet = bool(%d);\n", this.flags&body_e_bulletFlag)
-	Log("  bd.active = bool(%d);\n", this.flags&body_e_activeFlag)
-	Log("  bd.gravityScale = %.15f;\n", this.gravityScale)
-	Log("  bodies[%d] = world->CreateBody(&bd);\n", this.islandIndex)
+	Log("  bd.type = b2BodyType(%d);\n", b.xtype)
+	Log("  bd.position.Set(%.15f, %.15f);\n", b.xf.P.X, b.xf.P.Y)
+	Log("  bd.angle = %.15f;\n", b.sweep.A)
+	Log("  bd.linearVelocity.Set(%.15f, %.15f);\n", b.linearVelocity.X, b.linearVelocity.Y)
+	Log("  bd.angularVelocity = %.15f;\n", b.angularVelocity)
+	Log("  bd.linearDamping = %.15f;\n", b.linearDamping)
+	Log("  bd.angularDamping = %.15f;\n", b.angularDamping)
+	Log("  bd.allowSleep = bool(%d);\n", b.flags&body_e_autoSleepFlag)
+	Log("  bd.awake = bool(%d);\n", b.flags&body_e_awakeFlag)
+	Log("  bd.fixedRotation = bool(%d);\n", b.flags&body_e_fixedRotationFlag)
+	Log("  bd.bullet = bool(%d);\n", b.flags&body_e_bulletFlag)
+	Log("  bd.active = bool(%d);\n", b.flags&body_e_activeFlag)
+	Log("  bd.gravityScale = %.15f;\n", b.gravityScale)
+	Log("  bodies[%d] = world->CreateBody(&bd);\n", b.islandIndex)
 	Log("\n")
-	for f := this.fixtureList; f != nil; f = f.Next {
+	for f := b.fixtureList; f != nil; f = f.Next {
 		Log("  {\n")
 		f.Dump(bodyIndex)
 		Log("  }\n")
@@ -931,32 +928,32 @@ func (this *Body) Dump() {
 	Log("}\n")
 }
 
-func (this *Body) synchronizeFixtures() {
+func (b *Body) synchronizeFixtures() {
 	var xf1 Transform
-	xf1.Q.Set(this.sweep.A0)
-	xf1.P = SubVV(this.sweep.C0, MulRV(xf1.Q, this.sweep.LocalCenter))
+	xf1.Q.Set(b.sweep.A0)
+	xf1.P = SubVV(b.sweep.C0, MulRV(xf1.Q, b.sweep.LocalCenter))
 
-	broadPhase := this.world.contactManager.BroadPhase
-	for f := this.fixtureList; f != nil; f = f.Next {
-		f.Synchronize(broadPhase, xf1, this.xf)
+	broadPhase := b.world.contactManager.BroadPhase
+	for f := b.fixtureList; f != nil; f = f.Next {
+		f.Synchronize(broadPhase, xf1, b.xf)
 	}
 }
 
-func (this *Body) synchronizeTransform() {
-	this.xf.Q.Set(this.sweep.A)
-	this.xf.P = SubVV(this.sweep.C, MulRV(this.xf.Q, this.sweep.LocalCenter))
+func (b *Body) synchronizeTransform() {
+	b.xf.Q.Set(b.sweep.A)
+	b.xf.P = SubVV(b.sweep.C, MulRV(b.xf.Q, b.sweep.LocalCenter))
 }
 
 // This is used to prevent connected bodies from colliding.
 // It may lie, depending on the collideConnected flag.
-func (this *Body) ShouldCollide(other *Body) bool {
+func (b *Body) ShouldCollide(other *Body) bool {
 	// At least one body should be dynamic.
-	if this.xtype != DynamicBody && other.xtype != DynamicBody {
+	if b.xtype != DynamicBody && other.xtype != DynamicBody {
 		return false
 	}
 
 	// Does a joint prevent collision?
-	for jn := this.jointList; jn != nil; jn = jn.Next {
+	for jn := b.jointList; jn != nil; jn = jn.Next {
 		if jn.Other == other {
 			if !jn.Joint.GetCollideConnected() {
 				return false
@@ -967,11 +964,11 @@ func (this *Body) ShouldCollide(other *Body) bool {
 	return true
 }
 
-func (this *Body) Advance(alpha float64) {
+func (b *Body) Advance(alpha float64) {
 	// Advance to the new safe time. This doesn't sync the broad-phase.
-	this.sweep.Advance(alpha)
-	this.sweep.C = this.sweep.C0
-	this.sweep.A = this.sweep.A0
-	this.xf.Q.Set(this.sweep.A)
-	this.xf.P = SubVV(this.sweep.C, MulRV(this.xf.Q, this.sweep.LocalCenter))
+	b.sweep.Advance(alpha)
+	b.sweep.C = b.sweep.C0
+	b.sweep.A = b.sweep.A0
+	b.xf.Q.Set(b.sweep.A)
+	b.xf.P = SubVV(b.sweep.C, MulRV(b.xf.Q, b.sweep.LocalCenter))
 }

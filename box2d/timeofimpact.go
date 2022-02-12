@@ -18,7 +18,7 @@ type TOIOutput struct {
 type TOIOutputState byte
 
 const (
-	TOIOutput_e_unknown = iota
+	TOIOutput_e_unknown TOIOutputState = iota
 	TOIOutput_e_failed
 	TOIOutput_e_overlapped
 	TOIOutput_e_touching
@@ -37,7 +37,7 @@ type SeparationFunction struct {
 type SeparationFunctionType byte
 
 const (
-	SeparationFunction_e_points = iota
+	SeparationFunction_e_points SeparationFunctionType = iota
 	SeparationFunction_e_faceA
 	SeparationFunction_e_faceB
 )

@@ -1,9 +1,9 @@
 package box2d
 
-type JointType int
+type JointType byte
 
 const (
-	Joint_e_unknownJoint = iota
+	Joint_e_unknownJoint JointType = iota
 	Joint_e_revoluteJoint
 	Joint_e_prismaticJoint
 	Joint_e_distanceJoint
@@ -16,10 +16,10 @@ const (
 	Joint_e_ropeJoint
 )
 
-type LimitState int
+type LimitState byte
 
 const (
-	LimitState_e_inactiveLimit = iota
+	LimitState_e_inactiveLimit LimitState = iota
 	LimitState_e_atLowerLimit
 	LimitState_e_atUpperLimit
 	LimitState_e_equalLimits

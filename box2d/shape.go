@@ -15,11 +15,11 @@ type MassData struct {
 type ShapeType byte
 
 const (
-	Shape_e_circle    = 0
-	Shape_e_edge      = 1
-	Shape_e_polygon   = 2
-	Shape_e_chain     = 3
-	Shape_e_typeCount = 4
+	Shape_e_circle    ShapeType = 0
+	Shape_e_edge      ShapeType = 1
+	Shape_e_polygon   ShapeType = 2
+	Shape_e_chain     ShapeType = 3
+	Shape_e_typeCount ShapeType = 4
 )
 
 type IShape interface {
