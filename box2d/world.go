@@ -619,11 +619,11 @@ func (this *World) QueryShape(callback func(*Fixture) bool, shape IShape, transf
 /// @param point2 the ray ending point
 type WorldRayCastWrapper struct {
 	broadPhase *BroadPhase
-	callback   func(*Fixture, Vec2, Vec2, float64) float64
+	callback   IRayCastCallback
 }
 
-func (this *WorldRayCastWrapper) RayCastCallback(input RayCastInput, proxyId int) float64 {
-	proxy := this.broadPhase.GetUserData(proxyId).(*FixtureProxy)
+func (ww *WorldRayCastWrapper) RayCastCallback(input RayCastInput, proxyId int) float64 {
+	proxy := ww.broadPhase.GetUserData(proxyId).(*FixtureProxy)
 	fixture := proxy.Fixture
 	index := proxy.ChildIndex
 	output, hit := fixture.RayCast(input, index)
@@ -631,35 +631,35 @@ func (this *WorldRayCastWrapper) RayCastCallback(input RayCastInput, proxyId int
 	if hit {
 		fraction := output.Fraction
 		point := AddVV(MulFV(1.0-fraction, input.P1), MulFV(fraction, input.P2))
-		return this.callback(fixture, point, output.Normal, fraction)
+		return ww.callback.ReportFixture(fixture, point, output.Normal, fraction)
 	}
 
 	return input.MaxFraction
 }
 
-func (this *World) RayCast(callback func(*Fixture, Vec2, Vec2, float64) float64, point1 Vec2, point2 Vec2) {
+func (w *World) RayCast(callback IRayCastCallback, point1 Vec2, point2 Vec2) {
 	var wrapper WorldRayCastWrapper
-	wrapper.broadPhase = this.contactManager.BroadPhase
+	wrapper.broadPhase = w.contactManager.BroadPhase
 	wrapper.callback = callback
 	var input RayCastInput
 	input.MaxFraction = 1.0
 	input.P1 = point1
 	input.P2 = point2
-	this.contactManager.BroadPhase.RayCast(wrapper.RayCastCallback, input)
+	w.contactManager.BroadPhase.RayCast(wrapper.RayCastCallback, input)
 }
 
 /// Get the world body list. With the returned body, use b2Body::GetNext to get
 /// the next body in the world list. A NULL body indicates the end of the list.
 /// @return the head of the world body list.
-func (this *World) GetBodyList() *Body {
-	return this.bodyList
+func (w *World) GetBodyList() *Body {
+	return w.bodyList
 }
 
 /// Get the world joint list. With the returned joint, use b2Joint::GetNext to get
 /// the next joint in the world list. A NULL joint indicates the end of the list.
 /// @return the head of the world joint list.
-func (this *World) GetJointList() IJoint {
-	return this.jointList
+func (w *World) GetJointList() IJoint {
+	return w.jointList
 }
 
 /// Get the world contact list. With the returned contact, use b2Contact::GetNext to get
@@ -667,8 +667,8 @@ func (this *World) GetJointList() IJoint {
 /// @return the head of the world contact list.
 /// @warning contacts are created and destroyed in the middle of a time step.
 /// Use b2ContactListener to avoid missing contacts.
-func (this *World) GetContactList() IContact {
-	return this.contactManager.ContactList
+func (w *World) GetContactList() IContact {
+	return w.contactManager.ContactList
 }
 
 /// Enable/disable sleep.
