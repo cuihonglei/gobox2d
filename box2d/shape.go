@@ -685,11 +685,16 @@ type ChainShape struct {
 	HasPrevVertex, HasNextVertex bool
 }
 
+func MakeChainShape() ChainShape {
+	cs := ChainShape{}
+	cs.Type = Shape_e_chain
+	cs.Radius = PolygonRadius
+	return cs
+}
+
 func NewChainShape() *ChainShape {
-	this := new(ChainShape)
-	this.Type = Shape_e_chain
-	this.Radius = PolygonRadius
-	return this
+	cs := MakeChainShape()
+	return &cs
 }
 
 func (this *ChainShape) Clone() IShape {
