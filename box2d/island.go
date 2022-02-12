@@ -44,7 +44,7 @@ func (this *Island) Clear() {
 }
 
 func (this *Island) Solve(profile *Profile, step *timeStep, gravity Vec2, allowSleep bool) {
-	var timer Timer
+	timer := MakeTimer()
 
 	h := step.dt
 

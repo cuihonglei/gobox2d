@@ -932,7 +932,7 @@ func (this *World) solve(step *timeStep) {
 	//m_stackAllocator.Free(stack);
 
 	{
-		var timer Timer
+		timer := MakeTimer()
 		// Synchronize fixtures, check for out of range bodies.
 		for b := this.bodyList; b != nil; b = b.GetNext() {
 			// If a body was not in an island then it did not move.

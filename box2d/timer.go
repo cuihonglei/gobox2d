@@ -9,17 +9,23 @@ type Timer struct {
 	start int64
 }
 
+func MakeTimer() Timer {
+	t := Timer{}
+	t.Reset()
+	return t
+}
+
 func NewTimer() *Timer {
-	this := new(Timer)
-	return this
+	t := MakeTimer()
+	return &t
 }
 
 // Reset the timer.
-func (this *Timer) Reset() {
-	this.start = time.Now().UnixNano()
+func (t *Timer) Reset() {
+	t.start = time.Now().UnixNano()
 }
 
 // Get the time since construction or the last reset.
-func (this *Timer) GetMilliseconds() float64 {
-	return float64((time.Now().UnixNano() - this.start) / 1000000)
+func (t *Timer) GetMilliseconds() float64 {
+	return float64(time.Now().UnixNano()-t.start) / float64(time.Millisecond)
 }
