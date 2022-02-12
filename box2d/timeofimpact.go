@@ -42,121 +42,121 @@ const (
 	SeparationFunction_e_faceB
 )
 
-func (this *SeparationFunction) Initialize(cache *SimplexCache,
+func (sf *SeparationFunction) Initialize(cache *SimplexCache,
 	proxyA *DistanceProxy, sweepA *Sweep,
 	proxyB *DistanceProxy, sweepB *Sweep,
 	t1 float64) float64 {
 
-	this.proxyA = proxyA
-	this.proxyB = proxyB
+	sf.proxyA = proxyA
+	sf.proxyB = proxyB
 	count := cache.Count
 
-	this.sweepA = *sweepA
-	this.sweepB = *sweepB
+	sf.sweepA = *sweepA
+	sf.sweepB = *sweepB
 
-	xfA := this.sweepA.GetTransform(t1)
-	xfB := this.sweepB.GetTransform(t1)
+	xfA := sf.sweepA.GetTransform(t1)
+	xfB := sf.sweepB.GetTransform(t1)
 
 	if count == 1 {
-		this.xtype = SeparationFunction_e_points
-		localPointA := this.proxyA.GetVertex(int(cache.IndexA[0]))
-		localPointB := this.proxyB.GetVertex(int(cache.IndexB[0]))
+		sf.xtype = SeparationFunction_e_points
+		localPointA := sf.proxyA.GetVertex(int(cache.IndexA[0]))
+		localPointB := sf.proxyB.GetVertex(int(cache.IndexB[0]))
 		pointA := MulX(xfA, localPointA)
 		pointB := MulX(xfB, localPointB)
-		this.axis = SubVV(pointB, pointA)
-		s := this.axis.Normalize()
+		sf.axis = SubVV(pointB, pointA)
+		s := sf.axis.Normalize()
 		return s
 	} else if cache.IndexA[0] == cache.IndexA[1] {
 		// Two points on B and one on A.
-		this.xtype = SeparationFunction_e_faceB
+		sf.xtype = SeparationFunction_e_faceB
 		localPointB1 := proxyB.GetVertex(int(cache.IndexB[0]))
 		localPointB2 := proxyB.GetVertex(int(cache.IndexB[1]))
 
-		this.axis = CrossVF(SubVV(localPointB2, localPointB1), 1.0)
-		this.axis.Normalize()
-		normal := MulRV(xfB.Q, this.axis)
+		sf.axis = CrossVF(SubVV(localPointB2, localPointB1), 1.0)
+		sf.axis.Normalize()
+		normal := MulRV(xfB.Q, sf.axis)
 
-		this.localPoint = MulFV(0.5, AddVV(localPointB1, localPointB2))
-		pointB := MulX(xfB, this.localPoint)
+		sf.localPoint = MulFV(0.5, AddVV(localPointB1, localPointB2))
+		pointB := MulX(xfB, sf.localPoint)
 
 		localPointA := proxyA.GetVertex(int(cache.IndexA[0]))
 		pointA := MulX(xfA, localPointA)
 
 		s := DotVV(SubVV(pointA, pointB), normal)
 		if s < 0.0 {
-			this.axis = this.axis.Minus()
+			sf.axis = sf.axis.Minus()
 			s = -s
 		}
 		return s
 	} else {
 		// Two points on A and one or two points on B.
-		this.xtype = SeparationFunction_e_faceA
-		localPointA1 := this.proxyA.GetVertex(int(cache.IndexA[0]))
-		localPointA2 := this.proxyA.GetVertex(int(cache.IndexA[1]))
+		sf.xtype = SeparationFunction_e_faceA
+		localPointA1 := sf.proxyA.GetVertex(int(cache.IndexA[0]))
+		localPointA2 := sf.proxyA.GetVertex(int(cache.IndexA[1]))
 
-		this.axis = CrossVF(SubVV(localPointA2, localPointA1), 1.0)
-		this.axis.Normalize()
-		normal := MulRV(xfA.Q, this.axis)
+		sf.axis = CrossVF(SubVV(localPointA2, localPointA1), 1.0)
+		sf.axis.Normalize()
+		normal := MulRV(xfA.Q, sf.axis)
 
-		this.localPoint = MulFV(0.5, AddVV(localPointA1, localPointA2))
-		pointA := MulX(xfA, this.localPoint)
+		sf.localPoint = MulFV(0.5, AddVV(localPointA1, localPointA2))
+		pointA := MulX(xfA, sf.localPoint)
 
-		localPointB := this.proxyB.GetVertex(int(cache.IndexB[0]))
+		localPointB := sf.proxyB.GetVertex(int(cache.IndexB[0]))
 		pointB := MulX(xfB, localPointB)
 
 		s := DotVV(SubVV(pointB, pointA), normal)
 		if s < 0.0 {
-			this.axis = this.axis.Minus()
+			sf.axis = sf.axis.Minus()
 			s = -s
 		}
 		return s
 	}
 }
 
-func (this *SeparationFunction) FindMinSeparation(t float64) (indexA, indexB int, separation float64) {
-	xfA := this.sweepA.GetTransform(t)
-	xfB := this.sweepB.GetTransform(t)
+func (sf *SeparationFunction) FindMinSeparation(t float64) (indexA, indexB int, separation float64) {
+	xfA := sf.sweepA.GetTransform(t)
+	xfB := sf.sweepB.GetTransform(t)
 
-	switch this.xtype {
+	switch sf.xtype {
 	case SeparationFunction_e_points:
-		axisA := MulTRV(xfA.Q, this.axis)
-		axisB := MulTRV(xfB.Q, this.axis.Minus())
+		axisA := MulTRV(xfA.Q, sf.axis)
+		axisB := MulTRV(xfB.Q, sf.axis.Minus())
 
-		indexA = this.proxyA.GetSupport(axisA)
-		indexB = this.proxyB.GetSupport(axisB)
+		indexA = sf.proxyA.GetSupport(axisA)
+		indexB = sf.proxyB.GetSupport(axisB)
 
-		localPointA := this.proxyA.GetVertex(indexA)
-		localPointB := this.proxyB.GetVertex(indexB)
+		localPointA := sf.proxyA.GetVertex(indexA)
+		localPointB := sf.proxyB.GetVertex(indexB)
 
 		pointA := MulX(xfA, localPointA)
 		pointB := MulX(xfB, localPointB)
 
-		separation = DotVV(SubVV(pointB, pointA), this.axis)
+		separation = DotVV(SubVV(pointB, pointA), sf.axis)
 		return
 	case SeparationFunction_e_faceA:
-		normal := MulRV(xfA.Q, this.axis)
-		pointA := MulX(xfA, this.localPoint)
+		normal := MulRV(xfA.Q, sf.axis)
+		pointA := MulX(xfA, sf.localPoint)
 
 		axisB := MulTRV(xfB.Q, normal.Minus())
 
 		indexA = -1
-		indexB = this.proxyB.GetSupport(axisB)
+		indexB = sf.proxyB.GetSupport(axisB)
 
-		localPointB := this.proxyB.GetVertex(indexB)
+		localPointB := sf.proxyB.GetVertex(indexB)
 		pointB := MulX(xfB, localPointB)
 
 		separation = DotVV(SubVV(pointB, pointA), normal)
 		return
 	case SeparationFunction_e_faceB:
-		normal := MulRV(xfB.Q, this.axis)
-		pointB := MulX(xfB, this.localPoint)
+		normal := MulRV(xfB.Q, sf.axis)
+		pointB := MulX(xfB, sf.localPoint)
 
 		axisA := MulTRV(xfA.Q, normal.Minus())
 
 		indexB = -1
-		indexA = this.proxyA.GetSupport(axisA)
+		indexA = sf.proxyA.GetSupport(axisA)
 
-		localPointA := this.proxyA.GetVertex(indexA)
+		localPointA := sf.proxyA.GetVertex(indexA)
 		pointA := MulX(xfA, localPointA)
 
 		separation = DotVV(SubVV(pointA, pointB), normal)
@@ -168,43 +168,42 @@ func (this *SeparationFunction) FindMinSeparation(t float64) (indexA, indexB int
 		separation = 0.0
 		return
 	}
-	return
 }
 
-func (this *SeparationFunction) Evaluate(indexA int, indexB int, t float64) (separation float64) {
-	xfA := this.sweepA.GetTransform(t)
-	xfB := this.sweepB.GetTransform(t)
+func (sf *SeparationFunction) Evaluate(indexA int, indexB int, t float64) (separation float64) {
+	xfA := sf.sweepA.GetTransform(t)
+	xfB := sf.sweepB.GetTransform(t)
 
-	switch this.xtype {
+	switch sf.xtype {
 	case SeparationFunction_e_points:
-		//axisA := MulTRV(xfA.Q, this.axis)
-		//axisB := MulTRV(xfB.Q, this.axis.Minus())
+		//axisA := MulTRV(xfA.Q, sf.axis)
+		//axisB := MulTRV(xfB.Q, sf.axis.Minus())
 
-		localPointA := this.proxyA.GetVertex(indexA)
-		localPointB := this.proxyB.GetVertex(indexB)
+		localPointA := sf.proxyA.GetVertex(indexA)
+		localPointB := sf.proxyB.GetVertex(indexB)
 
 		pointA := MulX(xfA, localPointA)
 		pointB := MulX(xfB, localPointB)
-		separation = DotVV(SubVV(pointB, pointA), this.axis)
+		separation = DotVV(SubVV(pointB, pointA), sf.axis)
 		return
 	case SeparationFunction_e_faceA:
-		normal := MulRV(xfA.Q, this.axis)
-		pointA := MulX(xfA, this.localPoint)
+		normal := MulRV(xfA.Q, sf.axis)
+		pointA := MulX(xfA, sf.localPoint)
 
 		//axisB := MulTRV(xfB.Q, normal.Minus())
 
-		localPointB := this.proxyB.GetVertex(indexB)
+		localPointB := sf.proxyB.GetVertex(indexB)
 		pointB := MulX(xfB, localPointB)
 
 		separation = DotVV(SubVV(pointB, pointA), normal)
 		return
 	case SeparationFunction_e_faceB:
-		normal := MulRV(xfB.Q, this.axis)
-		pointB := MulX(xfB, this.localPoint)
+		normal := MulRV(xfB.Q, sf.axis)
+		pointB := MulX(xfB, sf.localPoint)
 
 		//axisA := MulTRV(xfA.Q, normal.Minus())
 
-		localPointA := this.proxyA.GetVertex(indexA)
+		localPointA := sf.proxyA.GetVertex(indexA)
 		pointA := MulX(xfA, localPointA)
 
 		separation = DotVV(SubVV(pointA, pointB), normal)
@@ -214,7 +213,6 @@ func (this *SeparationFunction) Evaluate(indexA int, indexB int, t float64) (sep
 		separation = 0.0
 		return
 	}
-	return
 }
 
 var ToiCalls, ToiIters, ToiMaxIters int
