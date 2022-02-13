@@ -10,44 +10,44 @@ type DistanceProxy struct {
 
 // Initialize the proxy using the given shape. The shape
 // must remain in scope while the proxy is in use.
-func (this *DistanceProxy) Set(shape IShape, index int) {
+func (dp *DistanceProxy) Set(shape IShape, index int) {
 	switch shape.GetType() {
 	case Shape_e_circle:
 		circle := shape.(*CircleShape)
-		this.Vertices = []Vec2{circle.P}
-		this.Count = 1
-		this.Radius = circle.Radius
+		dp.Vertices = []Vec2{circle.P}
+		dp.Count = 1
+		dp.Radius = circle.Radius
 	case Shape_e_polygon:
 		polygon := shape.(*PolygonShape)
-		this.Vertices = make([]Vec2, polygon.VertexCount, polygon.VertexCount)
-		copy(this.Vertices, polygon.Vertices[:])
-		this.Count = polygon.VertexCount
-		this.Radius = polygon.Radius
+		dp.Vertices = make([]Vec2, polygon.VertexCount)
+		copy(dp.Vertices, polygon.Vertices[:])
+		dp.Count = polygon.VertexCount
+		dp.Radius = polygon.Radius
 	case Shape_e_chain:
 		chain := shape.(*ChainShape)
-		this.Vertices = make([]Vec2, 2, 2)
-		this.Vertices[0] = chain.Vertices[index]
+		dp.Vertices = make([]Vec2, 2)
+		dp.Vertices[0] = chain.Vertices[index]
 		if index+1 < chain.Count {
-			this.Vertices[1] = chain.Vertices[index+1]
+			dp.Vertices[1] = chain.Vertices[index+1]
 		} else {
-			this.Vertices[1] = chain.Vertices[0]
+			dp.Vertices[1] = chain.Vertices[0]
 		}
-		this.Count = 2
-		this.Radius = chain.Radius
+		dp.Count = 2
+		dp.Radius = chain.Radius
 	case Shape_e_edge:
 		edge := shape.(*EdgeShape)
-		this.Vertices = []Vec2{edge.Vertex1, edge.Vertex2}
-		this.Count = 2
-		this.Radius = edge.Radius
+		dp.Vertices = []Vec2{edge.Vertex1, edge.Vertex2}
+		dp.Count = 2
+		dp.Radius = edge.Radius
 	}
 }
 
 // Get the supporting vertex index in the given direction.
-func (this *DistanceProxy) GetSupport(d Vec2) int {
+func (dp *DistanceProxy) GetSupport(d Vec2) int {
 	bestIndex := 0
-	bestValue := DotVV(this.Vertices[0], d)
-	for i := 1; i < this.Count; i++ {
-		value := DotVV(this.Vertices[i], d)
+	bestValue := DotVV(dp.Vertices[0], d)
+	for i := 1; i < dp.Count; i++ {
+		value := DotVV(dp.Vertices[i], d)
 		if value > bestValue {
 			bestIndex = i
 			bestValue = value
@@ -58,28 +58,28 @@ func (this *DistanceProxy) GetSupport(d Vec2) int {
 }
 
 // Get the supporting vertex in the given direction.
-func (this *DistanceProxy) GetSupportVertex(d Vec2) Vec2 {
+func (dp *DistanceProxy) GetSupportVertex(d Vec2) Vec2 {
 	bestIndex := 0
-	bestValue := DotVV(this.Vertices[0], d)
-	for i := 1; i < this.Count; i++ {
-		value := DotVV(this.Vertices[i], d)
+	bestValue := DotVV(dp.Vertices[0], d)
+	for i := 1; i < dp.Count; i++ {
+		value := DotVV(dp.Vertices[i], d)
 		if value > bestValue {
 			bestIndex = i
 			bestValue = value
 		}
 	}
 
-	return this.Vertices[bestIndex]
+	return dp.Vertices[bestIndex]
 }
 
 // Get the vertex count.
-func (this *DistanceProxy) GetVertexCount() int {
-	return this.Count
+func (dp *DistanceProxy) GetVertexCount() int {
+	return dp.Count
 }
 
 // Get a vertex by index. Used by b2Distance.
-func (this *DistanceProxy) GetVertex(index int) Vec2 {
-	return this.Vertices[index]
+func (dp *DistanceProxy) GetVertex(index int) Vec2 {
+	return dp.Vertices[index]
 }
 
 // Used to warm start b2Distance.
@@ -124,13 +124,13 @@ type Simplex struct {
 	count      int
 }
 
-func (this *Simplex) ReadCache(cache *SimplexCache,
+func (s *Simplex) ReadCache(cache *SimplexCache,
 	proxyA *DistanceProxy, transformA Transform,
 	proxyB *DistanceProxy, transformB Transform) {
 	// Copy data from cache.
-	this.count = int(cache.Count)
-	vertices := []*SimplexVertex{&this.v1, &this.v2, &this.v3}
-	for i := 0; i < this.count; i++ {
+	s.count = int(cache.Count)
+	vertices := []*SimplexVertex{&s.v1, &s.v2, &s.v3}
+	for i := 0; i < s.count; i++ {
 		v := vertices[i]
 		v.indexA = int(cache.IndexA[i])
 		v.indexB = int(cache.IndexB[i])
@@ -144,17 +144,17 @@ func (this *Simplex) ReadCache(cache *SimplexCache,
 
 	// Compute the new simplex metric, if it is substantially different than
 	// old metric then flush the simplex.
-	if this.count > 1 {
+	if s.count > 1 {
 		metric1 := cache.Metric
-		metric2 := this.GetMetric()
+		metric2 := s.GetMetric()
 		if metric2 < 0.5*metric1 || 2.0*metric1 < metric2 || metric2 < Epsilon {
 			// Reset the simplex.
-			this.count = 0
+			s.count = 0
 		}
 	}
 
 	// If the cache is empty or invalid ...
-	if this.count == 0 {
+	if s.count == 0 {
 		v := vertices[0]
 		v.indexA = 0
 		v.indexB = 0
@@ -163,28 +163,28 @@ func (this *Simplex) ReadCache(cache *SimplexCache,
 		v.wA = MulX(transformA, wALocal)
 		v.wB = MulX(transformB, wBLocal)
 		v.w = SubVV(v.wB, v.wA)
-		this.count = 1
+		s.count = 1
 	}
 }
 
-func (this *Simplex) WriteCache(cache *SimplexCache) {
-	cache.Metric = this.GetMetric()
-	cache.Count = uint16(this.count)
-	vertices := []*SimplexVertex{&this.v1, &this.v2, &this.v3}
-	for i := 0; i < this.count; i++ {
+func (s *Simplex) WriteCache(cache *SimplexCache) {
+	cache.Metric = s.GetMetric()
+	cache.Count = uint16(s.count)
+	vertices := []*SimplexVertex{&s.v1, &s.v2, &s.v3}
+	for i := 0; i < s.count; i++ {
 		cache.IndexA[i] = uint8(vertices[i].indexA)
 		cache.IndexB[i] = uint8(vertices[i].indexB)
 	}
 }
 
-func (this *Simplex) GetSearchDirection() Vec2 {
-	switch this.count {
+func (s *Simplex) GetSearchDirection() Vec2 {
+	switch s.count {
 	case 1:
-		return this.v1.w.Minus()
+		return s.v1.w.Minus()
 
 	case 2:
-		e12 := SubVV(this.v2.w, this.v1.w)
-		sgn := CrossVV(e12, this.v1.w.Minus())
+		e12 := SubVV(s.v2.w, s.v1.w)
+		sgn := CrossVV(e12, s.v1.w.Minus())
 		if sgn > 0.0 {
 			// Origin is left of e12.
 			return CrossFV(1.0, e12)
@@ -198,16 +198,16 @@ func (this *Simplex) GetSearchDirection() Vec2 {
 	}
 }
 
-func (this *Simplex) GetClosestPoint() Vec2 {
-	switch this.count {
+func (s *Simplex) GetClosestPoint() Vec2 {
+	switch s.count {
 	case 0:
 		return Vec2_zero
 
 	case 1:
-		return this.v1.w
+		return s.v1.w
 
 	case 2:
-		return AddVV(MulFV(this.v1.a, this.v1.w), MulFV(this.v2.a, this.v2.w))
+		return AddVV(MulFV(s.v1.a, s.v1.w), MulFV(s.v2.a, s.v2.w))
 
 	case 3:
 		return Vec2_zero
@@ -217,32 +217,32 @@ func (this *Simplex) GetClosestPoint() Vec2 {
 	}
 }
 
-func (this *Simplex) GetWitnessPoints(pA *Vec2, pB *Vec2) {
-	switch this.count {
+func (s *Simplex) GetWitnessPoints(pA *Vec2, pB *Vec2) {
+	switch s.count {
 	case 0:
 	case 1:
-		*pA = this.v1.wA
-		*pB = this.v1.wB
+		*pA = s.v1.wA
+		*pB = s.v1.wB
 	case 2:
-		*pA = AddVV(MulFV(this.v1.a, this.v1.wA), MulFV(this.v2.a, this.v2.wA))
-		*pB = AddVV(MulFV(this.v1.a, this.v1.wB), MulFV(this.v2.a, this.v2.wB))
+		*pA = AddVV(MulFV(s.v1.a, s.v1.wA), MulFV(s.v2.a, s.v2.wA))
+		*pB = AddVV(MulFV(s.v1.a, s.v1.wB), MulFV(s.v2.a, s.v2.wB))
 	case 3:
-		*pA = AddVV(AddVV(MulFV(this.v1.a, this.v1.wA), MulFV(this.v2.a, this.v2.wA)), MulFV(this.v3.a, this.v3.wA))
+		*pA = AddVV(AddVV(MulFV(s.v1.a, s.v1.wA), MulFV(s.v2.a, s.v2.wA)), MulFV(s.v3.a, s.v3.wA))
 		*pB = *pA
 	default:
 	}
 }
 
-func (this *Simplex) GetMetric() float64 {
-	switch this.count {
+func (s *Simplex) GetMetric() float64 {
+	switch s.count {
 	case 0:
 		return 0.0
 	case 1:
 		return 0.0
 	case 2:
-		return DistanceVV(this.v1.w, this.v2.w)
+		return DistanceVV(s.v1.w, s.v2.w)
 	case 3:
-		return CrossVV(SubVV(this.v2.w, this.v1.w), SubVV(this.v3.w, this.v1.w))
+		return CrossVV(SubVV(s.v2.w, s.v1.w), SubVV(s.v3.w, s.v1.w))
 	default:
 		return 0.0
 	}
@@ -271,17 +271,17 @@ func (this *Simplex) GetMetric() float64 {
 // Solution
 // a1 = d12_1 / d12
 // a2 = d12_2 / d12
-func (this *Simplex) Solve2() {
-	w1 := this.v1.w
-	w2 := this.v2.w
+func (s *Simplex) Solve2() {
+	w1 := s.v1.w
+	w2 := s.v2.w
 	e12 := SubVV(w2, w1)
 
 	// w1 region
 	d12_2 := -DotVV(w1, e12)
 	if d12_2 <= 0.0 {
 		// a2 <= 0, so we clamp it to 0
-		this.v1.a = 1.0
-		this.count = 1
+		s.v1.a = 1.0
+		s.count = 1
 		return
 	}
 
@@ -289,17 +289,17 @@ func (this *Simplex) Solve2() {
 	d12_1 := DotVV(w2, e12)
 	if d12_1 <= 0.0 {
 		// a1 <= 0, so we clamp it to 0
-		this.v2.a = 1.0
-		this.count = 1
-		this.v1 = this.v2
+		s.v2.a = 1.0
+		s.count = 1
+		s.v1 = s.v2
 		return
 	}
 
 	// Must be in e12 region.
 	inv_d12 := 1.0 / (d12_1 + d12_2)
-	this.v1.a = d12_1 * inv_d12
-	this.v2.a = d12_2 * inv_d12
-	this.count = 2
+	s.v1.a = d12_1 * inv_d12
+	s.v2.a = d12_2 * inv_d12
+	s.count = 2
 }
 
 // Possible regions:
@@ -307,10 +307,10 @@ func (this *Simplex) Solve2() {
 // - edge points[0]-points[2]
 // - edge points[1]-points[2]
 // - inside the triangle
-func (this *Simplex) Solve3() {
-	w1 := this.v1.w
-	w2 := this.v2.w
-	w3 := this.v3.w
+func (s *Simplex) Solve3() {
+	w1 := s.v1.w
+	w2 := s.v2.w
+	w3 := s.v3.w
 
 	// Edge12
 	// [1      1     ][a1] = [1]
@@ -351,62 +351,62 @@ func (this *Simplex) Solve3() {
 
 	// w1 region
 	if d12_2 <= 0.0 && d13_2 <= 0.0 {
-		this.v1.a = 1.0
-		this.count = 1
+		s.v1.a = 1.0
+		s.count = 1
 		return
 	}
 
 	// e12
 	if d12_1 > 0.0 && d12_2 > 0.0 && d123_3 <= 0.0 {
 		inv_d12 := 1.0 / (d12_1 + d12_2)
-		this.v1.a = d12_1 * inv_d12
-		this.v2.a = d12_2 * inv_d12
-		this.count = 2
+		s.v1.a = d12_1 * inv_d12
+		s.v2.a = d12_2 * inv_d12
+		s.count = 2
 		return
 	}
 
 	// e13
 	if d13_1 > 0.0 && d13_2 > 0.0 && d123_2 <= 0.0 {
 		inv_d13 := 1.0 / (d13_1 + d13_2)
-		this.v1.a = d13_1 * inv_d13
-		this.v3.a = d13_2 * inv_d13
-		this.count = 2
-		this.v2 = this.v3
+		s.v1.a = d13_1 * inv_d13
+		s.v3.a = d13_2 * inv_d13
+		s.count = 2
+		s.v2 = s.v3
 		return
 	}
 
 	// w2 region
 	if d12_1 <= 0.0 && d23_2 <= 0.0 {
-		this.v2.a = 1.0
-		this.count = 1
-		this.v1 = this.v2
+		s.v2.a = 1.0
+		s.count = 1
+		s.v1 = s.v2
 		return
 	}
 
 	// w3 region
 	if d13_1 <= 0.0 && d23_1 <= 0.0 {
-		this.v3.a = 1.0
-		this.count = 1
-		this.v1 = this.v3
+		s.v3.a = 1.0
+		s.count = 1
+		s.v1 = s.v3
 		return
 	}
 
 	// e23
 	if d23_1 > 0.0 && d23_2 > 0.0 && d123_1 <= 0.0 {
 		inv_d23 := 1.0 / (d23_1 + d23_2)
-		this.v2.a = d23_1 * inv_d23
-		this.v3.a = d23_2 * inv_d23
-		this.count = 2
-		this.v1 = this.v3
+		s.v2.a = d23_1 * inv_d23
+		s.v3.a = d23_2 * inv_d23
+		s.count = 2
+		s.v1 = s.v3
 		return
 	}
 
 	// Must be in triangle123
 	inv_d123 := 1.0 / (d123_1 + d123_2 + d123_3)
-	this.v1.a = d123_1 * inv_d123
-	this.v2.a = d123_2 * inv_d123
-	this.v3.a = d123_3 * inv_d123
-	this.count = 3
+	s.v1.a = d123_1 * inv_d123
+	s.v2.a = d123_2 * inv_d123
+	s.v3.a = d123_3 * inv_d123
+	s.count = 3
 }
 
 // GJK using Voronoi regions (Christer Ericson) and Barycentric coordinates.

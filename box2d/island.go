@@ -20,37 +20,37 @@ type Island struct {
 }
 
 func NewIsland(bodyCapacity int, contactCapacity int, jointCapacity int, listener IContactListener) *Island {
-	this := new(Island)
+	island := new(Island)
 
-	this.BodyCapacity = bodyCapacity
-	this.ContactCapacity = contactCapacity
-	this.JointCapacity = jointCapacity
+	island.BodyCapacity = bodyCapacity
+	island.ContactCapacity = contactCapacity
+	island.JointCapacity = jointCapacity
 
-	this.Listener = listener
-	this.Bodies = make([]*Body, this.BodyCapacity, this.BodyCapacity)
-	this.Contacts = make([]IContact, this.ContactCapacity, this.ContactCapacity)
-	this.Joints = make([]IJoint, this.JointCapacity, this.JointCapacity)
+	island.Listener = listener
+	island.Bodies = make([]*Body, island.BodyCapacity)
+	island.Contacts = make([]IContact, island.ContactCapacity)
+	island.Joints = make([]IJoint, island.JointCapacity)
 
-	this.Positions = make([]position, this.BodyCapacity, this.BodyCapacity)
-	this.Velocities = make([]velocity, this.BodyCapacity, this.BodyCapacity)
+	island.Positions = make([]position, island.BodyCapacity)
+	island.Velocities = make([]velocity, island.BodyCapacity)
 
-	return this
+	return island
 }
 
-func (this *Island) Clear() {
-	this.BodyCount = 0
-	this.JointCount = 0
-	this.ContactCount = 0
+func (island *Island) Clear() {
+	island.BodyCount = 0
+	island.JointCount = 0
+	island.ContactCount = 0
 }
 
-func (this *Island) Solve(profile *Profile, step *timeStep, gravity Vec2, allowSleep bool) {
+func (island *Island) Solve(profile *Profile, step *timeStep, gravity Vec2, allowSleep bool) {
 	timer := MakeTimer()
 
 	h := step.dt
 
 	// Integrate velocities and apply damping. Initialize the body state.
-	for i := 0; i < this.BodyCount; i++ {
-		b := this.Bodies[i]
+	for i := 0; i < island.BodyCount; i++ {
+		b := island.Bodies[i]
 
 		c := b.sweep.C
 		a := b.sweep.A
@@ -79,10 +79,10 @@ func (this *Island) Solve(profile *Profile, step *timeStep, gravity Vec2, allowS
 
 		}
 
-		this.Positions[i].c = c
-		this.Positions[i].a = a
-		this.Velocities[i].v = v
-		this.Velocities[i].w = w
+		island.Positions[i].c = c
+		island.Positions[i].a = a
+		island.Velocities[i].v = v
+		island.Velocities[i].w = w
 	}
 
 	timer.Reset()
@@ -90,16 +90,16 @@ func (this *Island) Solve(profile *Profile, step *timeStep, gravity Vec2, allowS
 	// Solver data
 	var solverData solverData
 	solverData.step = *step
-	solverData.positions = this.Positions
-	solverData.velocities = this.Velocities
+	solverData.positions = island.Positions
+	solverData.velocities = island.Velocities
 
 	// Initialize velocity constraints.
 	var contactSolverDef ContactSolverDef
 	contactSolverDef.Step = *step
-	contactSolverDef.Contacts = this.Contacts
-	contactSolverDef.Count = this.ContactCount
-	contactSolverDef.Positions = this.Positions
-	contactSolverDef.Velocities = this.Velocities
+	contactSolverDef.Contacts = island.Contacts
+	contactSolverDef.Count = island.ContactCount
+	contactSolverDef.Positions = island.Positions
+	contactSolverDef.Velocities = island.Velocities
 
 	contactSolver := NewContactSolver(&contactSolverDef)
 	contactSolver.InitializeVelocityConstraints()
@@ -108,8 +108,8 @@ func (this *Island) Solve(profile *Profile, step *timeStep, gravity Vec2, allowS
 		contactSolver.WarmStart()
 	}
 
-	for i := 0; i < this.JointCount; i++ {
-		this.Joints[i].InitVelocityConstraints(&solverData)
+	for i := 0; i < island.JointCount; i++ {
+		island.Joints[i].InitVelocityConstraints(&solverData)
 	}
 
 	profile.solveInit = timer.GetMilliseconds()
@@ -117,8 +117,8 @@ func (this *Island) Solve(profile *Profile, step *timeStep, gravity Vec2, allowS
 	// Solve velocity constraints
 	timer.Reset()
 	for i := 0; i < step.velocityIterations; i++ {
-		for j := 0; j < this.JointCount; j++ {
-			this.Joints[j].SolveVelocityConstraints(&solverData)
+		for j := 0; j < island.JointCount; j++ {
+			island.Joints[j].SolveVelocityConstraints(&solverData)
 		}
 
 		contactSolver.SolveVelocityConstraints()
@@ -129,11 +129,11 @@ func (this *Island) Solve(profile *Profile, step *timeStep, gravity Vec2, allowS
 	profile.solveVelocity = timer.GetMilliseconds()
 
 	// Integrate positions
-	for i := 0; i < this.BodyCount; i++ {
-		c := this.Positions[i].c
-		a := this.Positions[i].a
-		v := this.Velocities[i].v
-		w := this.Velocities[i].w
+	for i := 0; i < island.BodyCount; i++ {
+		c := island.Positions[i].c
+		a := island.Positions[i].a
+		v := island.Velocities[i].v
+		w := island.Velocities[i].w
 
 		// Check for large velocities
 		translation := MulFV(h, v)
@@ -152,10 +152,10 @@ func (this *Island) Solve(profile *Profile, step *timeStep, gravity Vec2, allowS
 		c.Add(MulFV(h, v))
 		a += h * w
 
-		this.Positions[i].c = c
-		this.Positions[i].a = a
-		this.Velocities[i].v = v
-		this.Velocities[i].w = w
+		island.Positions[i].c = c
+		island.Positions[i].a = a
+		island.Velocities[i].v = v
+		island.Velocities[i].w = w
 	}
 
 	// Solve position constraints
@@ -165,8 +165,8 @@ func (this *Island) Solve(profile *Profile, step *timeStep, gravity Vec2, allowS
 		contactsOkay := contactSolver.SolvePositionConstraints()
 
 		jointsOkay := true
-		for i := 0; i < this.JointCount; i++ {
-			jointOkay := this.Joints[i].SolvePositionConstraints(&solverData)
+		for i := 0; i < island.JointCount; i++ {
+			jointOkay := island.Joints[i].SolvePositionConstraints(&solverData)
 			jointsOkay = jointsOkay && jointOkay
 		}
 
@@ -178,18 +178,18 @@ func (this *Island) Solve(profile *Profile, step *timeStep, gravity Vec2, allowS
 	}
 
 	// Copy state buffers back to the bodies
-	for i := 0; i < this.BodyCount; i++ {
-		body := this.Bodies[i]
-		body.sweep.C = this.Positions[i].c
-		body.sweep.A = this.Positions[i].a
-		body.linearVelocity = this.Velocities[i].v
-		body.angularVelocity = this.Velocities[i].w
+	for i := 0; i < island.BodyCount; i++ {
+		body := island.Bodies[i]
+		body.sweep.C = island.Positions[i].c
+		body.sweep.A = island.Positions[i].a
+		body.linearVelocity = island.Velocities[i].v
+		body.angularVelocity = island.Velocities[i].w
 		body.synchronizeTransform()
 	}
 
 	profile.solvePosition = timer.GetMilliseconds()
 
-	this.Report(contactSolver.VelocityConstraints)
+	island.Report(contactSolver.VelocityConstraints)
 
 	if allowSleep {
 		minSleepTime := MaxFloat
@@ -197,8 +197,8 @@ func (this *Island) Solve(profile *Profile, step *timeStep, gravity Vec2, allowS
 		linTolSqr := LinearSleepTolerance * LinearSleepTolerance
 		angTolSqr := AngularSleepTolerance * AngularSleepTolerance
 
-		for i := 0; i < this.BodyCount; i++ {
-			b := this.Bodies[i]
+		for i := 0; i < island.BodyCount; i++ {
+			b := island.Bodies[i]
 			if b.GetType() == StaticBody {
 				continue
 			}
@@ -215,30 +215,30 @@ func (this *Island) Solve(profile *Profile, step *timeStep, gravity Vec2, allowS
 		}
 
 		if minSleepTime >= TimeToSleep && positionSolved {
-			for i := 0; i < this.BodyCount; i++ {
-				b := this.Bodies[i]
+			for i := 0; i < island.BodyCount; i++ {
+				b := island.Bodies[i]
 				b.SetAwake(false)
 			}
 		}
 	}
 }
 
-func (this *Island) SolveTOI(subStep *timeStep, toiIndexA int, toiIndexB int) {
+func (island *Island) SolveTOI(subStep *timeStep, toiIndexA int, toiIndexB int) {
 	// Initialize the body state.
-	for i := 0; i < this.BodyCount; i++ {
-		b := this.Bodies[i]
-		this.Positions[i].c = b.sweep.C
-		this.Positions[i].a = b.sweep.A
-		this.Velocities[i].v = b.linearVelocity
-		this.Velocities[i].w = b.angularVelocity
+	for i := 0; i < island.BodyCount; i++ {
+		b := island.Bodies[i]
+		island.Positions[i].c = b.sweep.C
+		island.Positions[i].a = b.sweep.A
+		island.Velocities[i].v = b.linearVelocity
+		island.Velocities[i].w = b.angularVelocity
 	}
 
 	var contactSolverDef ContactSolverDef
-	contactSolverDef.Contacts = this.Contacts
-	contactSolverDef.Count = this.ContactCount
+	contactSolverDef.Contacts = island.Contacts
+	contactSolverDef.Count = island.ContactCount
 	contactSolverDef.Step = *subStep
-	contactSolverDef.Positions = this.Positions
-	contactSolverDef.Velocities = this.Velocities
+	contactSolverDef.Positions = island.Positions
+	contactSolverDef.Velocities = island.Velocities
 	contactSolver := NewContactSolver(&contactSolverDef)
 
 	// Solve position constraints.
@@ -283,10 +283,10 @@ func (this *Island) SolveTOI(subStep *timeStep, toiIndexA int, toiIndexB int) {
 	//#endif
 
 	// Leap of faith to new safe state.
-	this.Bodies[toiIndexA].sweep.C0 = this.Positions[toiIndexA].c
-	this.Bodies[toiIndexA].sweep.A0 = this.Positions[toiIndexA].a
-	this.Bodies[toiIndexB].sweep.C0 = this.Positions[toiIndexB].c
-	this.Bodies[toiIndexB].sweep.A0 = this.Positions[toiIndexB].a
+	island.Bodies[toiIndexA].sweep.C0 = island.Positions[toiIndexA].c
+	island.Bodies[toiIndexA].sweep.A0 = island.Positions[toiIndexA].a
+	island.Bodies[toiIndexB].sweep.C0 = island.Positions[toiIndexB].c
+	island.Bodies[toiIndexB].sweep.A0 = island.Positions[toiIndexB].a
 
 	// No warm starting is needed for TOI events because warm
 	// starting impulses were applied in the discrete solver.
@@ -303,11 +303,11 @@ func (this *Island) SolveTOI(subStep *timeStep, toiIndexA int, toiIndexB int) {
 	h := subStep.dt
 
 	// Integrate positions
-	for i := 0; i < this.BodyCount; i++ {
-		c := this.Positions[i].c
-		a := this.Positions[i].a
-		v := this.Velocities[i].v
-		w := this.Velocities[i].w
+	for i := 0; i < island.BodyCount; i++ {
+		c := island.Positions[i].c
+		a := island.Positions[i].a
+		v := island.Velocities[i].v
+		w := island.Velocities[i].w
 
 		// Check for large velocities
 		translation := MulFV(h, v)
@@ -326,13 +326,13 @@ func (this *Island) SolveTOI(subStep *timeStep, toiIndexA int, toiIndexB int) {
 		c.Add(MulFV(h, v))
 		a += h * w
 
-		this.Positions[i].c = c
-		this.Positions[i].a = a
-		this.Velocities[i].v = v
-		this.Velocities[i].w = w
+		island.Positions[i].c = c
+		island.Positions[i].a = a
+		island.Velocities[i].v = v
+		island.Velocities[i].w = w
 
 		// Sync bodies
-		body := this.Bodies[i]
+		body := island.Bodies[i]
 		body.sweep.C = c
 		body.sweep.A = a
 		body.linearVelocity = v
@@ -340,32 +340,32 @@ func (this *Island) SolveTOI(subStep *timeStep, toiIndexA int, toiIndexB int) {
 		body.synchronizeTransform()
 	}
 
-	this.Report(contactSolver.VelocityConstraints)
+	island.Report(contactSolver.VelocityConstraints)
 }
 
-func (this *Island) AddBody(body *Body) {
-	body.islandIndex = this.BodyCount
-	this.Bodies[this.BodyCount] = body
-	this.BodyCount++
+func (island *Island) AddBody(body *Body) {
+	body.islandIndex = island.BodyCount
+	island.Bodies[island.BodyCount] = body
+	island.BodyCount++
 }
 
-func (this *Island) AddContact(contact IContact) {
-	this.Contacts[this.ContactCount] = contact
-	this.ContactCount++
+func (island *Island) AddContact(contact IContact) {
+	island.Contacts[island.ContactCount] = contact
+	island.ContactCount++
 }
 
-func (this *Island) AddJoint(joint IJoint) {
-	this.Joints[this.JointCount] = joint
-	this.JointCount++
+func (island *Island) AddJoint(joint IJoint) {
+	island.Joints[island.JointCount] = joint
+	island.JointCount++
 }
 
-func (this *Island) Report(constraints []ContactVelocityConstraint) {
-	if this.Listener == nil {
+func (island *Island) Report(constraints []ContactVelocityConstraint) {
+	if island.Listener == nil {
 		return
 	}
 
-	for i := 0; i < this.ContactCount; i++ {
-		c := this.Contacts[i]
+	for i := 0; i < island.ContactCount; i++ {
+		c := island.Contacts[i]
 
 		vc := &constraints[i]
 
@@ -376,6 +376,6 @@ func (this *Island) Report(constraints []ContactVelocityConstraint) {
 			impulse.TangentImpulses[j] = vc.Points[j].TangentImpulse
 		}
 
-		this.Listener.PostSolve(c, &impulse)
+		island.Listener.PostSolve(c, &impulse)
 	}
 }

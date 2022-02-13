@@ -134,200 +134,200 @@ const (
 	Contact_e_toiFlag uint = 0x0020
 )
 
-func (this *Contact) Init(ex IContactEx, fA *Fixture, indexA int, fB *Fixture, indexB int) {
-	this.Ex = ex
+func (c *Contact) Init(ex IContactEx, fA *Fixture, indexA int, fB *Fixture, indexB int) {
+	c.Ex = ex
 
-	this.Flags = Contact_e_enabledFlag
+	c.Flags = Contact_e_enabledFlag
 
-	this.FixtureA = fA
-	this.FixtureB = fB
+	c.FixtureA = fA
+	c.FixtureB = fB
 
-	this.IndexA = indexA
-	this.IndexB = indexB
+	c.IndexA = indexA
+	c.IndexB = indexB
 
-	this.Friction = MixFriction(this.FixtureA.Friction, this.FixtureB.Friction)
-	this.Restitution = MixRestitution(this.FixtureA.Restitution, this.FixtureB.Restitution)
+	c.Friction = MixFriction(c.FixtureA.Friction, c.FixtureB.Friction)
+	c.Restitution = MixRestitution(c.FixtureA.Restitution, c.FixtureB.Restitution)
 }
 
-func (this *Contact) GetNext() IContact {
-	return this.Next
+func (c *Contact) GetNext() IContact {
+	return c.Next
 }
 
-func (this *Contact) GetPrev() IContact {
-	return this.Prev
+func (c *Contact) GetPrev() IContact {
+	return c.Prev
 }
 
-func (this *Contact) SetNext(next IContact) {
-	this.Next = next
+func (c *Contact) SetNext(next IContact) {
+	c.Next = next
 }
 
-func (this *Contact) SetPrev(prev IContact) {
-	this.Prev = prev
+func (c *Contact) SetPrev(prev IContact) {
+	c.Prev = prev
 }
 
-func (this *Contact) GetNodeA() *ContactEdge {
-	return &this.NodeA
+func (c *Contact) GetNodeA() *ContactEdge {
+	return &c.NodeA
 }
 
-func (this *Contact) GetNodeB() *ContactEdge {
-	return &this.NodeB
+func (c *Contact) GetNodeB() *ContactEdge {
+	return &c.NodeB
 }
 
 /// Get the contact manifold. Do not modify the manifold unless you understand the
 /// internals of Box2D.
-func (this *Contact) GetManifold() *Manifold {
-	return &this.Manifold
+func (c *Contact) GetManifold() *Manifold {
+	return &c.Manifold
 }
 
-func (this *Contact) GetToiCount() int {
-	return this.ToiCount
+func (c *Contact) GetToiCount() int {
+	return c.ToiCount
 }
 
-func (this *Contact) SetToiCount(toiCount int) {
-	this.ToiCount = toiCount
+func (c *Contact) SetToiCount(toiCount int) {
+	c.ToiCount = toiCount
 }
 
-func (this *Contact) GetToi() float64 {
-	return this.Toi
+func (c *Contact) GetToi() float64 {
+	return c.Toi
 }
 
-func (this *Contact) SetToi(toi float64) {
-	this.Toi = toi
+func (c *Contact) SetToi(toi float64) {
+	c.Toi = toi
 }
 
-func (this *Contact) GetFlags() uint {
-	return this.Flags
+func (c *Contact) GetFlags() uint {
+	return c.Flags
 }
 
-func (this *Contact) SetFlags(flags uint) {
-	this.Flags = flags
+func (c *Contact) SetFlags(flags uint) {
+	c.Flags = flags
 }
 
 /// Get the world manifold.
-func (this *Contact) GetWorldManifold() *WorldManifold {
+func (c *Contact) GetWorldManifold() *WorldManifold {
 	worldManifold := new(WorldManifold)
 
-	bodyA := this.FixtureA.GetBody()
-	bodyB := this.FixtureB.GetBody()
-	shapeA := this.FixtureA.GetShape()
-	shapeB := this.FixtureB.GetShape()
+	bodyA := c.FixtureA.GetBody()
+	bodyB := c.FixtureB.GetBody()
+	shapeA := c.FixtureA.GetShape()
+	shapeB := c.FixtureB.GetShape()
 
-	worldManifold.Initialize(&this.Manifold, bodyA.GetTransform(), shapeA.GetRadius(), bodyB.GetTransform(), shapeB.GetRadius())
+	worldManifold.Initialize(&c.Manifold, bodyA.GetTransform(), shapeA.GetRadius(), bodyB.GetTransform(), shapeB.GetRadius())
 	return worldManifold
 }
 
 /// Is this contact touching?
-func (this *Contact) IsTouching() bool {
-	return (this.Flags & Contact_e_touchingFlag) == Contact_e_touchingFlag
+func (c *Contact) IsTouching() bool {
+	return (c.Flags & Contact_e_touchingFlag) == Contact_e_touchingFlag
 }
 
 /// Enable/disable this contact. This can be used inside the pre-solve
 /// contact listener. The contact is only disabled for the current
 /// time step (or sub-step in continuous collisions).
-func (this *Contact) SetEnabled(flag bool) {
+func (c *Contact) SetEnabled(flag bool) {
 	if flag {
-		this.Flags |= Contact_e_enabledFlag
+		c.Flags |= Contact_e_enabledFlag
 	} else {
-		this.Flags &= ^Contact_e_enabledFlag
+		c.Flags &= ^Contact_e_enabledFlag
 	}
 }
 
 /// Has this contact been disabled?
-func (this *Contact) IsEnabled() bool {
-	return (this.Flags & Contact_e_enabledFlag) == Contact_e_enabledFlag
+func (c *Contact) IsEnabled() bool {
+	return (c.Flags & Contact_e_enabledFlag) == Contact_e_enabledFlag
 }
 
 // Get fixture A in this contact.
-func (this *Contact) GetFixtureA() *Fixture {
-	return this.FixtureA
+func (c *Contact) GetFixtureA() *Fixture {
+	return c.FixtureA
 }
 
 // Get the child primitive index for fixture A.
-func (this *Contact) GetChildIndexA() int {
-	return this.IndexA
+func (c *Contact) GetChildIndexA() int {
+	return c.IndexA
 }
 
 // Get fixture B in this contact.
-func (this *Contact) GetFixtureB() *Fixture {
-	return this.FixtureB
+func (c *Contact) GetFixtureB() *Fixture {
+	return c.FixtureB
 }
 
-func (this *Contact) GetChildIndexB() int {
-	return this.IndexB
+func (c *Contact) GetChildIndexB() int {
+	return c.IndexB
 }
 
 /// Override the default friction mixture. You can call this in b2ContactListener::PreSolve.
 /// This value persists until set or reset.
-func (this *Contact) SetFriction(friction float64) {
-	this.Friction = friction
+func (c *Contact) SetFriction(friction float64) {
+	c.Friction = friction
 }
 
 /// Get the friction.
-func (this *Contact) GetFriction() float64 {
-	return this.Friction
+func (c *Contact) GetFriction() float64 {
+	return c.Friction
 }
 
 /// Reset the friction mixture to the default value.
-func (this *Contact) ResetFriction() {
-	this.Friction = MixFriction(this.FixtureA.Friction, this.FixtureB.Friction)
+func (c *Contact) ResetFriction() {
+	c.Friction = MixFriction(c.FixtureA.Friction, c.FixtureB.Friction)
 }
 
 /// Override the default restitution mixture. You can call this in b2ContactListener::PreSolve.
 /// The value persists until you set or reset.
-func (this *Contact) SetRestitution(restitution float64) {
-	this.Restitution = restitution
+func (c *Contact) SetRestitution(restitution float64) {
+	c.Restitution = restitution
 }
 
 /// Get the restitution.
-func (this *Contact) GetRestitution() float64 {
-	return this.Restitution
+func (c *Contact) GetRestitution() float64 {
+	return c.Restitution
 }
 
 /// Reset the restitution to the default value.
-func (this *Contact) ResetRestitution() {
-	this.Restitution = MixRestitution(this.FixtureA.Restitution, this.FixtureB.Restitution)
+func (c *Contact) ResetRestitution() {
+	c.Restitution = MixRestitution(c.FixtureA.Restitution, c.FixtureB.Restitution)
 }
 
-func (this *Contact) FlagForFiltering() {
-	this.Flags |= Contact_e_filterFlag
+func (c *Contact) FlagForFiltering() {
+	c.Flags |= Contact_e_filterFlag
 }
 
 // Update the contact manifold and touching status.
 // Note: do not assume the fixture AABBs are overlapping or are valid.
-func (this *Contact) Update(listener IContactListener) {
-	oldManifold := this.Manifold
+func (c *Contact) Update(listener IContactListener) {
+	oldManifold := c.Manifold
 
 	// Re-enable this contact.
-	this.Flags |= Contact_e_enabledFlag
+	c.Flags |= Contact_e_enabledFlag
 
 	touching := false
-	wasTouching := (this.Flags & Contact_e_touchingFlag) == Contact_e_touchingFlag
+	wasTouching := (c.Flags & Contact_e_touchingFlag) == Contact_e_touchingFlag
 
-	sensorA := this.FixtureA.GetSensor()
-	sensorB := this.FixtureB.GetSensor()
+	sensorA := c.FixtureA.GetSensor()
+	sensorB := c.FixtureB.GetSensor()
 	sensor := sensorA || sensorB
 
-	bodyA := this.FixtureA.GetBody()
-	bodyB := this.FixtureB.GetBody()
+	bodyA := c.FixtureA.GetBody()
+	bodyB := c.FixtureB.GetBody()
 	xfA := bodyA.GetTransform()
 	xfB := bodyB.GetTransform()
 
 	// Is this contact a sensor?
 	if sensor {
-		shapeA := this.FixtureA.GetShape()
-		shapeB := this.FixtureB.GetShape()
-		touching = TestOverlap(shapeA, this.IndexA, shapeB, this.IndexB, xfA, xfB)
+		shapeA := c.FixtureA.GetShape()
+		shapeB := c.FixtureB.GetShape()
+		touching = TestOverlap(shapeA, c.IndexA, shapeB, c.IndexB, xfA, xfB)
 
 		// Sensors don't generate manifolds.
-		this.Manifold.PointCount = 0
+		c.Manifold.PointCount = 0
 	} else {
-		this.Ex.Evaluate(&this.Manifold, xfA, xfB)
-		touching = this.Manifold.PointCount > 0
+		c.Ex.Evaluate(&c.Manifold, xfA, xfB)
+		touching = c.Manifold.PointCount > 0
 
 		// Match old contact ids to new contact ids and copy the
 		// stored impulses to warm start the solver.
-		for i := 0; i < this.Manifold.PointCount; i++ {
-			mp2 := &this.Manifold.Points[i]
+		for i := 0; i < c.Manifold.PointCount; i++ {
+			mp2 := &c.Manifold.Points[i]
 			mp2.NormalImpulse = 0.0
 			mp2.TangentImpulse = 0.0
 			id2 := mp2.Id
@@ -350,21 +350,21 @@ func (this *Contact) Update(listener IContactListener) {
 	}
 
 	if touching {
-		this.Flags |= Contact_e_touchingFlag
+		c.Flags |= Contact_e_touchingFlag
 	} else {
-		this.Flags &= ^Contact_e_touchingFlag
+		c.Flags &= ^Contact_e_touchingFlag
 	}
 
 	if !wasTouching && touching && listener != nil {
-		listener.BeginContact(this.Ex.(IContact))
+		listener.BeginContact(c.Ex.(IContact))
 	}
 
 	if wasTouching && !touching && listener != nil {
-		listener.EndContact(this.Ex.(IContact))
+		listener.EndContact(c.Ex.(IContact))
 	}
 
 	if !sensor && touching && listener != nil {
-		listener.PreSolve(this.Ex.(IContact), &oldManifold)
+		listener.PreSolve(c.Ex.(IContact), &oldManifold)
 	}
 }
 
@@ -376,16 +376,16 @@ type ChainAndCircleContact struct {
 }
 
 func ChainAndCircleContact_Create(fixtureA *Fixture, indexA int, fixtureB *Fixture, indexB int) IContact {
-	this := new(ChainAndCircleContact)
-	this.Contact.Init(this, fixtureA, indexA, fixtureB, indexB)
-	return this
+	c := new(ChainAndCircleContact)
+	c.Contact.Init(c, fixtureA, indexA, fixtureB, indexB)
+	return c
 }
 
-func (this *ChainAndCircleContact) Evaluate(manifold *Manifold, xfA Transform, xfB Transform) {
-	chain := this.FixtureA.GetShape().(*ChainShape)
-	edge := chain.GetChildEdge(this.IndexA)
+func (c *ChainAndCircleContact) Evaluate(manifold *Manifold, xfA Transform, xfB Transform) {
+	chain := c.FixtureA.GetShape().(*ChainShape)
+	edge := chain.GetChildEdge(c.IndexA)
 	CollideEdgeAndCircle(manifold, edge, xfA,
-		this.FixtureB.GetShape().(*CircleShape), xfB)
+		c.FixtureB.GetShape().(*CircleShape), xfB)
 }
 
 //
@@ -396,16 +396,16 @@ type ChainAndPolygonContact struct {
 }
 
 func ChainAndPolygonContact_Create(fixtureA *Fixture, indexA int, fixtureB *Fixture, indexB int) IContact {
-	this := new(ChainAndPolygonContact)
-	this.Contact.Init(this, fixtureA, indexA, fixtureB, indexB)
-	return this
+	c := new(ChainAndPolygonContact)
+	c.Contact.Init(c, fixtureA, indexA, fixtureB, indexB)
+	return c
 }
 
-func (this *ChainAndPolygonContact) Evaluate(manifold *Manifold, xfA Transform, xfB Transform) {
-	chain := this.FixtureA.GetShape().(*ChainShape)
-	edge := chain.GetChildEdge(this.IndexA)
+func (c *ChainAndPolygonContact) Evaluate(manifold *Manifold, xfA Transform, xfB Transform) {
+	chain := c.FixtureA.GetShape().(*ChainShape)
+	edge := chain.GetChildEdge(c.IndexA)
 	CollideEdgeAndPolygon(manifold, edge, xfA,
-		this.FixtureB.GetShape().(*PolygonShape), xfB)
+		c.FixtureB.GetShape().(*PolygonShape), xfB)
 }
 
 //
@@ -416,14 +416,14 @@ type CircleContact struct {
 }
 
 func CircleContact_Create(fixtureA *Fixture, indexA int, fixtureB *Fixture, indexB int) IContact {
-	this := new(CircleContact)
-	this.Contact.Init(this, fixtureA, indexA, fixtureB, indexB)
-	return this
+	c := new(CircleContact)
+	c.Contact.Init(c, fixtureA, indexA, fixtureB, indexB)
+	return c
 }
 
-func (this *CircleContact) Evaluate(manifold *Manifold, xfA Transform, xfB Transform) {
-	CollideCircles(manifold, this.FixtureA.GetShape().(*CircleShape), xfA,
-		this.FixtureB.GetShape().(*CircleShape), xfB)
+func (c *CircleContact) Evaluate(manifold *Manifold, xfA Transform, xfB Transform) {
+	CollideCircles(manifold, c.FixtureA.GetShape().(*CircleShape), xfA,
+		c.FixtureB.GetShape().(*CircleShape), xfB)
 }
 
 //
@@ -434,14 +434,14 @@ type EdgeAndCircleContact struct {
 }
 
 func EdgeAndCircleContact_Create(fixtureA *Fixture, indexA int, fixtureB *Fixture, indexB int) IContact {
-	this := new(EdgeAndCircleContact)
-	this.Contact.Init(this, fixtureA, indexA, fixtureB, indexB)
-	return this
+	c := new(EdgeAndCircleContact)
+	c.Contact.Init(c, fixtureA, indexA, fixtureB, indexB)
+	return c
 }
 
-func (this *EdgeAndCircleContact) Evaluate(manifold *Manifold, xfA Transform, xfB Transform) {
-	CollideEdgeAndCircle(manifold, this.FixtureA.GetShape().(*EdgeShape), xfA,
-		this.FixtureB.GetShape().(*CircleShape), xfB)
+func (c *EdgeAndCircleContact) Evaluate(manifold *Manifold, xfA Transform, xfB Transform) {
+	CollideEdgeAndCircle(manifold, c.FixtureA.GetShape().(*EdgeShape), xfA,
+		c.FixtureB.GetShape().(*CircleShape), xfB)
 }
 
 //
@@ -452,14 +452,14 @@ type EdgeAndPolygonContact struct {
 }
 
 func EdgeAndPolygonContact_Create(fixtureA *Fixture, indexA int, fixtureB *Fixture, indexB int) IContact {
-	this := new(EdgeAndPolygonContact)
-	this.Contact.Init(this, fixtureA, indexA, fixtureB, indexB)
-	return this
+	c := new(EdgeAndPolygonContact)
+	c.Contact.Init(c, fixtureA, indexA, fixtureB, indexB)
+	return c
 }
 
-func (this *EdgeAndPolygonContact) Evaluate(manifold *Manifold, xfA Transform, xfB Transform) {
-	CollideEdgeAndPolygon(manifold, this.FixtureA.GetShape().(*EdgeShape), xfA,
-		this.FixtureB.GetShape().(*PolygonShape), xfB)
+func (c *EdgeAndPolygonContact) Evaluate(manifold *Manifold, xfA Transform, xfB Transform) {
+	CollideEdgeAndPolygon(manifold, c.FixtureA.GetShape().(*EdgeShape), xfA,
+		c.FixtureB.GetShape().(*PolygonShape), xfB)
 }
 
 //
@@ -470,14 +470,14 @@ type PolygonAndCircleContact struct {
 }
 
 func PolygonAndCircleContact_Create(fixtureA *Fixture, indexA int, fixtureB *Fixture, indexB int) IContact {
-	this := new(PolygonAndCircleContact)
-	this.Contact.Init(this, fixtureA, indexA, fixtureB, indexB)
-	return this
+	c := new(PolygonAndCircleContact)
+	c.Contact.Init(c, fixtureA, indexA, fixtureB, indexB)
+	return c
 }
 
-func (this *PolygonAndCircleContact) Evaluate(manifold *Manifold, xfA Transform, xfB Transform) {
-	CollidePolygonAndCircle(manifold, this.FixtureA.GetShape().(*PolygonShape), xfA,
-		this.FixtureB.GetShape().(*CircleShape), xfB)
+func (c *PolygonAndCircleContact) Evaluate(manifold *Manifold, xfA Transform, xfB Transform) {
+	CollidePolygonAndCircle(manifold, c.FixtureA.GetShape().(*PolygonShape), xfA,
+		c.FixtureB.GetShape().(*CircleShape), xfB)
 }
 
 //
@@ -488,14 +488,14 @@ type PolygonContact struct {
 }
 
 func PolygonContact_Create(fixtureA *Fixture, indexA int, fixtureB *Fixture, indexB int) IContact {
-	this := new(PolygonContact)
-	this.Contact.Init(this, fixtureA, indexA, fixtureB, indexB)
-	return this
+	c := new(PolygonContact)
+	c.Contact.Init(c, fixtureA, indexA, fixtureB, indexB)
+	return c
 }
 
-func (this *PolygonContact) Evaluate(manifold *Manifold, xfA Transform, xfB Transform) {
-	CollidePolygons(manifold, this.FixtureA.GetShape().(*PolygonShape), xfA,
-		this.FixtureB.GetShape().(*PolygonShape), xfB)
+func (c *PolygonContact) Evaluate(manifold *Manifold, xfA Transform, xfB Transform) {
+	CollidePolygons(manifold, c.FixtureA.GetShape().(*PolygonShape), xfA,
+		c.FixtureB.GetShape().(*PolygonShape), xfB)
 }
 
 var Contact_s_registers [Shape_e_typeCount][Shape_e_typeCount]ContactRegister
@@ -523,7 +523,7 @@ func Contact_InitializeRegisters() {
 	Contact_AddType(ChainAndPolygonContact_Create, Shape_e_chain, Shape_e_polygon)
 }
 func Contact_Create(fixtureA *Fixture, indexA int, fixtureB *Fixture, indexB int) IContact {
-	if Contact_s_initialized == false {
+	if !Contact_s_initialized {
 		Contact_InitializeRegisters()
 		Contact_s_initialized = true
 	}

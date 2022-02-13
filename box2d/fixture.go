@@ -103,86 +103,86 @@ type Fixture struct {
 }
 
 func NewFixture() *Fixture {
-	this := new(Fixture)
-	return this
+	f := new(Fixture)
+	return f
 }
 
 // We need separation create/destroy functions from the constructor/destructor because
 // the destructor cannot access the allocator (no destructor arguments allowed by C++).
-func (this *Fixture) Create(body *Body, def *FixtureDef) {
-	this.UserData = def.UserData
-	this.Friction = def.Friction
-	this.Restitution = def.Restitution
+func (f *Fixture) Create(body *Body, def *FixtureDef) {
+	f.UserData = def.UserData
+	f.Friction = def.Friction
+	f.Restitution = def.Restitution
 
-	this.Body = body
-	this.Next = nil
+	f.Body = body
+	f.Next = nil
 
-	this.Filter = def.Filter
+	f.Filter = def.Filter
 
-	this.IsSensor = def.IsSensor
+	f.IsSensor = def.IsSensor
 
-	this.Shape = def.Shape.Clone()
+	f.Shape = def.Shape.Clone()
 
 	// Reserve proxy space
-	childCount := this.Shape.GetChildCount()
-	this.Proxies = make([]FixtureProxy, childCount, childCount)
+	childCount := f.Shape.GetChildCount()
+	f.Proxies = make([]FixtureProxy, childCount)
 	for i := 0; i < childCount; i++ {
-		this.Proxies[i].Fixture = nil
-		this.Proxies[i].ProxyId = BroadPhase_e_nullProxy
+		f.Proxies[i].Fixture = nil
+		f.Proxies[i].ProxyId = BroadPhase_e_nullProxy
 	}
-	this.ProxyCount = 0
+	f.ProxyCount = 0
 
-	this.Density = def.Density
+	f.Density = def.Density
 }
 
-func (this *Fixture) Destroy() {
+func (f *Fixture) Destroy() {
 	// The proxies must be destroyed before calling this.
 	//Assert(this.ProxyCount == 0)
 
 	// Free the proxy array.
-	this.Proxies = nil
+	f.Proxies = nil
 
 	// Free the child shape.
-	this.Shape = nil
+	f.Shape = nil
 }
 
 // These support body activation/deactivation.
-func (this *Fixture) CreateProxies(broadPhase *BroadPhase, xf Transform) {
+func (f *Fixture) CreateProxies(broadPhase *BroadPhase, xf Transform) {
 	// Create proxies in the broad-phase.
-	this.ProxyCount = this.Shape.GetChildCount()
+	f.ProxyCount = f.Shape.GetChildCount()
 
-	for i := 0; i < this.ProxyCount; i++ {
-		proxy := &this.Proxies[i]
-		this.Shape.ComputeAABB(&proxy.AABB, xf, i)
+	for i := 0; i < f.ProxyCount; i++ {
+		proxy := &f.Proxies[i]
+		f.Shape.ComputeAABB(&proxy.AABB, xf, i)
 		proxy.ProxyId = broadPhase.CreateProxy(proxy.AABB, proxy)
-		proxy.Fixture = this
+		proxy.Fixture = f
 		proxy.ChildIndex = i
 	}
 }
 
-func (this *Fixture) DestroyProxies(broadPhase *BroadPhase) {
+func (f *Fixture) DestroyProxies(broadPhase *BroadPhase) {
 	// Destroy proxies in the broad-phase.
-	for i := 0; i < this.ProxyCount; i++ {
-		proxy := &this.Proxies[i]
+	for i := 0; i < f.ProxyCount; i++ {
+		proxy := &f.Proxies[i]
 		broadPhase.DestroyProxy(proxy.ProxyId)
 		proxy.ProxyId = BroadPhase_e_nullProxy
 	}
 
-	this.ProxyCount = 0
+	f.ProxyCount = 0
 }
 
-func (this *Fixture) Synchronize(broadPhase *BroadPhase, transform1 Transform, transform2 Transform) {
-	if this.ProxyCount == 0 {
+func (f *Fixture) Synchronize(broadPhase *BroadPhase, transform1 Transform, transform2 Transform) {
+	if f.ProxyCount == 0 {
 		return
 	}
 
-	for i := 0; i < this.ProxyCount; i++ {
-		proxy := &this.Proxies[i]
+	for i := 0; i < f.ProxyCount; i++ {
+		proxy := &f.Proxies[i]
 
 		// Compute an AABB that covers the swept shape (may miss some rotation effect).
 		var aabb1, aabb2 AABB
-		this.Shape.ComputeAABB(&aabb1, transform1, proxy.ChildIndex)
-		this.Shape.ComputeAABB(&aabb2, transform2, proxy.ChildIndex)
+		f.Shape.ComputeAABB(&aabb1, transform1, proxy.ChildIndex)
+		f.Shape.ComputeAABB(&aabb2, transform2, proxy.ChildIndex)
 
 		proxy.AABB.Combine2(aabb1, aabb2)
 
@@ -194,64 +194,64 @@ func (this *Fixture) Synchronize(broadPhase *BroadPhase, transform1 Transform, t
 
 /// Get the type of the child shape. You can use this to down cast to the concrete shape.
 /// @return the shape type.
-func (this *Fixture) GetType() ShapeType {
-	return this.Shape.GetType()
+func (f *Fixture) GetType() ShapeType {
+	return f.Shape.GetType()
 }
 
 // Get the child shape. You can modify the child shape, however you should not change the
 // number of vertices because this will crash some collision caching mechanisms.
 // Manipulating the shape may lead to non-physical behavior.
-func (this *Fixture) GetShape() IShape {
-	return this.Shape
+func (f *Fixture) GetShape() IShape {
+	return f.Shape
 }
 
 /// Set if this fixture is a sensor.
-func (this *Fixture) SetSensor(sensor bool) {
-	if sensor != this.IsSensor {
-		this.Body.SetAwake(true)
-		this.IsSensor = sensor
+func (f *Fixture) SetSensor(sensor bool) {
+	if sensor != f.IsSensor {
+		f.Body.SetAwake(true)
+		f.IsSensor = sensor
 	}
 }
 
 /// Is this fixture a sensor (non-solid)?
 /// @return the true if the shape is a sensor.
-func (this *Fixture) GetSensor() bool {
-	return this.IsSensor
+func (f *Fixture) GetSensor() bool {
+	return f.IsSensor
 }
 
 // Set the contact filtering data. This will not update contacts until the next time
 // step when either parent body is active and awake.
 // This automatically calls Refilter.
-func (this *Fixture) SetFilterData(filter Filter) {
-	this.Filter = filter
-	this.Refilter()
+func (f *Fixture) SetFilterData(filter Filter) {
+	f.Filter = filter
+	f.Refilter()
 }
 
 // Get the contact filtering data.
-func (this *Fixture) GetFilterData() Filter {
-	return this.Filter
+func (f *Fixture) GetFilterData() Filter {
+	return f.Filter
 }
 
 // Call this if you want to establish collision that was previously disabled by b2ContactFilter::ShouldCollide.
-func (this *Fixture) Refilter() {
-	if this.Body == nil {
+func (f *Fixture) Refilter() {
+	if f.Body == nil {
 		return
 	}
 
 	// Flag associated contacts for filtering.
-	edge := this.Body.GetContactList()
+	edge := f.Body.GetContactList()
 	for edge != nil {
 		contact := edge.Contact
 		fixtureA := contact.GetFixtureA()
 		fixtureB := contact.GetFixtureB()
-		if fixtureA == this || fixtureB == this {
+		if fixtureA == f || fixtureB == f {
 			contact.FlagForFiltering()
 		}
 
 		edge = edge.Next
 	}
 
-	world := this.Body.GetWorld()
+	world := f.Body.GetWorld()
 
 	if world == nil {
 		return
@@ -259,116 +259,116 @@ func (this *Fixture) Refilter() {
 
 	// Touch each proxy so that new pairs may be created
 	broadPhase := world.contactManager.BroadPhase
-	for i := 0; i < this.ProxyCount; i++ {
-		broadPhase.TouchProxy(this.Proxies[i].ProxyId)
+	for i := 0; i < f.ProxyCount; i++ {
+		broadPhase.TouchProxy(f.Proxies[i].ProxyId)
 	}
 }
 
 // Get the parent body of this fixture. This is NULL if the fixture is not attached.
 // @return the parent body.
-func (this *Fixture) GetBody() *Body {
-	return this.Body
+func (f *Fixture) GetBody() *Body {
+	return f.Body
 }
 
 // Get the next fixture in the parent body's fixture list.
 // @return the next shape.
-func (this *Fixture) GetNext() *Fixture {
-	return this.Next
+func (f *Fixture) GetNext() *Fixture {
+	return f.Next
 }
 
 // Get the user data that was assigned in the fixture definition. Use this to
 // store your application specific data.
-func (this *Fixture) GetUserData() interface{} {
-	return this.UserData
+func (f *Fixture) GetUserData() interface{} {
+	return f.UserData
 }
 
 // Set the user data. Use this to store your application specific data.
-func (this *Fixture) SetUserData(data interface{}) {
-	this.UserData = data
+func (f *Fixture) SetUserData(data interface{}) {
+	f.UserData = data
 }
 
 // Test a point for containment in this fixture.
 // @param p a point in world coordinates.
-func (this *Fixture) TestPoint(p Vec2) bool {
-	return this.Shape.TestPoint(this.Body.GetTransform(), p)
+func (f *Fixture) TestPoint(p Vec2) bool {
+	return f.Shape.TestPoint(f.Body.GetTransform(), p)
 }
 
 // Cast a ray against this shape.
 // @param output the ray-cast results.
 // @param input the ray-cast input parameters.
-func (this *Fixture) RayCast(input RayCastInput, childIndex int) (output RayCastOutput, ret bool) {
-	return this.Shape.RayCast(input, this.Body.GetTransform(), childIndex)
+func (f *Fixture) RayCast(input RayCastInput, childIndex int) (output RayCastOutput, ret bool) {
+	return f.Shape.RayCast(input, f.Body.GetTransform(), childIndex)
 }
 
 // Get the mass data for this fixture. The mass data is based on the density and
 // the shape. The rotational inertia is about the shape's origin. This operation
 // may be expensive.
-func (this *Fixture) GetMassData(massData *MassData) {
-	this.Shape.ComputeMass(massData, this.Density)
+func (f *Fixture) GetMassData(massData *MassData) {
+	f.Shape.ComputeMass(massData, f.Density)
 }
 
 // Set the density of this fixture. This will _not_ automatically adjust the mass
 // of the body. You must call b2Body::ResetMassData to update the body's mass.
-func (this *Fixture) SetDensity(density float64) {
-	this.Density = density
+func (f *Fixture) SetDensity(density float64) {
+	f.Density = density
 }
 
 // Get the density of this fixture.
-func (this *Fixture) GetDensity() float64 {
-	return this.Density
+func (f *Fixture) GetDensity() float64 {
+	return f.Density
 }
 
 // Get the coefficient of friction.
-func (this *Fixture) GetFriction() float64 {
-	return this.Friction
+func (f *Fixture) GetFriction() float64 {
+	return f.Friction
 }
 
 // Set the coefficient of friction. This will _not_ change the friction of
 // existing contacts.
-func (this *Fixture) SetFriction(friction float64) {
-	this.Friction = friction
+func (f *Fixture) SetFriction(friction float64) {
+	f.Friction = friction
 }
 
 // Get the coefficient of restitution.
-func (this *Fixture) GetRestitution() float64 {
-	return this.Restitution
+func (f *Fixture) GetRestitution() float64 {
+	return f.Restitution
 }
 
 // Set the coefficient of restitution. This will _not_ change the restitution of
 // existing contacts.
-func (this *Fixture) SetRestitution(restitution float64) {
-	this.Restitution = restitution
+func (f *Fixture) SetRestitution(restitution float64) {
+	f.Restitution = restitution
 }
 
 // Get the fixture's AABB. This AABB may be enlarge and/or stale.
 // If you need a more accurate AABB, compute it using the shape and
 // the body transform.
-func (this *Fixture) GetAABB(childIndex int) AABB {
-	return this.Proxies[childIndex].AABB
+func (f *Fixture) GetAABB(childIndex int) AABB {
+	return f.Proxies[childIndex].AABB
 }
 
 // Dump this fixture to the log file.
-func (this *Fixture) Dump(bodyIndex int) {
+func (f *Fixture) Dump(bodyIndex int) {
 	Log("    b2FixtureDef fd;\n")
-	Log("    fd.friction = %.15f;\n", this.Friction)
-	Log("    fd.restitution = %.15f;\n", this.Restitution)
-	Log("    fd.density = %.15f;\n", this.Density)
-	Log("    fd.isSensor = bool(%t);\n", this.IsSensor)
-	Log("    fd.filter.categoryBits = uint16(%d);\n", this.Filter.CategoryBits)
-	Log("    fd.filter.maskBits = uint16(%d);\n", this.Filter.MaskBits)
-	Log("    fd.filter.groupIndex = int16(%d);\n", this.Filter.GroupIndex)
+	Log("    fd.friction = %.15f;\n", f.Friction)
+	Log("    fd.restitution = %.15f;\n", f.Restitution)
+	Log("    fd.density = %.15f;\n", f.Density)
+	Log("    fd.isSensor = bool(%t);\n", f.IsSensor)
+	Log("    fd.filter.categoryBits = uint16(%d);\n", f.Filter.CategoryBits)
+	Log("    fd.filter.maskBits = uint16(%d);\n", f.Filter.MaskBits)
+	Log("    fd.filter.groupIndex = int16(%d);\n", f.Filter.GroupIndex)
 
-	switch this.Shape.GetType() {
+	switch f.Shape.GetType() {
 	case Shape_e_circle:
 		{
-			s := this.Shape.(*CircleShape)
+			s := f.Shape.(*CircleShape)
 			Log("    b2CircleShape shape;\n")
 			Log("    shape.m_radius = %.15f;\n", s.Radius)
 			Log("    shape.m_p.Set(%.15f, %.15f);\n", s.P.X, s.P.Y)
 		}
 	case Shape_e_edge:
 		{
-			s := this.Shape.(*EdgeShape)
+			s := f.Shape.(*EdgeShape)
 			Log("    b2EdgeShape shape;\n")
 			Log("    shape.m_radius = %.15f;\n", s.Radius)
 			Log("    shape.m_vertex0.Set(%.15f, %.15f);\n", s.Vertex0.X, s.Vertex0.Y)
@@ -380,7 +380,7 @@ func (this *Fixture) Dump(bodyIndex int) {
 		}
 	case Shape_e_polygon:
 		{
-			s := this.Shape.(*PolygonShape)
+			s := f.Shape.(*PolygonShape)
 			Log("    b2PolygonShape shape;\n")
 			Log("    b2Vec2 vs[%d];\n", MaxPolygonVertices)
 			for i := 0; i < s.VertexCount; i++ {
@@ -390,7 +390,7 @@ func (this *Fixture) Dump(bodyIndex int) {
 		}
 	case Shape_e_chain:
 		{
-			s := this.Shape.(*ChainShape)
+			s := f.Shape.(*ChainShape)
 			Log("    b2ChainShape shape;\n")
 			Log("    b2Vec2 vs[%d];\n", len(s.Vertices))
 			for i := 0; i < len(s.Vertices); i++ {

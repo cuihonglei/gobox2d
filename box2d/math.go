@@ -67,63 +67,63 @@ func (v *Vec2) SetZero() {
 }
 
 // Set this vector to some specified coordinates.
-func (this *Vec2) Set(x float64, y float64) {
-	this.X, this.Y = x, y
+func (v *Vec2) Set(x float64, y float64) {
+	v.X, v.Y = x, y
 }
 
 // Add a vector to this vector.
-func (this *Vec2) Add(v1 Vec2) {
-	this.X += v1.X
-	this.Y += v1.Y
+func (v *Vec2) Add(v1 Vec2) {
+	v.X += v1.X
+	v.Y += v1.Y
 }
 
 // Subtract a vector from this vector.
-func (this *Vec2) Sub(v1 Vec2) {
-	this.X -= v1.X
-	this.Y -= v1.Y
+func (v *Vec2) Sub(v1 Vec2) {
+	v.X -= v1.X
+	v.Y -= v1.Y
 }
 
 // Multiply this vector by a scalar.
-func (this *Vec2) Mul(a float64) {
-	this.X *= a
-	this.Y *= a
+func (v *Vec2) Mul(a float64) {
+	v.X *= a
+	v.Y *= a
 }
 
 // Get the length of this vector (the norm).
-func (this *Vec2) Length() float64 {
-	return Sqrt(this.X*this.X + this.Y*this.Y)
+func (v *Vec2) Length() float64 {
+	return Sqrt(v.X*v.X + v.Y*v.Y)
 }
 
 // Get the length squared. For performance, use this instead of
 // Vec2::Length (if possible).
-func (this *Vec2) LengthSquared() float64 {
-	return this.X*this.X + this.Y*this.Y
+func (v *Vec2) LengthSquared() float64 {
+	return v.X*v.X + v.Y*v.Y
 }
 
 // Convert this vector into a unit vector. Returns the length.
-func (this *Vec2) Normalize() float64 {
-	length := this.Length()
+func (v *Vec2) Normalize() float64 {
+	length := v.Length()
 	if length < Epsilon {
 		return 0.0
 	}
 	invLength := 1.0 / length
-	this.X *= invLength
-	this.Y *= invLength
+	v.X *= invLength
+	v.Y *= invLength
 	return length
 }
 
 // Does this vector contain finite coordinates?
-func (this *Vec2) IsValid() bool {
-	return IsValid(this.X) && IsValid(this.Y)
+func (v *Vec2) IsValid() bool {
+	return IsValid(v.X) && IsValid(v.Y)
 }
 
 // Get the skew vector such that dot(skew_vec, other) == cross(vec, other)
-func (this *Vec2) Skew() Vec2 {
-	return Vec2{-this.Y, this.X}
+func (v *Vec2) Skew() Vec2 {
+	return Vec2{-v.Y, v.X}
 }
 
-func (this *Vec2) Minus() Vec2 {
-	return Vec2{-this.X, -this.Y}
+func (v *Vec2) Minus() Vec2 {
+	return Vec2{-v.X, -v.Y}
 }
 
 // A 2D column vector with 3 elements.
@@ -132,38 +132,38 @@ type Vec3 struct {
 }
 
 // Set this vector to all zeros.
-func (this *Vec3) SetZero() {
-	this.X, this.Y, this.Z = 0.0, 0.0, 0.0
+func (v *Vec3) SetZero() {
+	v.X, v.Y, v.Z = 0.0, 0.0, 0.0
 }
 
 // Set this vector to some specified coordinates.
-func (this *Vec3) Set(x, y, z float64) {
-	this.X, this.Y, this.Z = x, y, z
+func (v *Vec3) Set(x, y, z float64) {
+	v.X, v.Y, v.Z = x, y, z
 }
 
 // Add a vector to this vector.
-func (this *Vec3) Add(v1 Vec3) {
-	this.X += v1.X
-	this.Y += v1.Y
-	this.Z += v1.Z
+func (v *Vec3) Add(v1 Vec3) {
+	v.X += v1.X
+	v.Y += v1.Y
+	v.Z += v1.Z
 }
 
 // Subtract a vector from this vector.
-func (this *Vec3) Sub(v1 Vec3) {
-	this.X -= v1.X
-	this.Y -= v1.Y
-	this.Z -= v1.Z
+func (v *Vec3) Sub(v1 Vec3) {
+	v.X -= v1.X
+	v.Y -= v1.Y
+	v.Z -= v1.Z
 }
 
 // Multiply this vector by a scalar.
-func (this *Vec3) Mul(a float64) {
-	this.X *= a
-	this.Y *= a
-	this.Z *= a
+func (v *Vec3) Mul(a float64) {
+	v.X *= a
+	v.Y *= a
+	v.Z *= a
 }
 
-func (this *Vec3) Minus() Vec3 {
-	return Vec3{-this.X, -this.Y, -this.Z}
+func (v *Vec3) Minus() Vec3 {
+	return Vec3{-v.X, -v.Y, -v.Z}
 }
 
 // A 2-by-2 matrix. Stored in column-major order.
@@ -172,24 +172,24 @@ type Mat22 struct {
 }
 
 // Initialize this matrix using columns.
-func (this *Mat22) Set(c1, c2 Vec2) {
-	this.Ex, this.Ey = c1, c2
+func (m *Mat22) Set(c1, c2 Vec2) {
+	m.Ex, m.Ey = c1, c2
 }
 
 // Set this to the identity matrix.
-func (this *Mat22) SetIdentity() {
-	this.Ex.X, this.Ey.X = 1.0, 0.0
-	this.Ex.Y, this.Ey.Y = 0.0, 1.0
+func (m *Mat22) SetIdentity() {
+	m.Ex.X, m.Ey.X = 1.0, 0.0
+	m.Ex.Y, m.Ey.Y = 0.0, 1.0
 }
 
 // Set this matrix to all zeros.
-func (this *Mat22) SetZero() {
-	this.Ex.X, this.Ey.X = 0.0, 0.0
-	this.Ex.Y, this.Ey.Y = 0.0, 0.0
+func (m *Mat22) SetZero() {
+	m.Ex.X, m.Ey.X = 0.0, 0.0
+	m.Ex.Y, m.Ey.Y = 0.0, 0.0
 }
 
-func (this *Mat22) GetInverse() (B Mat22) {
-	a, b, c, d := this.Ex.X, this.Ey.X, this.Ex.Y, this.Ey.Y
+func (m *Mat22) GetInverse() (B Mat22) {
+	a, b, c, d := m.Ex.X, m.Ey.X, m.Ex.Y, m.Ey.Y
 	det := a*d - b*c
 	if det != 0.0 {
 		det = 1.0 / det
@@ -203,8 +203,8 @@ func (this *Mat22) GetInverse() (B Mat22) {
 
 // Solve A * x = b, where b is a column vector. This is more efficient
 // than computing the inverse in one-shot cases.
-func (this *Mat22) Solve(b Vec2) (x Vec2) {
-	a11, a12, a21, a22 := this.Ex.X, this.Ey.X, this.Ex.Y, this.Ey.Y
+func (m *Mat22) Solve(b Vec2) (x Vec2) {
+	a11, a12, a21, a22 := m.Ex.X, m.Ey.X, m.Ex.Y, m.Ey.Y
 	det := a11*a22 - a12*a21
 	if det != 0.0 {
 		det = 1.0 / det
@@ -220,30 +220,30 @@ type Mat33 struct {
 }
 
 // Set this matrix to all zeros.
-func (this *Mat33) SetZero() {
-	this.Ex.SetZero()
-	this.Ey.SetZero()
-	this.Ez.SetZero()
+func (m *Mat33) SetZero() {
+	m.Ex.SetZero()
+	m.Ey.SetZero()
+	m.Ez.SetZero()
 }
 
 // Solve A * x = b, where b is a column vector. This is more efficient
 // than computing the inverse in one-shot cases.
-func (this *Mat33) Solve33(b Vec3) (x Vec3) {
-	det := DotV3V3(this.Ex, CrossV3V3(this.Ey, this.Ez))
+func (m *Mat33) Solve33(b Vec3) (x Vec3) {
+	det := DotV3V3(m.Ex, CrossV3V3(m.Ey, m.Ez))
 	if det != 0.0 {
 		det = 1.0 / det
 	}
-	x.X = det * DotV3V3(b, CrossV3V3(this.Ey, this.Ez))
-	x.Y = det * DotV3V3(this.Ex, CrossV3V3(b, this.Ez))
-	x.Z = det * DotV3V3(this.Ex, CrossV3V3(this.Ey, b))
+	x.X = det * DotV3V3(b, CrossV3V3(m.Ey, m.Ez))
+	x.Y = det * DotV3V3(m.Ex, CrossV3V3(b, m.Ez))
+	x.Z = det * DotV3V3(m.Ex, CrossV3V3(m.Ey, b))
 	return
 }
 
 // Solve A * x = b, where b is a column vector. This is more efficient
 // than computing the inverse in one-shot cases. Solve only the upper
 // 2-by-2 matrix equation.
-func (this *Mat33) Solve22(b Vec2) (x Vec2) {
-	a11, a12, a21, a22 := this.Ex.X, this.Ey.X, this.Ex.Y, this.Ey.Y
+func (m *Mat33) Solve22(b Vec2) (x Vec2) {
+	a11, a12, a21, a22 := m.Ex.X, m.Ey.X, m.Ex.Y, m.Ey.Y
 	det := a11*a22 - a12*a21
 	if det != 0.0 {
 		det = 1.0 / det
@@ -255,8 +255,8 @@ func (this *Mat33) Solve22(b Vec2) (x Vec2) {
 
 // Get the inverse of this matrix as a 2-by-2.
 // Returns the zero matrix if singular.
-func (this *Mat33) GetInverse22(M *Mat33) {
-	a, b, c, d := this.Ex.X, this.Ey.X, this.Ex.Y, this.Ey.Y
+func (m *Mat33) GetInverse22(M *Mat33) {
+	a, b, c, d := m.Ex.X, m.Ey.X, m.Ex.Y, m.Ey.Y
 	det := a*d - b*c
 	if det != 0.0 {
 		det = 1.0 / det
@@ -268,15 +268,15 @@ func (this *Mat33) GetInverse22(M *Mat33) {
 
 // Get the symmetric inverse of this matrix as a 3-by-3.
 // Returns the zero matrix if singular.
-func (this *Mat33) GetSymInverse33(M *Mat33) {
-	det := DotV3V3(this.Ex, CrossV3V3(this.Ey, this.Ez))
+func (m *Mat33) GetSymInverse33(M *Mat33) {
+	det := DotV3V3(m.Ex, CrossV3V3(m.Ey, m.Ez))
 	if det != 0.0 {
 		det = 1.0 / det
 	}
 
-	a11, a12, a13 := this.Ex.X, this.Ey.X, this.Ez.X
-	a22, a23 := this.Ey.Y, this.Ez.Y
-	a33 := this.Ez.Z
+	a11, a12, a13 := m.Ex.X, m.Ey.X, m.Ez.X
+	a22, a23 := m.Ey.Y, m.Ez.Y
+	a33 := m.Ez.Z
 
 	M.Ex.X = det * (a22*a33 - a23*a23)
 	M.Ex.Y = det * (a13*a23 - a12*a33)
@@ -297,38 +297,38 @@ type Rot struct {
 	S, C float64
 }
 
-func NewRot(angle float64) Rot {
-	var this Rot
-	this.S = Sin(angle)
-	this.C = Cos(angle)
-	return this
+func MakeRot(angle float64) Rot {
+	r := Rot{}
+	r.S = Sin(angle)
+	r.C = Cos(angle)
+	return r
 }
 
 // Set using an angle in radians.
-func (this *Rot) Set(angle float64) {
-	this.S = Sin(angle)
-	this.C = Cos(angle)
+func (r *Rot) Set(angle float64) {
+	r.S = Sin(angle)
+	r.C = Cos(angle)
 }
 
 // Set to the identity rotation
-func (this *Rot) SetIdentity() {
-	this.S = 0.0
-	this.C = 1.0
+func (r *Rot) SetIdentity() {
+	r.S = 0.0
+	r.C = 1.0
 }
 
 // Get the angle in radians
-func (this *Rot) GetAngle() float64 {
-	return Atan2(this.S, this.C)
+func (r *Rot) GetAngle() float64 {
+	return Atan2(r.S, r.C)
 }
 
 // Get the x-axis
-func (this *Rot) GetXAxis() Vec2 {
-	return Vec2{this.C, this.S}
+func (r *Rot) GetXAxis() Vec2 {
+	return Vec2{r.C, r.S}
 }
 
 // Get the u-axis
-func (this *Rot) GetYAxis() Vec2 {
-	return Vec2{-this.S, this.C}
+func (r *Rot) GetYAxis() Vec2 {
+	return Vec2{-r.S, r.C}
 }
 
 // A transform contains translation and rotation. It is used to represent
@@ -339,15 +339,15 @@ type Transform struct {
 }
 
 // Set this to the identity transform.
-func (this *Transform) SetIdentity() {
-	this.P.SetZero()
-	this.Q.SetIdentity()
+func (t *Transform) SetIdentity() {
+	t.P.SetZero()
+	t.Q.SetIdentity()
 }
 
 // Set this based on the position and angle.
-func (this *Transform) Set(position Vec2, angle float64) {
-	this.P = position
-	this.Q.Set(angle)
+func (t *Transform) Set(position Vec2, angle float64) {
+	t.P = position
+	t.Q.Set(angle)
 }
 
 // This describes the motion of a body/shape for TOI computation.
@@ -366,31 +366,31 @@ type Sweep struct {
 
 // Get the interpolated transform at a specific time.
 // @param beta is a factor in [0,1], where 0 indicates alpha0.
-func (this *Sweep) GetTransform(beta float64) (xf Transform) {
-	xf.P = AddVV(MulFV(1.0-beta, this.C0), MulFV(beta, this.C))
-	angle := (1.0-beta)*this.A0 + beta*this.A
+func (s *Sweep) GetTransform(beta float64) (xf Transform) {
+	xf.P = AddVV(MulFV(1.0-beta, s.C0), MulFV(beta, s.C))
+	angle := (1.0-beta)*s.A0 + beta*s.A
 	xf.Q.Set(angle)
 
 	// Shift to origin
-	xf.P.Sub(MulRV(xf.Q, this.LocalCenter))
+	xf.P.Sub(MulRV(xf.Q, s.LocalCenter))
 	return
 }
 
 // Advance the sweep forward, yielding a new initial state.
 // @param alpha the new initial time.
-func (this *Sweep) Advance(alpha float64) {
-	beta := (alpha - this.Alpha0) / (1.0 - this.Alpha0)
-	this.C0 = AddVV(MulFV(1.0-beta, this.C0), MulFV(beta, this.C))
-	this.A0 = (1.0-beta)*this.A0 + beta*this.A
-	this.Alpha0 = alpha
+func (s *Sweep) Advance(alpha float64) {
+	beta := (alpha - s.Alpha0) / (1.0 - s.Alpha0)
+	s.C0 = AddVV(MulFV(1.0-beta, s.C0), MulFV(beta, s.C))
+	s.A0 = (1.0-beta)*s.A0 + beta*s.A
+	s.Alpha0 = alpha
 }
 
 // Normalize the angles.
-func (this *Sweep) Normalize() {
+func (s *Sweep) Normalize() {
 	twoPi := 2.0 * Pi
-	d := twoPi * Floor(this.A0/twoPi)
-	this.A0 -= d
-	this.A -= d
+	d := twoPi * Floor(s.A0/twoPi)
+	s.A0 -= d
+	s.A -= d
 }
 
 // Useful constant

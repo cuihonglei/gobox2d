@@ -196,8 +196,8 @@ func (w *World) DestroyBody(b *Body) {
 // Create a joint to constrain bodies together. No reference to the definition
 // is retained. This may cause the connected bodies to cease colliding.
 // @warning This function is locked during callbacks.
-func (this *World) CreateJoint(def IJointDef) IJoint {
-	if this.IsLocked() {
+func (w *World) CreateJoint(def IJointDef) IJoint {
+	if w.IsLocked() {
 		return nil
 	}
 
@@ -205,12 +205,12 @@ func (this *World) CreateJoint(def IJointDef) IJoint {
 
 	// Connect to the world list.
 	j.SetPrev(nil)
-	j.SetNext(this.jointList)
-	if this.jointList != nil {
-		this.jointList.SetPrev(j)
+	j.SetNext(w.jointList)
+	if w.jointList != nil {
+		w.jointList.SetPrev(j)
 	}
-	this.jointList = j
-	this.jointCount++
+	w.jointList = j
+	w.jointCount++
 
 	// Connect to the bodies' doubly linked lists.
 	j.GetEdgeA().Joint = j
@@ -255,8 +255,8 @@ func (this *World) CreateJoint(def IJointDef) IJoint {
 
 // Destroy a joint. This may cause the connected bodies to begin colliding.
 // @warning This function is locked during callbacks.
-func (this *World) DestroyJoint(j IJoint) {
-	if this.IsLocked() {
+func (w *World) DestroyJoint(j IJoint) {
+	if w.IsLocked() {
 		return
 	}
 
@@ -271,8 +271,8 @@ func (this *World) DestroyJoint(j IJoint) {
 		j.GetNext().SetPrev(j.GetPrev())
 	}
 
-	if j == this.jointList {
-		this.jointList = j.GetNext()
+	if j == w.jointList {
+		w.jointList = j.GetNext()
 	}
 
 	// Disconnect from island graph.
@@ -315,7 +315,7 @@ func (this *World) DestroyJoint(j IJoint) {
 	j.GetEdgeB().Prev = nil
 	j.GetEdgeB().Next = nil
 
-	this.jointCount--
+	w.jointCount--
 
 	// If the joint prevents collisions, then flag any contacts for filtering.
 	if !collideConnected {
@@ -337,16 +337,16 @@ func (this *World) DestroyJoint(j IJoint) {
 // @param timeStep the amount of time to simulate, this should not vary.
 // @param velocityIterations for the velocity constraint solver.
 // @param positionIterations for the position constraint solver.
-func (this *World) Step(dt float64, velocityIterations int, positionIterations int) {
+func (w *World) Step(dt float64, velocityIterations int, positionIterations int) {
 	stepTimer := NewTimer()
 
 	// If new fixtures were added, we need to find the new contacts.
-	if (this.flags & world_e_newFixture) != 0 {
-		this.contactManager.FindNewContacts()
-		this.flags &= ^world_e_newFixture
+	if (w.flags & world_e_newFixture) != 0 {
+		w.contactManager.FindNewContacts()
+		w.flags &= ^world_e_newFixture
 	}
 
-	this.flags |= world_e_locked
+	w.flags |= world_e_locked
 
 	var step timeStep
 	step.dt = dt
@@ -358,42 +358,42 @@ func (this *World) Step(dt float64, velocityIterations int, positionIterations i
 		step.inv_dt = 0.0
 	}
 
-	step.dtRatio = this.inv_dt0 * dt
+	step.dtRatio = w.inv_dt0 * dt
 
-	step.warmStarting = this.warmStarting
+	step.warmStarting = w.warmStarting
 
 	// Update contacts. This is where some contacts are destroyed.
 	{
 		timer := NewTimer()
-		this.contactManager.Collide()
-		this.profile.collide = timer.GetMilliseconds()
+		w.contactManager.Collide()
+		w.profile.collide = timer.GetMilliseconds()
 	}
 
 	// Integrate velocities, solve velocity constraints, and integrate positions.
-	if this.stepComplete && step.dt > 0.0 {
+	if w.stepComplete && step.dt > 0.0 {
 		timer := NewTimer()
-		this.solve(&step)
-		this.profile.solve = timer.GetMilliseconds()
+		w.solve(&step)
+		w.profile.solve = timer.GetMilliseconds()
 	}
 
 	// Handle TOI events.
-	if this.continuousPhysics && step.dt > 0.0 {
+	if w.continuousPhysics && step.dt > 0.0 {
 		timer := NewTimer()
-		this.solveTOI(&step)
-		this.profile.solveTOI = timer.GetMilliseconds()
+		w.solveTOI(&step)
+		w.profile.solveTOI = timer.GetMilliseconds()
 	}
 
 	if step.dt > 0.0 {
-		this.inv_dt0 = step.inv_dt
+		w.inv_dt0 = step.inv_dt
 	}
 
-	if (this.flags & world_e_clearForces) != 0 {
-		this.ClearForces()
+	if (w.flags & world_e_clearForces) != 0 {
+		w.ClearForces()
 	}
 
-	this.flags &= ^world_e_locked
+	w.flags &= ^world_e_locked
 
-	this.profile.step = stepTimer.GetMilliseconds()
+	w.profile.step = stepTimer.GetMilliseconds()
 }
 
 // Manually clear the force buffer on all bodies. By default, forces are cleared automatically
@@ -403,14 +403,14 @@ func (this *World) Step(dt float64, velocityIterations int, positionIterations i
 // When you perform sub-stepping you will disable auto clearing of forces and instead call
 // ClearForces after all sub-steps are complete in one pass of your game loop.
 // @see SetAutoClearForces
-func (this *World) ClearForces() {
-	for body := this.bodyList; body != nil; body = body.GetNext() {
+func (w *World) ClearForces() {
+	for body := w.bodyList; body != nil; body = body.GetNext() {
 		body.force.SetZero()
 		body.torque = 0.0
 	}
 }
 
-func (this *World) DrawShape(fixture *Fixture, xf Transform, color Color) {
+func (w *World) DrawShape(fixture *Fixture, xf Transform, color Color) {
 	switch fixture.GetType() {
 	case Shape_e_circle:
 		circle := fixture.GetShape().(*CircleShape)
@@ -419,12 +419,12 @@ func (this *World) DrawShape(fixture *Fixture, xf Transform, color Color) {
 		radius := circle.Radius
 		axis := MulRV(xf.Q, Vec2{1.0, 0.0})
 
-		this.debugDraw.DrawSolidCircle(center, radius, axis, color)
+		w.debugDraw.DrawSolidCircle(center, radius, axis, color)
 	case Shape_e_edge:
 		edge := fixture.GetShape().(*EdgeShape)
 		v1 := MulX(xf, edge.Vertex1)
 		v2 := MulX(xf, edge.Vertex2)
-		this.debugDraw.DrawSegment(v1, v2, color)
+		w.debugDraw.DrawSegment(v1, v2, color)
 	case Shape_e_chain:
 		chain := fixture.GetShape().(*ChainShape)
 		count := chain.Count
@@ -433,8 +433,8 @@ func (this *World) DrawShape(fixture *Fixture, xf Transform, color Color) {
 		v1 := MulX(xf, vertices[0])
 		for i := 0; i < count; i++ {
 			v2 := MulX(xf, vertices[i])
-			this.debugDraw.DrawSegment(v1, v2, color)
-			this.debugDraw.DrawCircle(v1, 0.05, color)
+			w.debugDraw.DrawSegment(v1, v2, color)
+			w.debugDraw.DrawCircle(v1, 0.05, color)
 			v1 = v2
 		}
 	case Shape_e_polygon:
@@ -446,12 +446,12 @@ func (this *World) DrawShape(fixture *Fixture, xf Transform, color Color) {
 			vertices[i] = MulX(xf, poly.Vertices[i])
 		}
 
-		this.debugDraw.DrawSolidPolygon(vertices[:vertexCount], color)
+		w.debugDraw.DrawSolidPolygon(vertices[:vertexCount], color)
 	default:
 	}
 }
 
-func (this *World) drawJoint(joint IJoint) {
+func (w *World) drawJoint(joint IJoint) {
 	bodyA := joint.GetBodyA()
 	bodyB := joint.GetBodyB()
 	xf1 := bodyA.GetTransform()
@@ -465,68 +465,68 @@ func (this *World) drawJoint(joint IJoint) {
 
 	switch joint.GetType() {
 	case Joint_e_distanceJoint:
-		this.debugDraw.DrawSegment(p1, p2, color)
+		w.debugDraw.DrawSegment(p1, p2, color)
 	case Joint_e_pulleyJoint:
 		pulley := joint.(*PulleyJoint)
 		s1 := pulley.GetGroundAnchorA()
 		s2 := pulley.GetGroundAnchorB()
-		this.debugDraw.DrawSegment(s1, p1, color)
-		this.debugDraw.DrawSegment(s2, p2, color)
-		this.debugDraw.DrawSegment(s1, s2, color)
+		w.debugDraw.DrawSegment(s1, p1, color)
+		w.debugDraw.DrawSegment(s2, p2, color)
+		w.debugDraw.DrawSegment(s1, s2, color)
 	case Joint_e_mouseJoint:
 		// don't draw this
 	default:
-		this.debugDraw.DrawSegment(x1, p1, color)
-		this.debugDraw.DrawSegment(p1, p2, color)
-		this.debugDraw.DrawSegment(x2, p2, color)
+		w.debugDraw.DrawSegment(x1, p1, color)
+		w.debugDraw.DrawSegment(p1, p2, color)
+		w.debugDraw.DrawSegment(x2, p2, color)
 	}
 }
 
 // Call this to draw shapes and other debug draw data. This is intentionally non-const.
-func (this *World) DebugDraw() {
-	if this.debugDraw == nil {
+func (w *World) DebugDraw() {
+	if w.debugDraw == nil {
 		return
 	}
 
-	flags := this.debugDraw.GetFlags()
+	flags := w.debugDraw.GetFlags()
 
 	if (flags & Draw_e_shapeBit) != 0 {
-		for b := this.bodyList; b != nil; b = b.GetNext() {
+		for b := w.bodyList; b != nil; b = b.GetNext() {
 			xf := b.GetTransform()
 			for f := b.GetFixtureList(); f != nil; f = f.GetNext() {
 				if !b.IsActive() {
-					this.DrawShape(f, xf, MakeColor(0.5, 0.5, 0.3))
+					w.DrawShape(f, xf, MakeColor(0.5, 0.5, 0.3))
 				} else if b.GetType() == StaticBody {
-					this.DrawShape(f, xf, MakeColor(0.5, 0.9, 0.5))
+					w.DrawShape(f, xf, MakeColor(0.5, 0.9, 0.5))
 				} else if b.GetType() == KinematicBody {
-					this.DrawShape(f, xf, MakeColor(0.5, 0.5, 0.9))
+					w.DrawShape(f, xf, MakeColor(0.5, 0.5, 0.9))
 				} else if !b.IsAwake() {
-					this.DrawShape(f, xf, MakeColor(0.6, 0.6, 0.6))
+					w.DrawShape(f, xf, MakeColor(0.6, 0.6, 0.6))
 				} else {
-					this.DrawShape(f, xf, MakeColor(0.9, 0.7, 0.7))
+					w.DrawShape(f, xf, MakeColor(0.9, 0.7, 0.7))
 				}
 			}
 		}
 	}
 
 	if (flags & Draw_e_jointBit) != 0 {
-		for j := this.jointList; j != nil; j = j.GetNext() {
-			this.drawJoint(j)
+		for j := w.jointList; j != nil; j = j.GetNext() {
+			w.drawJoint(j)
 		}
 	}
 
 	if (flags & Draw_e_pairBit) != 0 {
 		//color := Color{0.3, 0.9, 0.9}
-		for c := this.contactManager.ContactList; c != nil; c = c.GetNext() {
+		for c := w.contactManager.ContactList; c != nil; c = c.GetNext() {
 
 		}
 	}
 
 	if (flags & Draw_e_aabbBit) != 0 {
 		color := MakeColor(0.9, 0.3, 0.9)
-		bp := this.contactManager.BroadPhase
+		bp := w.contactManager.BroadPhase
 
-		for b := this.bodyList; b != nil; b = b.GetNext() {
+		for b := w.bodyList; b != nil; b = b.GetNext() {
 			if !b.IsActive() {
 				continue
 			}
@@ -541,17 +541,17 @@ func (this *World) DebugDraw() {
 					vs[2].Set(aabb.UpperBound.X, aabb.UpperBound.Y)
 					vs[3].Set(aabb.LowerBound.X, aabb.UpperBound.Y)
 
-					this.debugDraw.DrawPolygon(vs[:], color)
+					w.debugDraw.DrawPolygon(vs[:], color)
 				}
 			}
 		}
 	}
 
 	if (flags & Draw_e_centerOfMassBit) != 0 {
-		for b := this.bodyList; b != nil; b = b.GetNext() {
+		for b := w.bodyList; b != nil; b = b.GetNext() {
 			xf := b.GetTransform()
 			xf.P = b.GetWorldCenter()
-			this.debugDraw.DrawTransform(xf)
+			w.debugDraw.DrawTransform(xf)
 		}
 	}
 }
@@ -588,27 +588,27 @@ type WorldQueryShapeWrapper struct {
 	transform  *Transform
 }
 
-func (this *WorldQueryShapeWrapper) QueryCallback(proxyId int) bool {
-	fixture := this.broadPhase.GetUserData(proxyId).(*FixtureProxy).Fixture
-	if TestOverlap(this.shape, 0, fixture.GetShape(), 0, *this.transform, fixture.GetBody().GetTransform()) {
-		return this.callback(fixture)
+func (w *WorldQueryShapeWrapper) QueryCallback(proxyId int) bool {
+	fixture := w.broadPhase.GetUserData(proxyId).(*FixtureProxy).Fixture
+	if TestOverlap(w.shape, 0, fixture.GetShape(), 0, *w.transform, fixture.GetBody().GetTransform()) {
+		return w.callback(fixture)
 	}
 	return true
 }
 
-func (this *World) QueryShape(callback func(*Fixture) bool, shape IShape, transform *Transform) {
+func (w *World) QueryShape(callback func(*Fixture) bool, shape IShape, transform *Transform) {
 	if transform == nil {
 		transform = new(Transform)
 		transform.SetIdentity()
 	}
 	var wrapper WorldQueryShapeWrapper
-	wrapper.broadPhase = this.contactManager.BroadPhase
+	wrapper.broadPhase = w.contactManager.BroadPhase
 	wrapper.callback = callback
 	wrapper.shape = shape
 	wrapper.transform = transform
 	var aabb AABB
 	shape.ComputeAABB(&aabb, *transform, 0)
-	this.contactManager.BroadPhase.Query(wrapper.QueryCallback, aabb)
+	w.contactManager.BroadPhase.Query(wrapper.QueryCallback, aabb)
 }
 
 /// Ray-cast the world for all fixtures in the path of the ray. Your callback
@@ -672,149 +672,149 @@ func (w *World) GetContactList() IContact {
 }
 
 /// Enable/disable sleep.
-func (this *World) SetAllowSleeping(flag bool) {
-	if flag == this.allowSleep {
+func (w *World) SetAllowSleeping(flag bool) {
+	if flag == w.allowSleep {
 		return
 	}
 
-	this.allowSleep = flag
-	if !this.allowSleep {
-		for b := this.bodyList; b != nil; b = b.next {
+	w.allowSleep = flag
+	if !w.allowSleep {
+		for b := w.bodyList; b != nil; b = b.next {
 			b.SetAwake(true)
 		}
 	}
 }
-func (this *World) GetAllowSleeping() bool {
-	return this.allowSleep
+func (w *World) GetAllowSleeping() bool {
+	return w.allowSleep
 }
 
 /// Enable/disable warm starting. For testing.
-func (this *World) SetWarmStarting(flag bool) {
-	this.warmStarting = flag
+func (w *World) SetWarmStarting(flag bool) {
+	w.warmStarting = flag
 }
 
-func (this *World) GetWarmStarting() bool {
-	return this.warmStarting
+func (w *World) GetWarmStarting() bool {
+	return w.warmStarting
 }
 
 /// Enable/disable continuous physics. For testing.
-func (this *World) SetContinuousPhysics(flag bool) {
-	this.continuousPhysics = flag
+func (w *World) SetContinuousPhysics(flag bool) {
+	w.continuousPhysics = flag
 }
 
-func (this *World) GetContinuousPhysics() bool {
-	return this.continuousPhysics
+func (w *World) GetContinuousPhysics() bool {
+	return w.continuousPhysics
 }
 
 /// Enable/disable single stepped continuous physics. For testing.
-func (this *World) SetSubStepping(flag bool) {
-	this.subStepping = flag
+func (w *World) SetSubStepping(flag bool) {
+	w.subStepping = flag
 }
 
-func (this *World) GetSubStepping() bool {
-	return this.subStepping
+func (w *World) GetSubStepping() bool {
+	return w.subStepping
 }
 
 /// Get the number of broad-phase proxies.
-func (this *World) GetProxyCount() int {
-	return this.contactManager.BroadPhase.GetProxyCount()
+func (w *World) GetProxyCount() int {
+	return w.contactManager.BroadPhase.GetProxyCount()
 }
 
 /// Get the number of bodies.
-func (this *World) GetBodyCount() int {
-	return this.bodyCount
+func (w *World) GetBodyCount() int {
+	return w.bodyCount
 }
 
 /// Get the number of joints.
-func (this *World) GetJointCount() int {
-	return this.jointCount
+func (w *World) GetJointCount() int {
+	return w.jointCount
 }
 
 /// Get the number of contacts (each may have 0 or more contact points).
-func (this *World) GetContactCount() int {
-	return this.contactManager.ContactCount
+func (w *World) GetContactCount() int {
+	return w.contactManager.ContactCount
 }
 
 /// Get the height of the dynamic tree.
-func (this *World) GetTreeHeight() int {
-	return this.contactManager.BroadPhase.GetTreeHeight()
+func (w *World) GetTreeHeight() int {
+	return w.contactManager.BroadPhase.GetTreeHeight()
 }
 
 /// Get the balance of the dynamic tree.
-func (this *World) GetTreeBalance() int {
-	return this.contactManager.BroadPhase.GetTreeBalance()
+func (w *World) GetTreeBalance() int {
+	return w.contactManager.BroadPhase.GetTreeBalance()
 }
 
 /// Get the quality metric of the dynamic tree. The smaller the better.
 /// The minimum is 1.
-func (this *World) GetTreeQuality() float64 {
-	return this.contactManager.BroadPhase.GetTreeQuality()
+func (w *World) GetTreeQuality() float64 {
+	return w.contactManager.BroadPhase.GetTreeQuality()
 }
 
 /// Change the global gravity vector.
-func (this *World) SetGravity(gravity Vec2) {
-	this.gravity = gravity
+func (w *World) SetGravity(gravity Vec2) {
+	w.gravity = gravity
 }
 
 /// Get the global gravity vector.
-func (this *World) GetGravity() Vec2 {
-	return this.gravity
+func (w *World) GetGravity() Vec2 {
+	return w.gravity
 }
 
 // Is the world locked (in the middle of a time step).
-func (this *World) IsLocked() bool {
-	return (this.flags & world_e_locked) == world_e_locked
+func (w *World) IsLocked() bool {
+	return (w.flags & world_e_locked) == world_e_locked
 }
 
 /// Set flag to control automatic clearing of forces after each time step.
-func (this *World) SetAutoClearForces(flag bool) {
+func (w *World) SetAutoClearForces(flag bool) {
 	if flag {
-		this.flags |= world_e_clearForces
+		w.flags |= world_e_clearForces
 	} else {
-		this.flags &= ^world_e_clearForces
+		w.flags &= ^world_e_clearForces
 	}
 }
 
 /// Get the flag that controls automatic clearing of forces after each time step.
-func (this *World) GetAutoClearForces() bool {
-	return (this.flags & world_e_clearForces) == world_e_clearForces
+func (w *World) GetAutoClearForces() bool {
+	return (w.flags & world_e_clearForces) == world_e_clearForces
 }
 
 /// Get the contact manager for testing.
-func (this *World) GetContactManager() *ContactManager {
-	return this.contactManager
+func (w *World) GetContactManager() *ContactManager {
+	return w.contactManager
 }
 
 /// Get the current profile.
-func (this *World) GetProfile() *Profile {
-	return &this.profile
+func (w *World) GetProfile() *Profile {
+	return &w.profile
 }
 
-func (this *World) solve(step *timeStep) {
-	this.profile.solveInit = 0.0
-	this.profile.solveVelocity = 0.0
-	this.profile.solvePosition = 0.0
+func (w *World) solve(step *timeStep) {
+	w.profile.solveInit = 0.0
+	w.profile.solveVelocity = 0.0
+	w.profile.solvePosition = 0.0
 
 	// Size the island for the worst case.
-	island := NewIsland(this.bodyCount, this.contactManager.ContactCount,
-		this.jointCount, this.contactManager.ContactListener)
+	island := NewIsland(w.bodyCount, w.contactManager.ContactCount,
+		w.jointCount, w.contactManager.ContactListener)
 
 	// Clear all the island flags.
-	for b := this.bodyList; b != nil; b = b.next {
+	for b := w.bodyList; b != nil; b = b.next {
 		b.flags &= ^body_e_islandFlag
 	}
-	for c := this.contactManager.ContactList; c != nil; c = c.GetNext() {
+	for c := w.contactManager.ContactList; c != nil; c = c.GetNext() {
 		c.SetFlags(c.GetFlags() & ^Contact_e_islandFlag)
 	}
-	for j := this.jointList; j != nil; j = j.GetNext() {
+	for j := w.jointList; j != nil; j = j.GetNext() {
 		j.SetIsland(false)
 	}
 
 	// Build and simulate all awake islands.
-	stackSize := this.bodyCount
+	stackSize := w.bodyCount
 	//b2Body** stack = (b2Body**)m_stackAllocator.Allocate(stackSize * sizeof(b2Body*));
-	stack := make([]*Body, stackSize, stackSize)
-	for seed := this.bodyList; seed != nil; seed = seed.next {
+	stack := make([]*Body, stackSize)
+	for seed := w.bodyList; seed != nil; seed = seed.next {
 		if (seed.flags & body_e_islandFlag) != 0 {
 			continue
 		}
@@ -914,10 +914,10 @@ func (this *World) solve(step *timeStep) {
 		}
 
 		var profile Profile
-		island.Solve(&profile, step, this.gravity, this.allowSleep)
-		this.profile.solveInit += profile.solveInit
-		this.profile.solveVelocity += profile.solveVelocity
-		this.profile.solvePosition += profile.solvePosition
+		island.Solve(&profile, step, w.gravity, w.allowSleep)
+		w.profile.solveInit += profile.solveInit
+		w.profile.solveVelocity += profile.solveVelocity
+		w.profile.solvePosition += profile.solvePosition
 
 		// Post solve cleanup.
 		for i := 0; i < island.BodyCount; i++ {
@@ -934,7 +934,7 @@ func (this *World) solve(step *timeStep) {
 	{
 		timer := MakeTimer()
 		// Synchronize fixtures, check for out of range bodies.
-		for b := this.bodyList; b != nil; b = b.GetNext() {
+		for b := w.bodyList; b != nil; b = b.GetNext() {
 			// If a body was not in an island then it did not move.
 			if (b.flags & body_e_islandFlag) == 0 {
 				continue
@@ -949,21 +949,21 @@ func (this *World) solve(step *timeStep) {
 		}
 
 		// Look for new contacts.
-		this.contactManager.FindNewContacts()
-		this.profile.broadphase = timer.GetMilliseconds()
+		w.contactManager.FindNewContacts()
+		w.profile.broadphase = timer.GetMilliseconds()
 	}
 }
 
-func (this *World) solveTOI(step *timeStep) {
-	island := NewIsland(2*MaxTOIContacts, MaxTOIContacts, 0, this.contactManager.ContactListener)
+func (w *World) solveTOI(step *timeStep) {
+	island := NewIsland(2*MaxTOIContacts, MaxTOIContacts, 0, w.contactManager.ContactListener)
 
-	if this.stepComplete {
-		for b := this.bodyList; b != nil; b = b.next {
+	if w.stepComplete {
+		for b := w.bodyList; b != nil; b = b.next {
 			b.flags &= ^body_e_islandFlag
 			b.sweep.Alpha0 = 0.0
 		}
 
-		for c := this.contactManager.ContactList; c != nil; c = c.GetNext() {
+		for c := w.contactManager.ContactList; c != nil; c = c.GetNext() {
 			// Invalidate TOI
 			c.SetFlags(c.GetFlags() & ^(Contact_e_toiFlag | Contact_e_islandFlag))
 			c.SetToiCount(0)
@@ -977,7 +977,7 @@ func (this *World) solveTOI(step *timeStep) {
 		var minContact IContact = nil
 		minAlpha := 1.0
 
-		for c := this.contactManager.ContactList; c != nil; c = c.GetNext() {
+		for c := w.contactManager.ContactList; c != nil; c = c.GetNext() {
 			// Is this contact disabled?
 			if !c.IsEnabled() {
 				continue
@@ -1070,7 +1070,7 @@ func (this *World) solveTOI(step *timeStep) {
 
 		if minContact == nil || 1.0-10.0*Epsilon < minAlpha {
 			// No more TOI events. Done!
-			this.stepComplete = true
+			w.stepComplete = true
 			break
 		}
 
@@ -1087,7 +1087,7 @@ func (this *World) solveTOI(step *timeStep) {
 		bB.Advance(minAlpha)
 
 		// The TOI contact likely has some new contact points.
-		minContact.Update(this.contactManager.ContactListener)
+		minContact.Update(w.contactManager.ContactListener)
 		minContact.SetFlags(minContact.GetFlags() & ^Contact_e_toiFlag)
 		minContact.SetToiCount(minContact.GetToiCount() + 1)
 
@@ -1156,7 +1156,7 @@ func (this *World) solveTOI(step *timeStep) {
 					}
 
 					// Update the contact points
-					contact.Update(this.contactManager.ContactListener)
+					contact.Update(w.contactManager.ContactListener)
 
 					// Was the contact disabled by the user?
 					if !contact.IsEnabled() {
@@ -1221,10 +1221,10 @@ func (this *World) solveTOI(step *timeStep) {
 
 		// Commit fixture proxy movements to the broad-phase so that new contacts are created.
 		// Also, some contacts can be destroyed.
-		this.contactManager.FindNewContacts()
+		w.contactManager.FindNewContacts()
 
-		if this.subStepping {
-			this.stepComplete = false
+		if w.subStepping {
+			w.stepComplete = false
 			break
 		}
 	}
@@ -1232,31 +1232,31 @@ func (this *World) solveTOI(step *timeStep) {
 
 /// Dump the world into the log file.
 /// @warning this should be called outside of a time step.
-func (this *World) Dump() {
-	if (this.flags & world_e_locked) == world_e_locked {
+func (w *World) Dump() {
+	if (w.flags & world_e_locked) == world_e_locked {
 		return
 	}
 
-	Log("b2Vec2 g(%.15f, %.15f);\n", this.gravity.X, this.gravity.Y)
+	Log("b2Vec2 g(%.15f, %.15f);\n", w.gravity.X, w.gravity.Y)
 	Log("m_world->SetGravity(g);\n")
 
-	Log("b2Body** bodies = (b2Body**)b2Alloc(%d * sizeof(b2Body*));\n", this.bodyCount)
-	Log("b2Joint** joints = (b2Joint**)b2Alloc(%d * sizeof(b2Joint*));\n", this.jointCount)
+	Log("b2Body** bodies = (b2Body**)b2Alloc(%d * sizeof(b2Body*));\n", w.bodyCount)
+	Log("b2Joint** joints = (b2Joint**)b2Alloc(%d * sizeof(b2Joint*));\n", w.jointCount)
 	i := 0
-	for b := this.bodyList; b != nil; b = b.next {
+	for b := w.bodyList; b != nil; b = b.next {
 		b.islandIndex = i
 		b.Dump()
 		i++
 	}
 
 	i = 0
-	for j := this.jointList; j != nil; j = j.GetNext() {
+	for j := w.jointList; j != nil; j = j.GetNext() {
 		j.SetIndex(i)
 		i++
 	}
 
 	// First pass on joints, skip gear joints.
-	for j := this.jointList; j != nil; j = j.GetNext() {
+	for j := w.jointList; j != nil; j = j.GetNext() {
 		if j.GetType() == Joint_e_gearJoint {
 			continue
 		}
@@ -1267,7 +1267,7 @@ func (this *World) Dump() {
 	}
 
 	// Second pass on joints, only gear joints.
-	for j := this.jointList; j != nil; j = j.GetNext() {
+	for j := w.jointList; j != nil; j = j.GetNext() {
 		if j.GetType() != Joint_e_gearJoint {
 			continue
 		}

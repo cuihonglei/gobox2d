@@ -70,20 +70,20 @@ type JointDef struct {
 	CollideConnected bool
 }
 
-func (this *JointDef) GetType() JointType {
-	return this.Type
+func (jd *JointDef) GetType() JointType {
+	return jd.Type
 }
 
-func (this *JointDef) GetBodyA() *Body {
-	return this.BodyA
+func (jd *JointDef) GetBodyA() *Body {
+	return jd.BodyA
 }
 
-func (this *JointDef) GetBodyB() *Body {
-	return this.BodyB
+func (jd *JointDef) GetBodyB() *Body {
+	return jd.BodyB
 }
 
-func (this *JointDef) GetCollideConnected() bool {
-	return this.CollideConnected
+func (jd *JointDef) GetCollideConnected() bool {
+	return jd.CollideConnected
 }
 
 type IJoint interface {
@@ -166,81 +166,81 @@ type Joint struct {
 	UserData interface{}
 }
 
-func (this *Joint) GetType() JointType {
-	return this.Type
+func (joint *Joint) GetType() JointType {
+	return joint.Type
 }
 
 /// Get the first body attached to this joint.
-func (this *Joint) GetBodyA() *Body {
-	return this.BodyA
+func (joint *Joint) GetBodyA() *Body {
+	return joint.BodyA
 }
 
 /// Get the second body attached to this joint.
-func (this *Joint) GetBodyB() *Body {
-	return this.BodyB
+func (joint *Joint) GetBodyB() *Body {
+	return joint.BodyB
 }
 
 // Get the next joint the world joint list.
-func (this *Joint) GetNext() IJoint {
-	return this.Next
+func (joint *Joint) GetNext() IJoint {
+	return joint.Next
 }
 
-func (this *Joint) SetNext(next IJoint) {
-	this.Next = next
+func (joint *Joint) SetNext(next IJoint) {
+	joint.Next = next
 }
 
-func (this *Joint) GetPrev() IJoint {
-	return this.Prev
+func (joint *Joint) GetPrev() IJoint {
+	return joint.Prev
 }
 
-func (this *Joint) SetPrev(prev IJoint) {
-	this.Prev = prev
+func (joint *Joint) SetPrev(prev IJoint) {
+	joint.Prev = prev
 }
 
-func (this *Joint) GetEdgeA() *JointEdge {
-	return &this.EdgeA
+func (joint *Joint) GetEdgeA() *JointEdge {
+	return &joint.EdgeA
 }
 
-func (this *Joint) GetEdgeB() *JointEdge {
-	return &this.EdgeB
+func (joint *Joint) GetEdgeB() *JointEdge {
+	return &joint.EdgeB
 }
 
 // Get the user data pointer.
-func (this *Joint) GetUserData() interface{} {
-	return this.UserData
+func (joint *Joint) GetUserData() interface{} {
+	return joint.UserData
 }
 
 // Set the user data pointer.
-func (this *Joint) SetUserData(data interface{}) {
-	this.UserData = data
+func (joint *Joint) SetUserData(data interface{}) {
+	joint.UserData = data
 }
 
 // Short-cut function to determine if either body is inactive.
-func (this *Joint) IsActive() bool {
-	return this.BodyA.IsActive() && this.BodyB.IsActive()
+func (joint *Joint) IsActive() bool {
+	return joint.BodyA.IsActive() && joint.BodyB.IsActive()
 }
 
 // Get collide connected.
 // Note: modifying the collide connect flag won't work correctly because
 // the flag is only checked when fixture AABBs begin to overlap.
-func (this *Joint) GetCollideConnected() bool {
-	return this.CollideConnected
+func (joint *Joint) GetCollideConnected() bool {
+	return joint.CollideConnected
 }
 
-func (this *Joint) GetIsland() bool {
-	return this.IslandFlag
+func (joint *Joint) GetIsland() bool {
+	return joint.IslandFlag
 }
 
-func (this *Joint) SetIsland(flag bool) {
-	this.IslandFlag = flag
+func (joint *Joint) SetIsland(flag bool) {
+	joint.IslandFlag = flag
 }
 
-func (this *Joint) GetIndex() int {
-	return this.Index
+func (joint *Joint) GetIndex() int {
+	return joint.Index
 }
 
-func (this *Joint) SetIndex(index int) {
-	this.Index = index
+func (joint *Joint) SetIndex(index int) {
+	joint.Index = index
 }
 
 func Joint_Create(def IJointDef) IJoint {
@@ -299,25 +299,25 @@ type DistanceJointDef struct {
 }
 
 func NewDistanceJointDef() *DistanceJointDef {
-	this := new(DistanceJointDef)
-	this.Type = Joint_e_distanceJoint
-	this.LocalAnchorA.Set(0.0, 0.0)
-	this.LocalAnchorB.Set(0.0, 0.0)
-	this.Length = 1.0
-	this.FrequencyHz = 0.0
-	this.DampingRatio = 0.0
-	return this
+	jd := new(DistanceJointDef)
+	jd.Type = Joint_e_distanceJoint
+	jd.LocalAnchorA.Set(0.0, 0.0)
+	jd.LocalAnchorB.Set(0.0, 0.0)
+	jd.Length = 1.0
+	jd.FrequencyHz = 0.0
+	jd.DampingRatio = 0.0
+	return jd
 }
 
 // Initialize the bodies, anchors, and length using the world
 // anchors.
-func (this *DistanceJointDef) Initialize(bodyA *Body, bodyB *Body, anchorA Vec2, anchorB Vec2) {
-	this.BodyA = bodyA
-	this.BodyB = bodyB
-	this.LocalAnchorA = bodyA.GetLocalPoint(anchorA)
-	this.LocalAnchorB = bodyB.GetLocalPoint(anchorB)
+func (jd *DistanceJointDef) Initialize(bodyA *Body, bodyB *Body, anchorA Vec2, anchorB Vec2) {
+	jd.BodyA = bodyA
+	jd.BodyB = bodyB
+	jd.LocalAnchorA = bodyA.GetLocalPoint(anchorA)
+	jd.LocalAnchorB = bodyB.GetLocalPoint(anchorB)
 	d := SubVV(anchorB, anchorA)
-	this.Length = d.Length()
+	jd.Length = d.Length()
 }
 
 // A distance joint constrains two points on two bodies
@@ -353,253 +353,253 @@ type DistanceJoint struct {
 }
 
 func NewDistanceJoint(def *DistanceJointDef) *DistanceJoint {
-	this := new(DistanceJoint)
-	this.Type = def.Type
-	this.BodyA = def.BodyA
-	this.BodyB = def.BodyB
-	this.CollideConnected = def.CollideConnected
-	this.UserData = def.UserData
+	joint := new(DistanceJoint)
+	joint.Type = def.Type
+	joint.BodyA = def.BodyA
+	joint.BodyB = def.BodyB
+	joint.CollideConnected = def.CollideConnected
+	joint.UserData = def.UserData
 
-	this.LocalAnchorA = def.LocalAnchorA
-	this.LocalAnchorB = def.LocalAnchorB
-	this.Length = def.Length
-	this.FrequencyHz = def.FrequencyHz
-	this.DampingRatio = def.DampingRatio
-	return this
+	joint.LocalAnchorA = def.LocalAnchorA
+	joint.LocalAnchorB = def.LocalAnchorB
+	joint.Length = def.Length
+	joint.FrequencyHz = def.FrequencyHz
+	joint.DampingRatio = def.DampingRatio
+	return joint
 }
 
-func (this *DistanceJoint) GetAnchorA() Vec2 {
-	return this.BodyA.GetWorldPoint(this.LocalAnchorA)
+func (joint *DistanceJoint) GetAnchorA() Vec2 {
+	return joint.BodyA.GetWorldPoint(joint.LocalAnchorA)
 }
 
-func (this *DistanceJoint) GetAnchorB() Vec2 {
-	return this.BodyB.GetWorldPoint(this.LocalAnchorB)
+func (joint *DistanceJoint) GetAnchorB() Vec2 {
+	return joint.BodyB.GetWorldPoint(joint.LocalAnchorB)
 }
 
 /// Get the reaction force given the inverse time step.
 /// Unit is N.
-func (this *DistanceJoint) GetReactionForce(inv_dt float64) Vec2 {
-	return MulFV(inv_dt*this.Impulse, this.U)
+func (joint *DistanceJoint) GetReactionForce(inv_dt float64) Vec2 {
+	return MulFV(inv_dt*joint.Impulse, joint.U)
 }
 
 /// Get the reaction torque given the inverse time step.
 /// Unit is N*m. This is always zero for a distance joint.
-func (this *DistanceJoint) GetReactionTorque(inv_dt float64) float64 {
+func (joint *DistanceJoint) GetReactionTorque(inv_dt float64) float64 {
 	return 0.0
 }
 
 /// The local anchor point relative to bodyA's origin.
-func (this *DistanceJoint) GetLocalAnchorA() Vec2 {
-	return this.LocalAnchorA
+func (joint *DistanceJoint) GetLocalAnchorA() Vec2 {
+	return joint.LocalAnchorA
 }
 
 /// The local anchor point relative to bodyB's origin.
-func (this *DistanceJoint) GetLocalAnchorB() Vec2 {
-	return this.LocalAnchorB
+func (joint *DistanceJoint) GetLocalAnchorB() Vec2 {
+	return joint.LocalAnchorB
 }
 
 /// Set/get the natural length.
 /// Manipulating the length can lead to non-physical behavior when the frequency is zero.
-func (this *DistanceJoint) SetLength(length float64) {
-	this.Length = length
+func (joint *DistanceJoint) SetLength(length float64) {
+	joint.Length = length
 }
 
-func (this *DistanceJoint) GetLength() float64 {
-	return this.Length
+func (joint *DistanceJoint) GetLength() float64 {
+	return joint.Length
 }
 
 /// Set/get frequency in Hz.
-func (this *DistanceJoint) SetFrequency(hz float64) {
-	this.FrequencyHz = hz
+func (joint *DistanceJoint) SetFrequency(hz float64) {
+	joint.FrequencyHz = hz
 }
 
-func (this *DistanceJoint) GetFrequency() float64 {
-	return this.FrequencyHz
+func (joint *DistanceJoint) GetFrequency() float64 {
+	return joint.FrequencyHz
 }
 
 /// Set/get damping ratio.
-func (this *DistanceJoint) SetDampingRatio(ratio float64) {
-	this.DampingRatio = ratio
+func (joint *DistanceJoint) SetDampingRatio(ratio float64) {
+	joint.DampingRatio = ratio
 }
 
-func (this *DistanceJoint) GetDampingRatio() float64 {
-	return this.DampingRatio
+func (joint *DistanceJoint) GetDampingRatio() float64 {
+	return joint.DampingRatio
 }
 
-func (this *DistanceJoint) InitVelocityConstraints(data *solverData) {
-	this.IndexA = this.BodyA.islandIndex
-	this.IndexB = this.BodyB.islandIndex
-	this.LocalCenterA = this.BodyA.sweep.LocalCenter
-	this.LocalCenterB = this.BodyB.sweep.LocalCenter
-	this.InvMassA = this.BodyA.invMass
-	this.InvMassB = this.BodyB.invMass
-	this.InvIA = this.BodyA.invI
-	this.InvIB = this.BodyB.invI
+func (joint *DistanceJoint) InitVelocityConstraints(data *solverData) {
+	joint.IndexA = joint.BodyA.islandIndex
+	joint.IndexB = joint.BodyB.islandIndex
+	joint.LocalCenterA = joint.BodyA.sweep.LocalCenter
+	joint.LocalCenterB = joint.BodyB.sweep.LocalCenter
+	joint.InvMassA = joint.BodyA.invMass
+	joint.InvMassB = joint.BodyB.invMass
+	joint.InvIA = joint.BodyA.invI
+	joint.InvIB = joint.BodyB.invI
 
-	cA := data.positions[this.IndexA].c
-	aA := data.positions[this.IndexA].a
-	vA := data.velocities[this.IndexA].v
-	wA := data.velocities[this.IndexA].w
+	cA := data.positions[joint.IndexA].c
+	aA := data.positions[joint.IndexA].a
+	vA := data.velocities[joint.IndexA].v
+	wA := data.velocities[joint.IndexA].w
 
-	cB := data.positions[this.IndexB].c
-	aB := data.positions[this.IndexB].a
-	vB := data.velocities[this.IndexB].v
-	wB := data.velocities[this.IndexB].w
+	cB := data.positions[joint.IndexB].c
+	aB := data.positions[joint.IndexB].a
+	vB := data.velocities[joint.IndexB].v
+	wB := data.velocities[joint.IndexB].w
 
-	qA := NewRot(aA)
-	qB := NewRot(aB)
+	qA := MakeRot(aA)
+	qB := MakeRot(aB)
 
-	this.RA = MulRV(qA, SubVV(this.LocalAnchorA, this.LocalCenterA))
-	this.RB = MulRV(qB, SubVV(this.LocalAnchorB, this.LocalCenterB))
-	this.U = SubVV(AddVV(cB, this.RB), AddVV(cA, this.RA))
+	joint.RA = MulRV(qA, SubVV(joint.LocalAnchorA, joint.LocalCenterA))
+	joint.RB = MulRV(qB, SubVV(joint.LocalAnchorB, joint.LocalCenterB))
+	joint.U = SubVV(AddVV(cB, joint.RB), AddVV(cA, joint.RA))
 
 	// Handle singularity.
-	length := this.U.Length()
+	length := joint.U.Length()
 	if length > LinearSlop {
-		this.U.Mul(1.0 / length)
+		joint.U.Mul(1.0 / length)
 	} else {
-		this.U.Set(0.0, 0.0)
+		joint.U.Set(0.0, 0.0)
 	}
 
-	crAu := CrossVV(this.RA, this.U)
-	crBu := CrossVV(this.RB, this.U)
-	invMass := this.InvMassA + this.InvIA*crAu*crAu + this.InvMassB + this.InvIB*crBu*crBu
+	crAu := CrossVV(joint.RA, joint.U)
+	crBu := CrossVV(joint.RB, joint.U)
+	invMass := joint.InvMassA + joint.InvIA*crAu*crAu + joint.InvMassB + joint.InvIB*crBu*crBu
 
 	// Compute the effective mass matrix.
-	this.Mass = 0.0
+	joint.Mass = 0.0
 	if invMass != 0.0 {
-		this.Mass = 1.0 / invMass
+		joint.Mass = 1.0 / invMass
 	}
 
-	if this.FrequencyHz > 0.0 {
-		C := length - this.Length
+	if joint.FrequencyHz > 0.0 {
+		C := length - joint.Length
 
 		// Frequency
-		omega := 2.0 * Pi * this.FrequencyHz
+		omega := 2.0 * Pi * joint.FrequencyHz
 
 		// Damping coefficient
-		d := 2.0 * this.Mass * this.DampingRatio * omega
+		d := 2.0 * joint.Mass * joint.DampingRatio * omega
 
 		// Spring stiffness
-		k := this.Mass * omega * omega
+		k := joint.Mass * omega * omega
 
 		// magic formulas
 		h := data.step.dt
-		this.Gamma = h * (d + h*k)
-		this.Gamma = 0.0
-		if this.Gamma != 0.0 {
-			this.Gamma = 1.0 / this.Gamma
+		joint.Gamma = h * (d + h*k)
+		joint.Gamma = 0.0
+		if joint.Gamma != 0.0 {
+			joint.Gamma = 1.0 / joint.Gamma
 		}
-		this.Bias = C * h * k * this.Gamma
+		joint.Bias = C * h * k * joint.Gamma
 
-		invMass += this.Gamma
-		this.Mass = 0.0
+		invMass += joint.Gamma
+		joint.Mass = 0.0
 		if invMass != 0.0 {
-			this.Mass = 1.0 / invMass
+			joint.Mass = 1.0 / invMass
 		}
 	} else {
-		this.Gamma = 0.0
-		this.Bias = 0.0
+		joint.Gamma = 0.0
+		joint.Bias = 0.0
 	}
 
 	if data.step.warmStarting {
 		// Scale the impulse to support a variable time step.
-		this.Impulse *= data.step.dtRatio
+		joint.Impulse *= data.step.dtRatio
 
-		P := MulFV(this.Impulse, this.U)
-		vA.Sub(MulFV(this.InvMassA, P))
-		wA -= this.InvIA * CrossVV(this.RA, P)
-		vB.Add(MulFV(this.InvMassB, P))
-		wB += this.InvIB * CrossVV(this.RB, P)
+		P := MulFV(joint.Impulse, joint.U)
+		vA.Sub(MulFV(joint.InvMassA, P))
+		wA -= joint.InvIA * CrossVV(joint.RA, P)
+		vB.Add(MulFV(joint.InvMassB, P))
+		wB += joint.InvIB * CrossVV(joint.RB, P)
 	} else {
-		this.Impulse = 0.0
+		joint.Impulse = 0.0
 	}
 
-	data.velocities[this.IndexA].v = vA
-	data.velocities[this.IndexA].w = wA
-	data.velocities[this.IndexB].v = vB
-	data.velocities[this.IndexB].w = wB
+	data.velocities[joint.IndexA].v = vA
+	data.velocities[joint.IndexA].w = wA
+	data.velocities[joint.IndexB].v = vB
+	data.velocities[joint.IndexB].w = wB
 }
 
-func (this *DistanceJoint) SolveVelocityConstraints(data *solverData) {
-	vA := data.velocities[this.IndexA].v
-	wA := data.velocities[this.IndexA].w
-	vB := data.velocities[this.IndexB].v
-	wB := data.velocities[this.IndexB].w
+func (joint *DistanceJoint) SolveVelocityConstraints(data *solverData) {
+	vA := data.velocities[joint.IndexA].v
+	wA := data.velocities[joint.IndexA].w
+	vB := data.velocities[joint.IndexB].v
+	wB := data.velocities[joint.IndexB].w
 
 	// Cdot = dot(u, v + cross(w, r))
-	vpA := AddVV(vA, CrossFV(wA, this.RA))
-	vpB := AddVV(vB, CrossFV(wB, this.RB))
-	Cdot := DotVV(this.U, SubVV(vpB, vpA))
+	vpA := AddVV(vA, CrossFV(wA, joint.RA))
+	vpB := AddVV(vB, CrossFV(wB, joint.RB))
+	Cdot := DotVV(joint.U, SubVV(vpB, vpA))
 
-	impulse := -this.Mass * (Cdot + this.Bias + this.Gamma*this.Impulse)
-	this.Impulse += impulse
+	impulse := -joint.Mass * (Cdot + joint.Bias + joint.Gamma*joint.Impulse)
+	joint.Impulse += impulse
 
-	P := MulFV(impulse, this.U)
-	vA.Sub(MulFV(this.InvMassA, P))
-	wA -= this.InvIA * CrossVV(this.RA, P)
-	vB.Add(MulFV(this.InvMassB, P))
-	wB += this.InvIB * CrossVV(this.RB, P)
+	P := MulFV(impulse, joint.U)
+	vA.Sub(MulFV(joint.InvMassA, P))
+	wA -= joint.InvIA * CrossVV(joint.RA, P)
+	vB.Add(MulFV(joint.InvMassB, P))
+	wB += joint.InvIB * CrossVV(joint.RB, P)
 
-	data.velocities[this.IndexA].v = vA
-	data.velocities[this.IndexA].w = wA
-	data.velocities[this.IndexB].v = vB
-	data.velocities[this.IndexB].w = wB
+	data.velocities[joint.IndexA].v = vA
+	data.velocities[joint.IndexA].w = wA
+	data.velocities[joint.IndexB].v = vB
+	data.velocities[joint.IndexB].w = wB
 }
 
-func (this *DistanceJoint) SolvePositionConstraints(data *solverData) bool {
-	if this.FrequencyHz > 0.0 {
+func (joint *DistanceJoint) SolvePositionConstraints(data *solverData) bool {
+	if joint.FrequencyHz > 0.0 {
 		// There is no position correction for soft distance constraints.
 		return true
 	}
 
-	cA := data.positions[this.IndexA].c
-	aA := data.positions[this.IndexA].a
-	cB := data.positions[this.IndexB].c
-	aB := data.positions[this.IndexB].a
+	cA := data.positions[joint.IndexA].c
+	aA := data.positions[joint.IndexA].a
+	cB := data.positions[joint.IndexB].c
+	aB := data.positions[joint.IndexB].a
 
-	qA := NewRot(aA)
-	qB := NewRot(aB)
+	qA := MakeRot(aA)
+	qB := MakeRot(aB)
 
-	rA := MulRV(qA, SubVV(this.LocalAnchorA, this.LocalCenterA))
-	rB := MulRV(qB, SubVV(this.LocalAnchorB, this.LocalCenterB))
+	rA := MulRV(qA, SubVV(joint.LocalAnchorA, joint.LocalCenterA))
+	rB := MulRV(qB, SubVV(joint.LocalAnchorB, joint.LocalCenterB))
 	u := SubVV(AddVV(cB, rB), AddVV(cA, rA))
 
 	length := u.Normalize()
-	C := length - this.Length
+	C := length - joint.Length
 	C = ClampF(C, -MaxLinearCorrection, MaxLinearCorrection)
 
-	impulse := -this.Mass * C
+	impulse := -joint.Mass * C
 	P := MulFV(impulse, u)
 
-	cA.Sub(MulFV(this.InvMassA, P))
-	aA -= this.InvIA * CrossVV(rA, P)
-	cB.Add(MulFV(this.InvMassB, P))
-	aB += this.InvIB * CrossVV(rB, P)
+	cA.Sub(MulFV(joint.InvMassA, P))
+	aA -= joint.InvIA * CrossVV(rA, P)
+	cB.Add(MulFV(joint.InvMassB, P))
+	aB += joint.InvIB * CrossVV(rB, P)
 
-	data.positions[this.IndexA].c = cA
-	data.positions[this.IndexA].a = aA
-	data.positions[this.IndexB].c = cB
-	data.positions[this.IndexB].a = aB
+	data.positions[joint.IndexA].c = cA
+	data.positions[joint.IndexA].a = aA
+	data.positions[joint.IndexB].c = cB
+	data.positions[joint.IndexB].a = aB
 
 	return AbsF(C) < LinearSlop
 }
 
 /// Dump joint to dmLog
-func (this *DistanceJoint) Dump() {
-	indexA := this.BodyA.islandIndex
-	indexB := this.BodyB.islandIndex
+func (joint *DistanceJoint) Dump() {
+	indexA := joint.BodyA.islandIndex
+	indexB := joint.BodyB.islandIndex
 
 	Log("  b2DistanceJointDef jd;\n")
 	Log("  jd.bodyA = bodies[%d];\n", indexA)
 	Log("  jd.bodyB = bodies[%d];\n", indexB)
-	Log("  jd.collideConnected = bool(%t);\n", this.CollideConnected)
-	Log("  jd.localAnchorA.Set(%.15lef, %.15lef);\n", this.LocalAnchorA.X, this.LocalAnchorA.Y)
-	Log("  jd.localAnchorB.Set(%.15lef, %.15lef);\n", this.LocalAnchorB.X, this.LocalAnchorB.Y)
-	Log("  jd.length = %.15lef;\n", this.Length)
-	Log("  jd.frequencyHz = %.15lef;\n", this.FrequencyHz)
-	Log("  jd.dampingRatio = %.15lef;\n", this.DampingRatio)
-	Log("  joints[%d] = m_world->CreateJoint(&jd);\n", this.Index)
+	Log("  jd.collideConnected = bool(%t);\n", joint.CollideConnected)
+	Log("  jd.localAnchorA.Set(%.15e, %.15e);\n", joint.LocalAnchorA.X, joint.LocalAnchorA.Y)
+	Log("  jd.localAnchorB.Set(%.15e, %.15e);\n", joint.LocalAnchorB.X, joint.LocalAnchorB.Y)
+	Log("  jd.length = %.15e;\n", joint.Length)
+	Log("  jd.frequencyHz = %.15e;\n", joint.FrequencyHz)
+	Log("  jd.dampingRatio = %.15e;\n", joint.DampingRatio)
+	Log("  joints[%d] = m_world->CreateJoint(&jd);\n", joint.Index)
 }
 
 /// Mouse joint definition. This requires a world target point,
@@ -671,106 +671,106 @@ type MouseJoint struct {
 }
 
 func NewMouseJoint(def *MouseJointDef) *MouseJoint {
-	this := new(MouseJoint)
-	this.Type = def.Type
-	this.BodyA = def.BodyA
-	this.BodyB = def.BodyB
-	this.CollideConnected = def.CollideConnected
-	this.UserData = def.UserData
+	joint := new(MouseJoint)
+	joint.Type = def.Type
+	joint.BodyA = def.BodyA
+	joint.BodyB = def.BodyB
+	joint.CollideConnected = def.CollideConnected
+	joint.UserData = def.UserData
 
-	this.TargetA = def.Target
-	this.LocalAnchorB = MulXT(this.BodyB.GetTransform(), this.TargetA)
-	this.MaxForce = def.MaxForce
-	this.Impulse.SetZero()
-	this.FrequencyHz = def.FrequencyHz
-	this.DampingRatio = def.DampingRatio
-	return this
+	joint.TargetA = def.Target
+	joint.LocalAnchorB = MulXT(joint.BodyB.GetTransform(), joint.TargetA)
+	joint.MaxForce = def.MaxForce
+	joint.Impulse.SetZero()
+	joint.FrequencyHz = def.FrequencyHz
+	joint.DampingRatio = def.DampingRatio
+	return joint
 }
 
 /// Implements b2Joint.
-func (this *MouseJoint) GetAnchorA() Vec2 {
-	return this.TargetA
+func (joint *MouseJoint) GetAnchorA() Vec2 {
+	return joint.TargetA
 }
 
 /// Implements b2Joint.
-func (this *MouseJoint) GetAnchorB() Vec2 {
-	return this.BodyB.GetWorldPoint(this.LocalAnchorB)
+func (joint *MouseJoint) GetAnchorB() Vec2 {
+	return joint.BodyB.GetWorldPoint(joint.LocalAnchorB)
 }
 
 /// Implements b2Joint.
-func (this *MouseJoint) GetReactionForce(inv_dt float64) Vec2 {
-	return MulFV(inv_dt, this.Impulse)
+func (joint *MouseJoint) GetReactionForce(inv_dt float64) Vec2 {
+	return MulFV(inv_dt, joint.Impulse)
 }
 
 /// Implements b2Joint.
-func (this *MouseJoint) GetReactionTorque(inv_dt float64) float64 {
+func (joint *MouseJoint) GetReactionTorque(inv_dt float64) float64 {
 	return inv_dt * 0.0
 }
 
 /// Use this to update the target point.
-func (this *MouseJoint) SetTarget(target Vec2) {
-	if !this.BodyB.IsAwake() {
-		this.BodyB.SetAwake(true)
+func (joint *MouseJoint) SetTarget(target Vec2) {
+	if !joint.BodyB.IsAwake() {
+		joint.BodyB.SetAwake(true)
 	}
-	this.TargetA = target
+	joint.TargetA = target
 }
 
-func (this *MouseJoint) GetTarget() Vec2 {
-	return this.TargetA
+func (joint *MouseJoint) GetTarget() Vec2 {
+	return joint.TargetA
 }
 
 /// Set/get the maximum force in Newtons.
-func (this *MouseJoint) SetMaxForce(force float64) {
-	this.MaxForce = force
+func (joint *MouseJoint) SetMaxForce(force float64) {
+	joint.MaxForce = force
 }
 
-func (this *MouseJoint) GetMaxForce() float64 {
-	return this.MaxForce
+func (joint *MouseJoint) GetMaxForce() float64 {
+	return joint.MaxForce
 }
 
 /// Set/get the frequency in Hertz.
-func (this *MouseJoint) SetFrequency(hz float64) {
-	this.FrequencyHz = hz
+func (joint *MouseJoint) SetFrequency(hz float64) {
+	joint.FrequencyHz = hz
 }
 
-func (this *MouseJoint) GetFrequency() float64 {
-	return this.FrequencyHz
+func (joint *MouseJoint) GetFrequency() float64 {
+	return joint.FrequencyHz
 }
 
 /// Set/get the damping ratio (dimensionless).
-func (this *MouseJoint) SetDampingRatio(ratio float64) {
-	this.DampingRatio = ratio
+func (joint *MouseJoint) SetDampingRatio(ratio float64) {
+	joint.DampingRatio = ratio
 }
 
-func (this *MouseJoint) GetDampingRatio() float64 {
-	return this.DampingRatio
+func (joint *MouseJoint) GetDampingRatio() float64 {
+	return joint.DampingRatio
 }
 
 /// The mouse joint does not support dumping.
-func (this *MouseJoint) Dump() {
+func (joint *MouseJoint) Dump() {
 	Log("Mouse joint dumping is not supported.\n")
 }
 
-func (this *MouseJoint) InitVelocityConstraints(data *solverData) {
-	this.IndexB = this.BodyB.islandIndex
-	this.LocalCenterB = this.BodyB.sweep.LocalCenter
-	this.InvMassB = this.BodyB.invMass
-	this.InvIB = this.BodyB.invI
+func (joint *MouseJoint) InitVelocityConstraints(data *solverData) {
+	joint.IndexB = joint.BodyB.islandIndex
+	joint.LocalCenterB = joint.BodyB.sweep.LocalCenter
+	joint.InvMassB = joint.BodyB.invMass
+	joint.InvIB = joint.BodyB.invI
 
-	cB := data.positions[this.IndexB].c
-	aB := data.positions[this.IndexB].a
-	vB := data.velocities[this.IndexB].v
-	wB := data.velocities[this.IndexB].w
+	cB := data.positions[joint.IndexB].c
+	aB := data.positions[joint.IndexB].a
+	vB := data.velocities[joint.IndexB].v
+	wB := data.velocities[joint.IndexB].w
 
-	qB := NewRot(aB)
+	qB := MakeRot(aB)
 
-	mass := this.BodyB.GetMass()
+	mass := joint.BodyB.GetMass()
 
 	// Frequency
-	omega := 2.0 * Pi * this.FrequencyHz
+	omega := 2.0 * Pi * joint.FrequencyHz
 
 	// Damping coefficient
-	d := 2.0 * mass * this.DampingRatio * omega
+	d := 2.0 * mass * joint.DampingRatio * omega
 
 	// Spring stiffness
 	k := mass * (omega * omega)
@@ -780,69 +780,69 @@ func (this *MouseJoint) InitVelocityConstraints(data *solverData) {
 	// beta has units of inverse time.
 	h := data.step.dt
 	//b2Assert(d + h * k > b2_epsilon);
-	this.Gamma = h * (d + h*k)
-	if this.Gamma != 0.0 {
-		this.Gamma = 1.0 / this.Gamma
+	joint.Gamma = h * (d + h*k)
+	if joint.Gamma != 0.0 {
+		joint.Gamma = 1.0 / joint.Gamma
 	}
-	this.Beta = h * k * this.Gamma
+	joint.Beta = h * k * joint.Gamma
 
 	// Compute the effective mass matrix.
-	this.RB = MulRV(qB, SubVV(this.LocalAnchorB, this.LocalCenterB))
+	joint.RB = MulRV(qB, SubVV(joint.LocalAnchorB, joint.LocalCenterB))
 
 	// K    = [(1/m1 + 1/m2) * eye(2) - skew(r1) * invI1 * skew(r1) - skew(r2) * invI2 * skew(r2)]
 	//      = [1/m1+1/m2     0    ] + invI1 * [r1.y*r1.y -r1.x*r1.y] + invI2 * [r1.y*r1.y -r1.x*r1.y]
 	//        [    0     1/m1+1/m2]           [-r1.x*r1.y r1.x*r1.x]           [-r1.x*r1.y r1.x*r1.x]
 	var K Mat22
-	K.Ex.X = this.InvMassB + this.InvIB*this.RB.Y*this.RB.Y + this.Gamma
-	K.Ex.Y = -this.InvIB * this.RB.X * this.RB.Y
+	K.Ex.X = joint.InvMassB + joint.InvIB*joint.RB.Y*joint.RB.Y + joint.Gamma
+	K.Ex.Y = -joint.InvIB * joint.RB.X * joint.RB.Y
 	K.Ey.X = K.Ex.Y
-	K.Ey.Y = this.InvMassB + this.InvIB*this.RB.X*this.RB.X + this.Gamma
+	K.Ey.Y = joint.InvMassB + joint.InvIB*joint.RB.X*joint.RB.X + joint.Gamma
 
-	this.Mass = K.GetInverse()
+	joint.Mass = K.GetInverse()
 
-	this.C = SubVV(AddVV(cB, this.RB), this.TargetA)
-	this.C.Mul(this.Beta)
+	joint.C = SubVV(AddVV(cB, joint.RB), joint.TargetA)
+	joint.C.Mul(joint.Beta)
 
 	// Cheat with some damping
 	wB *= 0.98
 
 	if data.step.warmStarting {
-		this.Impulse.Mul(data.step.dtRatio)
-		vB.Add(MulFV(this.InvMassB, this.Impulse))
-		wB += this.InvIB * CrossVV(this.RB, this.Impulse)
+		joint.Impulse.Mul(data.step.dtRatio)
+		vB.Add(MulFV(joint.InvMassB, joint.Impulse))
+		wB += joint.InvIB * CrossVV(joint.RB, joint.Impulse)
 	} else {
-		this.Impulse.SetZero()
+		joint.Impulse.SetZero()
 	}
 
-	data.velocities[this.IndexB].v = vB
-	data.velocities[this.IndexB].w = wB
+	data.velocities[joint.IndexB].v = vB
+	data.velocities[joint.IndexB].w = wB
 }
 
-func (this *MouseJoint) SolveVelocityConstraints(data *solverData) {
-	vB := data.velocities[this.IndexB].v
-	wB := data.velocities[this.IndexB].w
+func (joint *MouseJoint) SolveVelocityConstraints(data *solverData) {
+	vB := data.velocities[joint.IndexB].v
+	wB := data.velocities[joint.IndexB].w
 
 	// Cdot = v + cross(w, r)
-	Cdot := AddVV(vB, CrossFV(wB, this.RB))
-	tmpv := AddVV(AddVV(Cdot, this.C), MulFV(this.Gamma, this.Impulse))
-	impulse := MulMV(this.Mass, tmpv.Minus())
+	Cdot := AddVV(vB, CrossFV(wB, joint.RB))
+	tmpv := AddVV(AddVV(Cdot, joint.C), MulFV(joint.Gamma, joint.Impulse))
+	impulse := MulMV(joint.Mass, tmpv.Minus())
 
-	oldImpulse := this.Impulse
-	this.Impulse.Add(impulse)
-	maxImpulse := data.step.dt * this.MaxForce
-	if this.Impulse.LengthSquared() > maxImpulse*maxImpulse {
-		this.Impulse.Mul(maxImpulse / this.Impulse.Length())
+	oldImpulse := joint.Impulse
+	joint.Impulse.Add(impulse)
+	maxImpulse := data.step.dt * joint.MaxForce
+	if joint.Impulse.LengthSquared() > maxImpulse*maxImpulse {
+		joint.Impulse.Mul(maxImpulse / joint.Impulse.Length())
 	}
-	impulse = SubVV(this.Impulse, oldImpulse)
+	impulse = SubVV(joint.Impulse, oldImpulse)
 
-	vB.Add(MulFV(this.InvMassB, impulse))
-	wB += this.InvIB * CrossVV(this.RB, impulse)
+	vB.Add(MulFV(joint.InvMassB, impulse))
+	wB += joint.InvIB * CrossVV(joint.RB, impulse)
 
-	data.velocities[this.IndexB].v = vB
-	data.velocities[this.IndexB].w = wB
+	data.velocities[joint.IndexB].v = vB
+	data.velocities[joint.IndexB].w = wB
 }
 
-func (this *MouseJoint) SolvePositionConstraints(data *solverData) bool {
+func (joint *MouseJoint) SolvePositionConstraints(data *solverData) bool {
 	return true
 }
 
@@ -887,35 +887,35 @@ type PrismaticJointDef struct {
 }
 
 func MakePrismaticJointDef() PrismaticJointDef {
-	pjd := PrismaticJointDef{}
-	pjd.Type = Joint_e_prismaticJoint
-	pjd.LocalAnchorA.SetZero()
-	pjd.LocalAnchorB.SetZero()
-	pjd.LocalAxisA.Set(1.0, 0.0)
-	pjd.ReferenceAngle = 0.0
-	pjd.EnableLimit = false
-	pjd.LowerTranslation = 0.0
-	pjd.UpperTranslation = 0.0
-	pjd.EnableMotor = false
-	pjd.MaxMotorForce = 0.0
-	pjd.MotorSpeed = 0.0
-	return pjd
+	jd := PrismaticJointDef{}
+	jd.Type = Joint_e_prismaticJoint
+	jd.LocalAnchorA.SetZero()
+	jd.LocalAnchorB.SetZero()
+	jd.LocalAxisA.Set(1.0, 0.0)
+	jd.ReferenceAngle = 0.0
+	jd.EnableLimit = false
+	jd.LowerTranslation = 0.0
+	jd.UpperTranslation = 0.0
+	jd.EnableMotor = false
+	jd.MaxMotorForce = 0.0
+	jd.MotorSpeed = 0.0
+	return jd
 }
 
 func NewPrismaticJointDef() *PrismaticJointDef {
-	pjd := MakePrismaticJointDef()
-	return &pjd
+	jd := MakePrismaticJointDef()
+	return &jd
 }
 
 // Initialize the bodies, anchors, axis, and reference angle using the world
 // anchor and unit world axis.
-func (this *PrismaticJointDef) Initialize(bodyA *Body, bodyB *Body, anchor Vec2, axis Vec2) {
-	this.BodyA = bodyA
-	this.BodyB = bodyB
-	this.LocalAnchorA = bodyA.GetLocalPoint(anchor)
-	this.LocalAnchorB = bodyB.GetLocalPoint(anchor)
-	this.LocalAxisA = bodyA.GetLocalVector(axis)
-	this.ReferenceAngle = bodyB.GetAngle() - bodyA.GetAngle()
+func (jd *PrismaticJointDef) Initialize(bodyA *Body, bodyB *Body, anchor Vec2, axis Vec2) {
+	jd.BodyA = bodyA
+	jd.BodyB = bodyB
+	jd.LocalAnchorA = bodyA.GetLocalPoint(anchor)
+	jd.LocalAnchorB = bodyB.GetLocalPoint(anchor)
+	jd.LocalAxisA = bodyA.GetLocalVector(axis)
+	jd.ReferenceAngle = bodyB.GetAngle() - bodyA.GetAngle()
 }
 
 // A prismatic joint. This joint provides one degree of freedom: translation
@@ -1024,95 +1024,95 @@ type PrismaticJoint struct {
 // df = f2 - f1
 
 func NewPrismaticJoint(def *PrismaticJointDef) *PrismaticJoint {
-	this := new(PrismaticJoint)
-	this.Type = def.Type
-	this.BodyA = def.BodyA
-	this.BodyB = def.BodyB
-	this.CollideConnected = def.CollideConnected
-	this.UserData = def.UserData
+	joint := new(PrismaticJoint)
+	joint.Type = def.Type
+	joint.BodyA = def.BodyA
+	joint.BodyB = def.BodyB
+	joint.CollideConnected = def.CollideConnected
+	joint.UserData = def.UserData
 
-	this.LocalAnchorA = def.LocalAnchorA
-	this.LocalAnchorB = def.LocalAnchorB
-	this.LocalXAxisA = def.LocalAxisA
-	this.LocalXAxisA.Normalize()
-	this.LocalYAxisA = CrossFV(1.0, this.LocalXAxisA)
-	this.ReferenceAngle = def.ReferenceAngle
+	joint.LocalAnchorA = def.LocalAnchorA
+	joint.LocalAnchorB = def.LocalAnchorB
+	joint.LocalXAxisA = def.LocalAxisA
+	joint.LocalXAxisA.Normalize()
+	joint.LocalYAxisA = CrossFV(1.0, joint.LocalXAxisA)
+	joint.ReferenceAngle = def.ReferenceAngle
 
-	this.Impulse.SetZero()
-	this.MotorMass = 0.0
-	this.MotorImpulse = 0.0
+	joint.Impulse.SetZero()
+	joint.MotorMass = 0.0
+	joint.MotorImpulse = 0.0
 
-	this.LowerTranslation = def.LowerTranslation
-	this.UpperTranslation = def.UpperTranslation
-	this.MaxMotorForce = def.MaxMotorForce
-	this.MotorSpeed = def.MotorSpeed
-	this.EnableLimit = def.EnableLimit
-	this.EnableMotor = def.EnableMotor
-	this.LimitState = LimitState_e_inactiveLimit
+	joint.LowerTranslation = def.LowerTranslation
+	joint.UpperTranslation = def.UpperTranslation
+	joint.MaxMotorForce = def.MaxMotorForce
+	joint.MotorSpeed = def.MotorSpeed
+	joint.EnableLimit = def.EnableLimit
+	joint.EnableMotor = def.EnableMotor
+	joint.LimitState = LimitState_e_inactiveLimit
 
-	this.Axis.SetZero()
-	this.Perp.SetZero()
-	return this
+	joint.Axis.SetZero()
+	joint.Perp.SetZero()
+	return joint
 }
 
-func (this *PrismaticJoint) GetAnchorA() Vec2 {
-	return this.BodyA.GetWorldPoint(this.LocalAnchorA)
+func (joint *PrismaticJoint) GetAnchorA() Vec2 {
+	return joint.BodyA.GetWorldPoint(joint.LocalAnchorA)
 }
 
-func (this *PrismaticJoint) GetAnchorB() Vec2 {
-	return this.BodyB.GetWorldPoint(this.LocalAnchorB)
+func (joint *PrismaticJoint) GetAnchorB() Vec2 {
+	return joint.BodyB.GetWorldPoint(joint.LocalAnchorB)
 }
 
-func (this *PrismaticJoint) GetReactionForce(inv_dt float64) Vec2 {
-	return MulFV(inv_dt, AddVV(MulFV(this.Impulse.X, this.Perp), MulFV(this.MotorImpulse+this.Impulse.Z, this.Axis)))
+func (joint *PrismaticJoint) GetReactionForce(inv_dt float64) Vec2 {
+	return MulFV(inv_dt, AddVV(MulFV(joint.Impulse.X, joint.Perp), MulFV(joint.MotorImpulse+joint.Impulse.Z, joint.Axis)))
 }
 
-func (this *PrismaticJoint) GetReactionTorque(inv_dt float64) float64 {
-	return inv_dt * this.Impulse.Y
+func (joint *PrismaticJoint) GetReactionTorque(inv_dt float64) float64 {
+	return inv_dt * joint.Impulse.Y
 }
 
 /// The local anchor point relative to bodyA's origin.
-func (this *PrismaticJoint) GetLocalAnchorA() Vec2 {
-	return this.LocalAnchorA
+func (joint *PrismaticJoint) GetLocalAnchorA() Vec2 {
+	return joint.LocalAnchorA
 }
 
 /// The local anchor point relative to bodyB's origin.
-func (this *PrismaticJoint) GetLocalAnchorB() Vec2 {
-	return this.LocalAnchorB
+func (joint *PrismaticJoint) GetLocalAnchorB() Vec2 {
+	return joint.LocalAnchorB
 }
 
 /// The local joint axis relative to bodyA.
-func (this *PrismaticJoint) GetLocalAxisA() Vec2 {
-	return this.LocalXAxisA
+func (joint *PrismaticJoint) GetLocalAxisA() Vec2 {
+	return joint.LocalXAxisA
 }
 
 /// Get the reference angle.
-func (this *PrismaticJoint) GetReferenceAngle() float64 {
-	return this.ReferenceAngle
+func (joint *PrismaticJoint) GetReferenceAngle() float64 {
+	return joint.ReferenceAngle
 }
 
 /// Get the current joint translation, usually in meters.
-func (this *PrismaticJoint) GetJointTranslation() float64 {
-	pA := this.BodyA.GetWorldPoint(this.LocalAnchorA)
-	pB := this.BodyB.GetWorldPoint(this.LocalAnchorB)
+func (joint *PrismaticJoint) GetJointTranslation() float64 {
+	pA := joint.BodyA.GetWorldPoint(joint.LocalAnchorA)
+	pB := joint.BodyB.GetWorldPoint(joint.LocalAnchorB)
 	d := SubVV(pB, pA)
-	axis := this.BodyA.GetWorldVector(this.LocalXAxisA)
+	axis := joint.BodyA.GetWorldVector(joint.LocalXAxisA)
 
 	translation := DotVV(d, axis)
 	return translation
 }
 
 /// Get the current joint translation speed, usually in meters per second.
-func (this *PrismaticJoint) GetJointSpeed() float64 {
-	bA := this.BodyA
-	bB := this.BodyB
+func (joint *PrismaticJoint) GetJointSpeed() float64 {
+	bA := joint.BodyA
+	bB := joint.BodyB
 
-	rA := MulRV(bA.xf.Q, SubVV(this.LocalAnchorA, bA.sweep.LocalCenter))
-	rB := MulRV(bB.xf.Q, SubVV(this.LocalAnchorB, bB.sweep.LocalCenter))
+	rA := MulRV(bA.xf.Q, SubVV(joint.LocalAnchorA, bA.sweep.LocalCenter))
+	rB := MulRV(bB.xf.Q, SubVV(joint.LocalAnchorB, bB.sweep.LocalCenter))
 	p1 := AddVV(bA.sweep.C, rA)
 	p2 := AddVV(bB.sweep.C, rB)
 	d := SubVV(p2, p1)
-	axis := MulRV(bA.xf.Q, this.LocalXAxisA)
+	axis := MulRV(bA.xf.Q, joint.LocalXAxisA)
 
 	vA := bA.linearVelocity
 	vB := bB.linearVelocity
@@ -1124,186 +1124,186 @@ func (this *PrismaticJoint) GetJointSpeed() float64 {
 }
 
 /// Is the joint limit enabled?
-func (this *PrismaticJoint) IsLimitEnabled() bool {
-	return this.EnableLimit
+func (joint *PrismaticJoint) IsLimitEnabled() bool {
+	return joint.EnableLimit
 }
 
 /// Enable/disable the joint limit.
-func (this *PrismaticJoint) SetEnableLimit(flag bool) {
-	if flag != this.EnableLimit {
-		this.BodyA.SetAwake(true)
-		this.BodyB.SetAwake(true)
-		this.EnableLimit = flag
-		this.Impulse.Z = 0.0
+func (joint *PrismaticJoint) SetEnableLimit(flag bool) {
+	if flag != joint.EnableLimit {
+		joint.BodyA.SetAwake(true)
+		joint.BodyB.SetAwake(true)
+		joint.EnableLimit = flag
+		joint.Impulse.Z = 0.0
 	}
 }
 
 /// Get the lower joint limit, usually in meters.
-func (this *PrismaticJoint) GetLowerLimit() float64 {
-	return this.LowerTranslation
+func (joint *PrismaticJoint) GetLowerLimit() float64 {
+	return joint.LowerTranslation
 }
 
 /// Get the upper joint limit, usually in meters.
-func (this *PrismaticJoint) GetUpperLimit() float64 {
-	return this.UpperTranslation
+func (joint *PrismaticJoint) GetUpperLimit() float64 {
+	return joint.UpperTranslation
 }
 
 /// Set the joint limits, usually in meters.
-func (this *PrismaticJoint) SetLimits(lower float64, upper float64) {
+func (joint *PrismaticJoint) SetLimits(lower float64, upper float64) {
 	//b2Assert(lower <= upper);
-	if lower != this.LowerTranslation || upper != this.UpperTranslation {
-		this.BodyA.SetAwake(true)
-		this.BodyB.SetAwake(true)
-		this.LowerTranslation = lower
-		this.UpperTranslation = upper
-		this.Impulse.Z = 0.0
+	if lower != joint.LowerTranslation || upper != joint.UpperTranslation {
+		joint.BodyA.SetAwake(true)
+		joint.BodyB.SetAwake(true)
+		joint.LowerTranslation = lower
+		joint.UpperTranslation = upper
+		joint.Impulse.Z = 0.0
 	}
 }
 
 /// Is the joint motor enabled?
-func (this *PrismaticJoint) IsMotorEnabled() bool {
-	return this.EnableMotor
+func (joint *PrismaticJoint) IsMotorEnabled() bool {
+	return joint.EnableMotor
 }
 
 /// Enable/disable the joint motor.
-func (this *PrismaticJoint) SetEnableMotor(flag bool) {
-	this.BodyA.SetAwake(true)
-	this.BodyB.SetAwake(true)
-	this.EnableMotor = flag
+func (joint *PrismaticJoint) SetEnableMotor(flag bool) {
+	joint.BodyA.SetAwake(true)
+	joint.BodyB.SetAwake(true)
+	joint.EnableMotor = flag
 }
 
 /// Set the motor speed, usually in meters per second.
-func (this *PrismaticJoint) SetMotorSpeed(speed float64) {
-	this.BodyA.SetAwake(true)
-	this.BodyB.SetAwake(true)
-	this.MotorSpeed = speed
+func (joint *PrismaticJoint) SetMotorSpeed(speed float64) {
+	joint.BodyA.SetAwake(true)
+	joint.BodyB.SetAwake(true)
+	joint.MotorSpeed = speed
 }
 
 /// Get the motor speed, usually in meters per second.
-func (this *PrismaticJoint) GetMotorSpeed() float64 {
-	return this.MotorSpeed
+func (joint *PrismaticJoint) GetMotorSpeed() float64 {
+	return joint.MotorSpeed
 }
 
 /// Set the maximum motor force, usually in N.
-func (this *PrismaticJoint) SetMaxMotorForce(force float64) {
-	this.BodyA.SetAwake(true)
-	this.BodyB.SetAwake(true)
-	this.MaxMotorForce = force
+func (joint *PrismaticJoint) SetMaxMotorForce(force float64) {
+	joint.BodyA.SetAwake(true)
+	joint.BodyB.SetAwake(true)
+	joint.MaxMotorForce = force
 }
 
-func (this *PrismaticJoint) GetMaxMotorForce() float64 {
-	return this.MaxMotorForce
+func (joint *PrismaticJoint) GetMaxMotorForce() float64 {
+	return joint.MaxMotorForce
 }
 
 /// Get the current motor force given the inverse time step, usually in N.
-func (this *PrismaticJoint) GetMotorForce(inv_dt float64) float64 {
-	return inv_dt * this.MotorImpulse
+func (joint *PrismaticJoint) GetMotorForce(inv_dt float64) float64 {
+	return inv_dt * joint.MotorImpulse
 }
 
-func (this *PrismaticJoint) InitVelocityConstraints(data *solverData) {
-	this.IndexA = this.BodyA.islandIndex
-	this.IndexB = this.BodyB.islandIndex
-	this.LocalCenterA = this.BodyA.sweep.LocalCenter
-	this.LocalCenterB = this.BodyB.sweep.LocalCenter
-	this.InvMassA = this.BodyA.invMass
-	this.InvMassB = this.BodyB.invMass
-	this.InvIA = this.BodyA.invI
-	this.InvIB = this.BodyB.invI
+func (joint *PrismaticJoint) InitVelocityConstraints(data *solverData) {
+	joint.IndexA = joint.BodyA.islandIndex
+	joint.IndexB = joint.BodyB.islandIndex
+	joint.LocalCenterA = joint.BodyA.sweep.LocalCenter
+	joint.LocalCenterB = joint.BodyB.sweep.LocalCenter
+	joint.InvMassA = joint.BodyA.invMass
+	joint.InvMassB = joint.BodyB.invMass
+	joint.InvIA = joint.BodyA.invI
+	joint.InvIB = joint.BodyB.invI
 
-	cA := data.positions[this.IndexA].c
-	aA := data.positions[this.IndexA].a
-	vA := data.velocities[this.IndexA].v
-	wA := data.velocities[this.IndexA].w
+	cA := data.positions[joint.IndexA].c
+	aA := data.positions[joint.IndexA].a
+	vA := data.velocities[joint.IndexA].v
+	wA := data.velocities[joint.IndexA].w
 
-	cB := data.positions[this.IndexB].c
-	aB := data.positions[this.IndexB].a
-	vB := data.velocities[this.IndexB].v
-	wB := data.velocities[this.IndexB].w
+	cB := data.positions[joint.IndexB].c
+	aB := data.positions[joint.IndexB].a
+	vB := data.velocities[joint.IndexB].v
+	wB := data.velocities[joint.IndexB].w
 
-	qA := NewRot(aA)
-	qB := NewRot(aB)
+	qA := MakeRot(aA)
+	qB := MakeRot(aB)
 
 	// Compute the effective masses.
-	rA := MulRV(qA, SubVV(this.LocalAnchorA, this.LocalCenterA))
-	rB := MulRV(qB, SubVV(this.LocalAnchorB, this.LocalCenterB))
+	rA := MulRV(qA, SubVV(joint.LocalAnchorA, joint.LocalCenterA))
+	rB := MulRV(qB, SubVV(joint.LocalAnchorB, joint.LocalCenterB))
 	d := AddVV(SubVV(cB, cA), SubVV(rB, rA))
 
-	mA := this.InvMassA
-	mB := this.InvMassB
-	iA := this.InvIA
-	iB := this.InvIB
+	mA := joint.InvMassA
+	mB := joint.InvMassB
+	iA := joint.InvIA
+	iB := joint.InvIB
 
 	// Compute motor Jacobian and effective mass.
 	{
-		this.Axis = MulRV(qA, this.LocalXAxisA)
-		this.A1 = CrossVV(AddVV(d, rA), this.Axis)
-		this.A2 = CrossVV(rB, this.Axis)
+		joint.Axis = MulRV(qA, joint.LocalXAxisA)
+		joint.A1 = CrossVV(AddVV(d, rA), joint.Axis)
+		joint.A2 = CrossVV(rB, joint.Axis)
 
-		this.MotorMass = mA + mB + iA*this.A1*this.A1 + iB*this.A2*this.A2
-		if this.MotorMass > 0.0 {
-			this.MotorMass = 1.0 / this.MotorMass
+		joint.MotorMass = mA + mB + iA*joint.A1*joint.A1 + iB*joint.A2*joint.A2
+		if joint.MotorMass > 0.0 {
+			joint.MotorMass = 1.0 / joint.MotorMass
 		}
 	}
 
 	// Prismatic constraint.
 	{
-		this.Perp = MulRV(qA, this.LocalYAxisA)
+		joint.Perp = MulRV(qA, joint.LocalYAxisA)
 
-		this.S1 = CrossVV(AddVV(d, rA), this.Perp)
-		this.S2 = CrossVV(rB, this.Perp)
+		joint.S1 = CrossVV(AddVV(d, rA), joint.Perp)
+		joint.S2 = CrossVV(rB, joint.Perp)
 
-		k11 := mA + mB + iA*this.S1*this.S1 + iB*this.S2*this.S2
-		k12 := iA*this.S1 + iB*this.S2
-		k13 := iA*this.S1*this.A1 + iB*this.S2*this.A2
+		k11 := mA + mB + iA*joint.S1*joint.S1 + iB*joint.S2*joint.S2
+		k12 := iA*joint.S1 + iB*joint.S2
+		k13 := iA*joint.S1*joint.A1 + iB*joint.S2*joint.A2
 		k22 := iA + iB
 		if k22 == 0.0 {
 			// For bodies with fixed rotation.
 			k22 = 1.0
 		}
-		k23 := iA*this.A1 + iB*this.A2
-		k33 := mA + mB + iA*this.A1*this.A1 + iB*this.A2*this.A2
+		k23 := iA*joint.A1 + iB*joint.A2
+		k33 := mA + mB + iA*joint.A1*joint.A1 + iB*joint.A2*joint.A2
 
-		this.K.Ex.Set(k11, k12, k13)
-		this.K.Ey.Set(k12, k22, k23)
-		this.K.Ez.Set(k13, k23, k33)
+		joint.K.Ex.Set(k11, k12, k13)
+		joint.K.Ey.Set(k12, k22, k23)
+		joint.K.Ez.Set(k13, k23, k33)
 	}
 
 	// Compute motor and limit terms.
-	if this.EnableLimit {
-		jointTranslation := DotVV(this.Axis, d)
-		if AbsF(this.UpperTranslation-this.LowerTranslation) < 2.0*LinearSlop {
-			this.LimitState = LimitState_e_equalLimits
-		} else if jointTranslation <= this.LowerTranslation {
-			if this.LimitState != LimitState_e_atLowerLimit {
-				this.LimitState = LimitState_e_atLowerLimit
-				this.Impulse.Z = 0.0
+	if joint.EnableLimit {
+		jointTranslation := DotVV(joint.Axis, d)
+		if AbsF(joint.UpperTranslation-joint.LowerTranslation) < 2.0*LinearSlop {
+			joint.LimitState = LimitState_e_equalLimits
+		} else if jointTranslation <= joint.LowerTranslation {
+			if joint.LimitState != LimitState_e_atLowerLimit {
+				joint.LimitState = LimitState_e_atLowerLimit
+				joint.Impulse.Z = 0.0
 			}
-		} else if jointTranslation >= this.UpperTranslation {
-			if this.LimitState != LimitState_e_atUpperLimit {
-				this.LimitState = LimitState_e_atUpperLimit
-				this.Impulse.Z = 0.0
+		} else if jointTranslation >= joint.UpperTranslation {
+			if joint.LimitState != LimitState_e_atUpperLimit {
+				joint.LimitState = LimitState_e_atUpperLimit
+				joint.Impulse.Z = 0.0
 			}
 		} else {
-			this.LimitState = LimitState_e_inactiveLimit
-			this.Impulse.Z = 0.0
+			joint.LimitState = LimitState_e_inactiveLimit
+			joint.Impulse.Z = 0.0
 		}
 	} else {
-		this.LimitState = LimitState_e_inactiveLimit
-		this.Impulse.Z = 0.0
+		joint.LimitState = LimitState_e_inactiveLimit
+		joint.Impulse.Z = 0.0
 	}
 
-	if !this.EnableMotor {
-		this.MotorImpulse = 0.0
+	if !joint.EnableMotor {
+		joint.MotorImpulse = 0.0
 	}
 
 	if data.step.warmStarting {
 		// Account for variable time step.
-		this.Impulse.Mul(data.step.dtRatio)
-		this.MotorImpulse *= data.step.dtRatio
+		joint.Impulse.Mul(data.step.dtRatio)
+		joint.MotorImpulse *= data.step.dtRatio
 
-		P := AddVV(MulFV(this.Impulse.X, this.Perp), MulFV(this.MotorImpulse+this.Impulse.Z, this.Axis))
-		LA := this.Impulse.X*this.S1 + this.Impulse.Y + (this.MotorImpulse+this.Impulse.Z)*this.A1
-		LB := this.Impulse.X*this.S2 + this.Impulse.Y + (this.MotorImpulse+this.Impulse.Z)*this.A2
+		P := AddVV(MulFV(joint.Impulse.X, joint.Perp), MulFV(joint.MotorImpulse+joint.Impulse.Z, joint.Axis))
+		LA := joint.Impulse.X*joint.S1 + joint.Impulse.Y + (joint.MotorImpulse+joint.Impulse.Z)*joint.A1
+		LB := joint.Impulse.X*joint.S2 + joint.Impulse.Y + (joint.MotorImpulse+joint.Impulse.Z)*joint.A2
 
 		vA.Sub(MulFV(mA, P))
 		wA -= iA * LA
@@ -1311,39 +1311,39 @@ func (this *PrismaticJoint) InitVelocityConstraints(data *solverData) {
 		vB.Add(MulFV(mB, P))
 		wB += iB * LB
 	} else {
-		this.Impulse.SetZero()
-		this.MotorImpulse = 0.0
+		joint.Impulse.SetZero()
+		joint.MotorImpulse = 0.0
 	}
 
-	data.velocities[this.IndexA].v = vA
-	data.velocities[this.IndexA].w = wA
-	data.velocities[this.IndexB].v = vB
-	data.velocities[this.IndexB].w = wB
+	data.velocities[joint.IndexA].v = vA
+	data.velocities[joint.IndexA].w = wA
+	data.velocities[joint.IndexB].v = vB
+	data.velocities[joint.IndexB].w = wB
 }
 
-func (this *PrismaticJoint) SolveVelocityConstraints(data *solverData) {
-	vA := data.velocities[this.IndexA].v
-	wA := data.velocities[this.IndexA].w
-	vB := data.velocities[this.IndexB].v
-	wB := data.velocities[this.IndexB].w
+func (joint *PrismaticJoint) SolveVelocityConstraints(data *solverData) {
+	vA := data.velocities[joint.IndexA].v
+	wA := data.velocities[joint.IndexA].w
+	vB := data.velocities[joint.IndexB].v
+	wB := data.velocities[joint.IndexB].w
 
-	mA := this.InvMassA
-	mB := this.InvMassB
-	iA := this.InvIA
-	iB := this.InvIB
+	mA := joint.InvMassA
+	mB := joint.InvMassB
+	iA := joint.InvIA
+	iB := joint.InvIB
 
 	// Solve linear motor constraint.
-	if this.EnableMotor && this.LimitState != LimitState_e_equalLimits {
-		Cdot := DotVV(this.Axis, SubVV(vB, vA)) + this.A2*wB - this.A1*wA
-		impulse := this.MotorMass * (this.MotorSpeed - Cdot)
-		oldImpulse := this.MotorImpulse
-		maxImpulse := data.step.dt * this.MaxMotorForce
-		this.MotorImpulse = ClampF(this.MotorImpulse+impulse, -maxImpulse, maxImpulse)
-		impulse = this.MotorImpulse - oldImpulse
+	if joint.EnableMotor && joint.LimitState != LimitState_e_equalLimits {
+		Cdot := DotVV(joint.Axis, SubVV(vB, vA)) + joint.A2*wB - joint.A1*wA
+		impulse := joint.MotorMass * (joint.MotorSpeed - Cdot)
+		oldImpulse := joint.MotorImpulse
+		maxImpulse := data.step.dt * joint.MaxMotorForce
+		joint.MotorImpulse = ClampF(joint.MotorImpulse+impulse, -maxImpulse, maxImpulse)
+		impulse = joint.MotorImpulse - oldImpulse
 
-		P := MulFV(impulse, this.Axis)
-		LA := impulse * this.A1
-		LB := impulse * this.A2
+		P := MulFV(impulse, joint.Axis)
+		LA := impulse * joint.A1
+		LB := impulse * joint.A2
 
 		vA.Sub(MulFV(mA, P))
 		wA -= iA * LA
@@ -1353,36 +1353,35 @@ func (this *PrismaticJoint) SolveVelocityConstraints(data *solverData) {
 	}
 
 	var Cdot1 Vec2
-	Cdot1.X = DotVV(this.Perp, SubVV(vB, vA)) + this.S2*wB - this.S1*wA
+	Cdot1.X = DotVV(joint.Perp, SubVV(vB, vA)) + joint.S2*wB - joint.S1*wA
 	Cdot1.Y = wB - wA
 
-	if this.EnableLimit && this.LimitState != LimitState_e_inactiveLimit {
+	if joint.EnableLimit && joint.LimitState != LimitState_e_inactiveLimit {
 		// Solve prismatic and limit constraint in block form.
-		var Cdot2 float64
-		Cdot2 = DotVV(this.Axis, SubVV(vB, vA)) + this.A2*wB - this.A1*wA
+		Cdot2 := DotVV(joint.Axis, SubVV(vB, vA)) + joint.A2*wB - joint.A1*wA
 		Cdot := Vec3{Cdot1.X, Cdot1.Y, Cdot2}
 
-		f1 := this.Impulse
-		df := this.K.Solve33(Cdot.Minus())
-		this.Impulse.Add(df)
+		f1 := joint.Impulse
+		df := joint.K.Solve33(Cdot.Minus())
+		joint.Impulse.Add(df)
 
-		if this.LimitState == LimitState_e_atLowerLimit {
-			this.Impulse.Z = MaxF(this.Impulse.Z, 0.0)
-		} else if this.LimitState == LimitState_e_atUpperLimit {
-			this.Impulse.Z = MinF(this.Impulse.Z, 0.0)
+		if joint.LimitState == LimitState_e_atLowerLimit {
+			joint.Impulse.Z = MaxF(joint.Impulse.Z, 0.0)
+		} else if joint.LimitState == LimitState_e_atUpperLimit {
+			joint.Impulse.Z = MinF(joint.Impulse.Z, 0.0)
 		}
 
 		// f2(1:2) = invK(1:2,1:2) * (-Cdot(1:2) - K(1:2,3) * (f2(3) - f1(3))) + f1(1:2)
-		b := SubVV(Cdot1.Minus(), MulFV((this.Impulse.Z-f1.Z), Vec2{this.K.Ez.X, this.K.Ez.Y}))
-		f2r := AddVV(this.K.Solve22(b), Vec2{f1.X, f1.Y})
-		this.Impulse.X = f2r.X
-		this.Impulse.Y = f2r.Y
+		b := SubVV(Cdot1.Minus(), MulFV((joint.Impulse.Z-f1.Z), Vec2{joint.K.Ez.X, joint.K.Ez.Y}))
+		f2r := AddVV(joint.K.Solve22(b), Vec2{f1.X, f1.Y})
+		joint.Impulse.X = f2r.X
+		joint.Impulse.Y = f2r.Y
 
-		df = SubV3V3(this.Impulse, f1)
+		df = SubV3V3(joint.Impulse, f1)
 
-		P := AddVV(MulFV(df.X, this.Perp), MulFV(df.Z, this.Axis))
-		LA := df.X*this.S1 + df.Y + df.Z*this.A1
-		LB := df.X*this.S2 + df.Y + df.Z*this.A2
+		P := AddVV(MulFV(df.X, joint.Perp), MulFV(df.Z, joint.Axis))
+		LA := df.X*joint.S1 + df.Y + df.Z*joint.A1
+		LB := df.X*joint.S2 + df.Y + df.Z*joint.A2
 
 		vA.Sub(MulFV(mA, P))
 		wA -= iA * LA
@@ -1391,13 +1390,13 @@ func (this *PrismaticJoint) SolveVelocityConstraints(data *solverData) {
 		wB += iB * LB
 	} else {
 		// Limit is inactive, just solve the prismatic constraint in block form.
-		df := this.K.Solve22(Cdot1.Minus())
-		this.Impulse.X += df.X
-		this.Impulse.Y += df.Y
+		df := joint.K.Solve22(Cdot1.Minus())
+		joint.Impulse.X += df.X
+		joint.Impulse.Y += df.Y
 
-		P := MulFV(df.X, this.Perp)
-		LA := df.X*this.S1 + df.Y
-		LB := df.X*this.S2 + df.Y
+		P := MulFV(df.X, joint.Perp)
+		LA := df.X*joint.S1 + df.Y
+		LB := df.X*joint.S2 + df.Y
 
 		vA.Sub(MulFV(mA, P))
 		wA -= iA * LA
@@ -1407,44 +1406,44 @@ func (this *PrismaticJoint) SolveVelocityConstraints(data *solverData) {
 
 		//Cdot10 := Cdot1
 
-		Cdot1.X = DotVV(this.Perp, SubVV(vB, vA)) + this.S2*wB - this.S1*wA
+		Cdot1.X = DotVV(joint.Perp, SubVV(vB, vA)) + joint.S2*wB - joint.S1*wA
 		Cdot1.Y = wB - wA
 
 		if AbsF(Cdot1.X) > 0.01 || AbsF(Cdot1.Y) > 0.01 {
-			//test := MulM3V(this.K, df)
+			//test := MulM3V(joint.K, df)
 			Cdot1.X += 0.0
 		}
 	}
 
-	data.velocities[this.IndexA].v = vA
-	data.velocities[this.IndexA].w = wA
-	data.velocities[this.IndexB].v = vB
-	data.velocities[this.IndexB].w = wB
+	data.velocities[joint.IndexA].v = vA
+	data.velocities[joint.IndexA].w = wA
+	data.velocities[joint.IndexB].v = vB
+	data.velocities[joint.IndexB].w = wB
 }
 
-func (this *PrismaticJoint) SolvePositionConstraints(data *solverData) bool {
-	cA := data.positions[this.IndexA].c
-	aA := data.positions[this.IndexA].a
-	cB := data.positions[this.IndexB].c
-	aB := data.positions[this.IndexB].a
+func (joint *PrismaticJoint) SolvePositionConstraints(data *solverData) bool {
+	cA := data.positions[joint.IndexA].c
+	aA := data.positions[joint.IndexA].a
+	cB := data.positions[joint.IndexB].c
+	aB := data.positions[joint.IndexB].a
 
-	qA := NewRot(aA)
-	qB := NewRot(aB)
+	qA := MakeRot(aA)
+	qB := MakeRot(aB)
 
-	mA := this.InvMassA
-	mB := this.InvMassB
-	iA := this.InvIA
-	iB := this.InvIB
+	mA := joint.InvMassA
+	mB := joint.InvMassB
+	iA := joint.InvIA
+	iB := joint.InvIB
 
 	// Compute fresh Jacobians
-	rA := MulRV(qA, SubVV(this.LocalAnchorA, this.LocalCenterA))
-	rB := MulRV(qB, SubVV(this.LocalAnchorB, this.LocalCenterB))
+	rA := MulRV(qA, SubVV(joint.LocalAnchorA, joint.LocalCenterA))
+	rB := MulRV(qB, SubVV(joint.LocalAnchorB, joint.LocalCenterB))
 	d := SubVV(AddVV(cB, rB), AddVV(cA, rA))
 
-	axis := MulRV(qA, this.LocalXAxisA)
+	axis := MulRV(qA, joint.LocalXAxisA)
 	a1 := CrossVV(AddVV(d, rA), axis)
 	a2 := CrossVV(rB, axis)
-	perp := MulRV(qA, this.LocalYAxisA)
+	perp := MulRV(qA, joint.LocalYAxisA)
 
 	s1 := CrossVV(AddVV(d, rA), perp)
 	s2 := CrossVV(rB, perp)
@@ -1452,29 +1451,29 @@ func (this *PrismaticJoint) SolvePositionConstraints(data *solverData) bool {
 	var impulse Vec3
 	var C1 Vec2
 	C1.X = DotVV(perp, d)
-	C1.Y = aB - aA - this.ReferenceAngle
+	C1.Y = aB - aA - joint.ReferenceAngle
 
 	linearError := AbsF(C1.X)
 	angularError := AbsF(C1.Y)
 
 	active := false
 	C2 := 0.0
-	if this.EnableLimit {
+	if joint.EnableLimit {
 		translation := DotVV(axis, d)
-		if AbsF(this.UpperTranslation-this.LowerTranslation) < 2.0*LinearSlop {
+		if AbsF(joint.UpperTranslation-joint.LowerTranslation) < 2.0*LinearSlop {
 			// Prevent large angular corrections
 			C2 = ClampF(translation, -MaxLinearCorrection, MaxLinearCorrection)
 			linearError = MaxF(linearError, AbsF(translation))
 			active = true
-		} else if translation <= this.LowerTranslation {
+		} else if translation <= joint.LowerTranslation {
 			// Prevent large linear corrections and allow some slop.
-			C2 = ClampF(translation-this.LowerTranslation+LinearSlop, -MaxLinearCorrection, 0.0)
-			linearError = MaxF(linearError, this.LowerTranslation-translation)
+			C2 = ClampF(translation-joint.LowerTranslation+LinearSlop, -MaxLinearCorrection, 0.0)
+			linearError = MaxF(linearError, joint.LowerTranslation-translation)
 			active = true
-		} else if translation >= this.UpperTranslation {
+		} else if translation >= joint.UpperTranslation {
 			// Prevent large linear corrections and allow some slop.
-			C2 = ClampF(translation-this.UpperTranslation-LinearSlop, 0.0, MaxLinearCorrection)
-			linearError = MaxF(linearError, translation-this.UpperTranslation)
+			C2 = ClampF(translation-joint.UpperTranslation-LinearSlop, 0.0, MaxLinearCorrection)
+			linearError = MaxF(linearError, translation-joint.UpperTranslation)
 			active = true
 		}
 	}
@@ -1529,34 +1528,34 @@ func (this *PrismaticJoint) SolvePositionConstraints(data *solverData) bool {
 	cB.Add(MulFV(mB, P))
 	aB += iB * LB
 
-	data.positions[this.IndexA].c = cA
-	data.positions[this.IndexA].a = aA
-	data.positions[this.IndexB].c = cB
-	data.positions[this.IndexB].a = aB
+	data.positions[joint.IndexA].c = cA
+	data.positions[joint.IndexA].a = aA
+	data.positions[joint.IndexB].c = cB
+	data.positions[joint.IndexB].a = aB
 
 	return linearError <= LinearSlop && angularError <= AngularSlop
 }
 
 /// Dump to b2Log
-func (this *PrismaticJoint) Dump() {
-	indexA := this.BodyA.islandIndex
-	indexB := this.BodyB.islandIndex
+func (joint *PrismaticJoint) Dump() {
+	indexA := joint.BodyA.islandIndex
+	indexB := joint.BodyB.islandIndex
 
 	Log("  b2PrismaticJointDef jd;\n")
 	Log("  jd.bodyA = bodies[%d];\n", indexA)
 	Log("  jd.bodyB = bodies[%d];\n", indexB)
-	Log("  jd.collideConnected = bool(%d);\n", this.CollideConnected)
-	Log("  jd.localAnchorA.Set(%.15lef, %.15lef);\n", this.LocalAnchorA.X, this.LocalAnchorA.Y)
-	Log("  jd.localAnchorB.Set(%.15lef, %.15lef);\n", this.LocalAnchorB.X, this.LocalAnchorB.Y)
-	Log("  jd.localAxisA.Set(%.15lef, %.15lef);\n", this.LocalXAxisA.X, this.LocalXAxisA.Y)
-	Log("  jd.referenceAngle = %.15lef;\n", this.ReferenceAngle)
-	Log("  jd.enableLimit = bool(%d);\n", this.EnableLimit)
-	Log("  jd.lowerTranslation = %.15lef;\n", this.LowerTranslation)
-	Log("  jd.upperTranslation = %.15lef;\n", this.UpperTranslation)
-	Log("  jd.enableMotor = bool(%d);\n", this.EnableMotor)
-	Log("  jd.motorSpeed = %.15lef;\n", this.MotorSpeed)
-	Log("  jd.maxMotorForce = %.15lef;\n", this.MaxMotorForce)
-	Log("  joints[%d] = m_world->CreateJoint(&jd);\n", this.Index)
+	Log("  jd.collideConnected = bool(%t);\n", joint.CollideConnected)
+	Log("  jd.localAnchorA.Set(%.15e, %.15e);\n", joint.LocalAnchorA.X, joint.LocalAnchorA.Y)
+	Log("  jd.localAnchorB.Set(%.15e, %.15e);\n", joint.LocalAnchorB.X, joint.LocalAnchorB.Y)
+	Log("  jd.localAxisA.Set(%.15e, %.15e);\n", joint.LocalXAxisA.X, joint.LocalXAxisA.Y)
+	Log("  jd.referenceAngle = %.15e;\n", joint.ReferenceAngle)
+	Log("  jd.enableLimit = bool(%t);\n", joint.EnableLimit)
+	Log("  jd.lowerTranslation = %.15e;\n", joint.LowerTranslation)
+	Log("  jd.upperTranslation = %.15e;\n", joint.UpperTranslation)
+	Log("  jd.enableMotor = bool(%t);\n", joint.EnableMotor)
+	Log("  jd.motorSpeed = %.15e;\n", joint.MotorSpeed)
+	Log("  jd.maxMotorForce = %.15e;\n", joint.MaxMotorForce)
+	Log("  joints[%d] = m_world->CreateJoint(&jd);\n", joint.Index)
 }
 
 /// Revolute joint definition. This requires defining an
@@ -1627,12 +1626,12 @@ func NewRevoluteJointDef() *RevoluteJointDef {
 
 /// Initialize the bodies, anchors, and reference angle using a world
 /// anchor point.
-func (this *RevoluteJointDef) Initialize(bodyA *Body, bodyB *Body, anchor Vec2) {
-	this.BodyA = bodyA
-	this.BodyB = bodyB
-	this.LocalAnchorA = bodyA.GetLocalPoint(anchor)
-	this.LocalAnchorB = bodyB.GetLocalPoint(anchor)
-	this.ReferenceAngle = bodyB.GetAngle() - bodyA.GetAngle()
+func (jd *RevoluteJointDef) Initialize(bodyA *Body, bodyB *Body, anchor Vec2) {
+	jd.BodyA = bodyA
+	jd.BodyB = bodyB
+	jd.LocalAnchorA = bodyA.GetLocalPoint(anchor)
+	jd.LocalAnchorB = bodyB.GetLocalPoint(anchor)
+	jd.ReferenceAngle = bodyB.GetAngle() - bodyA.GetAngle()
 }
 
 /// A revolute joint constrains two bodies to share a common point while they
@@ -1688,183 +1687,183 @@ type RevoluteJoint struct {
 // J = [0 0 -1 0 0 1]
 // K = invI1 + invI2
 func NewRevoluteJoint(def *RevoluteJointDef) *RevoluteJoint {
-	this := new(RevoluteJoint)
-	this.Type = def.Type
-	this.BodyA = def.BodyA
-	this.BodyB = def.BodyB
-	this.CollideConnected = def.CollideConnected
-	this.UserData = def.UserData
+	joint := new(RevoluteJoint)
+	joint.Type = def.Type
+	joint.BodyA = def.BodyA
+	joint.BodyB = def.BodyB
+	joint.CollideConnected = def.CollideConnected
+	joint.UserData = def.UserData
 
-	this.LocalAnchorA = def.LocalAnchorA
-	this.LocalAnchorB = def.LocalAnchorB
-	this.ReferenceAngle = def.ReferenceAngle
+	joint.LocalAnchorA = def.LocalAnchorA
+	joint.LocalAnchorB = def.LocalAnchorB
+	joint.ReferenceAngle = def.ReferenceAngle
 
-	this.Impulse.SetZero()
-	this.MotorImpulse = 0.0
+	joint.Impulse.SetZero()
+	joint.MotorImpulse = 0.0
 
-	this.LowerAngle = def.LowerAngle
-	this.UpperAngle = def.UpperAngle
-	this.MaxMotorTorque = def.MaxMotorTorque
-	this.MotorSpeed = def.MotorSpeed
-	this.EnableLimit = def.EnableLimit
-	this.EnableMotor = def.EnableMotor
-	this.LimitState = LimitState_e_inactiveLimit
-	return this
+	joint.LowerAngle = def.LowerAngle
+	joint.UpperAngle = def.UpperAngle
+	joint.MaxMotorTorque = def.MaxMotorTorque
+	joint.MotorSpeed = def.MotorSpeed
+	joint.EnableLimit = def.EnableLimit
+	joint.EnableMotor = def.EnableMotor
+	joint.LimitState = LimitState_e_inactiveLimit
+	return joint
 }
 
-func (this *RevoluteJoint) GetAnchorA() Vec2 {
-	return this.BodyA.GetWorldPoint(this.LocalAnchorA)
+func (joint *RevoluteJoint) GetAnchorA() Vec2 {
+	return joint.BodyA.GetWorldPoint(joint.LocalAnchorA)
 }
 
-func (this *RevoluteJoint) GetAnchorB() Vec2 {
-	return this.BodyB.GetWorldPoint(this.LocalAnchorB)
+func (joint *RevoluteJoint) GetAnchorB() Vec2 {
+	return joint.BodyB.GetWorldPoint(joint.LocalAnchorB)
 }
 
 /// The local anchor point relative to bodyA's origin.
-func (this *RevoluteJoint) GetLocalAnchorA() Vec2 {
-	return this.LocalAnchorA
+func (joint *RevoluteJoint) GetLocalAnchorA() Vec2 {
+	return joint.LocalAnchorA
 }
 
 /// The local anchor point relative to bodyB's origin.
-func (this *RevoluteJoint) GetLocalAnchorB() Vec2 {
-	return this.LocalAnchorB
+func (joint *RevoluteJoint) GetLocalAnchorB() Vec2 {
+	return joint.LocalAnchorB
 }
 
 /// Get the reference angle.
-func (this *RevoluteJoint) GetReferenceAngle() float64 {
-	return this.ReferenceAngle
+func (joint *RevoluteJoint) GetReferenceAngle() float64 {
+	return joint.ReferenceAngle
 }
 
 /// Get the current joint angle in radians.
-func (this *RevoluteJoint) GetJointAngle() float64 {
-	bA := this.BodyA
-	bB := this.BodyB
-	return bB.sweep.A - bA.sweep.A - this.ReferenceAngle
+func (joint *RevoluteJoint) GetJointAngle() float64 {
+	bA := joint.BodyA
+	bB := joint.BodyB
+	return bB.sweep.A - bA.sweep.A - joint.ReferenceAngle
 }
 
 /// Get the current joint angle speed in radians per second.
-func (this *RevoluteJoint) GetJointSpeed() float64 {
-	bA := this.BodyA
-	bB := this.BodyB
+func (joint *RevoluteJoint) GetJointSpeed() float64 {
+	bA := joint.BodyA
+	bB := joint.BodyB
 	return bB.angularVelocity - bA.angularVelocity
 }
 
 /// Is the joint limit enabled?
-func (this *RevoluteJoint) IsLimitEnabled() bool {
-	return this.EnableLimit
+func (joint *RevoluteJoint) IsLimitEnabled() bool {
+	return joint.EnableLimit
 }
 
 /// Enable/disable the joint limit.
-func (this *RevoluteJoint) SetEnableLimit(flag bool) {
-	if flag != this.EnableLimit {
-		this.BodyA.SetAwake(true)
-		this.BodyB.SetAwake(true)
-		this.EnableLimit = flag
-		this.Impulse.Z = 0.0
+func (joint *RevoluteJoint) SetEnableLimit(flag bool) {
+	if flag != joint.EnableLimit {
+		joint.BodyA.SetAwake(true)
+		joint.BodyB.SetAwake(true)
+		joint.EnableLimit = flag
+		joint.Impulse.Z = 0.0
 	}
 }
 
 /// Get the lower joint limit in radians.
-func (this *RevoluteJoint) GetLowerLimit() float64 {
-	return this.LowerAngle
+func (joint *RevoluteJoint) GetLowerLimit() float64 {
+	return joint.LowerAngle
 }
 
 /// Get the upper joint limit in radians.
-func (this *RevoluteJoint) GetUpperLimit() float64 {
-	return this.UpperAngle
+func (joint *RevoluteJoint) GetUpperLimit() float64 {
+	return joint.UpperAngle
 }
 
 /// Set the joint limits in radians.
-func (this *RevoluteJoint) SetLimits(lower float64, upper float64) {
+func (joint *RevoluteJoint) SetLimits(lower float64, upper float64) {
 	//b2Assert(lower <= upper);
-	if lower != this.LowerAngle || upper != this.UpperAngle {
-		this.BodyA.SetAwake(true)
-		this.BodyB.SetAwake(true)
-		this.Impulse.Z = 0.0
-		this.LowerAngle = lower
-		this.UpperAngle = upper
+	if lower != joint.LowerAngle || upper != joint.UpperAngle {
+		joint.BodyA.SetAwake(true)
+		joint.BodyB.SetAwake(true)
+		joint.Impulse.Z = 0.0
+		joint.LowerAngle = lower
+		joint.UpperAngle = upper
 	}
 }
 
 /// Is the joint motor enabled?
-func (this *RevoluteJoint) IsMotorEnabled() bool {
-	return this.EnableMotor
+func (joint *RevoluteJoint) IsMotorEnabled() bool {
+	return joint.EnableMotor
 }
 
 /// Enable/disable the joint motor.
-func (this *RevoluteJoint) SetEnableMotor(flag bool) {
-	this.BodyA.SetAwake(true)
-	this.BodyB.SetAwake(true)
-	this.EnableMotor = flag
+func (joint *RevoluteJoint) SetEnableMotor(flag bool) {
+	joint.BodyA.SetAwake(true)
+	joint.BodyB.SetAwake(true)
+	joint.EnableMotor = flag
 }
 
 /// Set the motor speed in radians per second.
-func (this *RevoluteJoint) SetMotorSpeed(speed float64) {
-	this.BodyA.SetAwake(true)
-	this.BodyB.SetAwake(true)
-	this.MotorSpeed = speed
+func (joint *RevoluteJoint) SetMotorSpeed(speed float64) {
+	joint.BodyA.SetAwake(true)
+	joint.BodyB.SetAwake(true)
+	joint.MotorSpeed = speed
 }
 
 /// Get the motor speed in radians per second.
-func (this *RevoluteJoint) GetMotorSpeed() float64 {
-	return this.MotorSpeed
+func (joint *RevoluteJoint) GetMotorSpeed() float64 {
+	return joint.MotorSpeed
 }
 
 /// Set the maximum motor torque, usually in N-m.
-func (this *RevoluteJoint) SetMaxMotorTorque(torque float64) {
-	this.BodyA.SetAwake(true)
-	this.BodyB.SetAwake(true)
-	this.MaxMotorTorque = torque
+func (joint *RevoluteJoint) SetMaxMotorTorque(torque float64) {
+	joint.BodyA.SetAwake(true)
+	joint.BodyB.SetAwake(true)
+	joint.MaxMotorTorque = torque
 }
 
-func (this *RevoluteJoint) GetMaxMotorTorque() float64 {
-	return this.MaxMotorTorque
+func (joint *RevoluteJoint) GetMaxMotorTorque() float64 {
+	return joint.MaxMotorTorque
 }
 
 /// Get the reaction force given the inverse time step.
 /// Unit is N.
-func (this *RevoluteJoint) GetReactionForce(inv_dt float64) Vec2 {
-	P := Vec2{this.Impulse.X, this.Impulse.Y}
+func (joint *RevoluteJoint) GetReactionForce(inv_dt float64) Vec2 {
+	P := Vec2{joint.Impulse.X, joint.Impulse.Y}
 	return MulFV(inv_dt, P)
 }
 
 /// Get the reaction torque due to the joint limit given the inverse time step.
 /// Unit is N*m.
-func (this *RevoluteJoint) GetReactionTorque(inv_dt float64) float64 {
-	return inv_dt * this.Impulse.Z
+func (joint *RevoluteJoint) GetReactionTorque(inv_dt float64) float64 {
+	return inv_dt * joint.Impulse.Z
 }
 
 /// Get the current motor torque given the inverse time step.
 /// Unit is N*m.
-func (this *RevoluteJoint) GetMotorTorque(inv_dt float64) float64 {
-	return inv_dt * this.MotorImpulse
+func (joint *RevoluteJoint) GetMotorTorque(inv_dt float64) float64 {
+	return inv_dt * joint.MotorImpulse
 }
 
-func (this *RevoluteJoint) InitVelocityConstraints(data *solverData) {
-	this.IndexA = this.BodyA.islandIndex
-	this.IndexB = this.BodyB.islandIndex
-	this.LocalCenterA = this.BodyA.sweep.LocalCenter
-	this.LocalCenterB = this.BodyB.sweep.LocalCenter
-	this.InvMassA = this.BodyA.invMass
-	this.InvMassB = this.BodyB.invMass
-	this.InvIA = this.BodyA.invI
-	this.InvIB = this.BodyB.invI
+func (joint *RevoluteJoint) InitVelocityConstraints(data *solverData) {
+	joint.IndexA = joint.BodyA.islandIndex
+	joint.IndexB = joint.BodyB.islandIndex
+	joint.LocalCenterA = joint.BodyA.sweep.LocalCenter
+	joint.LocalCenterB = joint.BodyB.sweep.LocalCenter
+	joint.InvMassA = joint.BodyA.invMass
+	joint.InvMassB = joint.BodyB.invMass
+	joint.InvIA = joint.BodyA.invI
+	joint.InvIB = joint.BodyB.invI
 
-	//cA := data.positions[this.IndexA].c
-	aA := data.positions[this.IndexA].a
-	vA := data.velocities[this.IndexA].v
-	wA := data.velocities[this.IndexA].w
+	//cA := data.positions[joint.IndexA].c
+	aA := data.positions[joint.IndexA].a
+	vA := data.velocities[joint.IndexA].v
+	wA := data.velocities[joint.IndexA].w
 
-	//cB := data.positions[this.IndexB].c
-	aB := data.positions[this.IndexB].a
-	vB := data.velocities[this.IndexB].v
-	wB := data.velocities[this.IndexB].w
+	//cB := data.positions[joint.IndexB].c
+	aB := data.positions[joint.IndexB].a
+	vB := data.velocities[joint.IndexB].v
+	wB := data.velocities[joint.IndexB].w
 
-	qA := NewRot(aA)
-	qB := NewRot(aB)
+	qA := MakeRot(aA)
+	qB := MakeRot(aB)
 
-	this.RA = MulRV(qA, SubVV(this.LocalAnchorA, this.LocalCenterA))
-	this.RB = MulRV(qB, SubVV(this.LocalAnchorB, this.LocalCenterB))
+	joint.RA = MulRV(qA, SubVV(joint.LocalAnchorA, joint.LocalCenterA))
+	joint.RB = MulRV(qB, SubVV(joint.LocalAnchorB, joint.LocalCenterB))
 
 	// J = [-I -r1_skew I r2_skew]
 	//     [ 0       -1 0       1]
@@ -1875,230 +1874,230 @@ func (this *RevoluteJoint) InitVelocityConstraints(data *solverData) {
 	//     [  -r1y*iA*r1x-r2y*iB*r2x, mA+r1x^2*iA+mB+r2x^2*iB,           r1x*iA+r2x*iB]
 	//     [          -r1y*iA-r2y*iB,           r1x*iA+r2x*iB,                   iA+iB]
 
-	mA := this.InvMassA
-	mB := this.InvMassB
-	iA := this.InvIA
-	iB := this.InvIB
+	mA := joint.InvMassA
+	mB := joint.InvMassB
+	iA := joint.InvIA
+	iB := joint.InvIB
 
 	fixedRotation := (iA+iB == 0.0)
 
-	this.Mass.Ex.X = mA + mB + this.RA.Y*this.RA.Y*iA + this.RB.Y*this.RB.Y*iB
-	this.Mass.Ey.X = -this.RA.Y*this.RA.X*iA - this.RB.Y*this.RB.X*iB
-	this.Mass.Ez.X = -this.RA.Y*iA - this.RB.Y*iB
-	this.Mass.Ex.Y = this.Mass.Ey.X
-	this.Mass.Ey.Y = mA + mB + this.RA.X*this.RA.X*iA + this.RB.X*this.RB.X*iB
-	this.Mass.Ez.Y = this.RA.X*iA + this.RB.X*iB
-	this.Mass.Ex.Z = this.Mass.Ez.X
-	this.Mass.Ey.Z = this.Mass.Ez.Y
-	this.Mass.Ez.Z = iA + iB
+	joint.Mass.Ex.X = mA + mB + joint.RA.Y*joint.RA.Y*iA + joint.RB.Y*joint.RB.Y*iB
+	joint.Mass.Ey.X = -joint.RA.Y*joint.RA.X*iA - joint.RB.Y*joint.RB.X*iB
+	joint.Mass.Ez.X = -joint.RA.Y*iA - joint.RB.Y*iB
+	joint.Mass.Ex.Y = joint.Mass.Ey.X
+	joint.Mass.Ey.Y = mA + mB + joint.RA.X*joint.RA.X*iA + joint.RB.X*joint.RB.X*iB
+	joint.Mass.Ez.Y = joint.RA.X*iA + joint.RB.X*iB
+	joint.Mass.Ex.Z = joint.Mass.Ez.X
+	joint.Mass.Ey.Z = joint.Mass.Ez.Y
+	joint.Mass.Ez.Z = iA + iB
 
-	this.MotorMass = iA + iB
-	if this.MotorMass > 0.0 {
-		this.MotorMass = 1.0 / this.MotorMass
+	joint.MotorMass = iA + iB
+	if joint.MotorMass > 0.0 {
+		joint.MotorMass = 1.0 / joint.MotorMass
 	}
 
-	if !this.EnableMotor || fixedRotation {
-		this.MotorImpulse = 0.0
+	if !joint.EnableMotor || fixedRotation {
+		joint.MotorImpulse = 0.0
 	}
 
-	if this.EnableLimit && !fixedRotation {
-		jointAngle := aB - aA - this.ReferenceAngle
-		if AbsF(this.UpperAngle-this.LowerAngle) < 2.0*AngularSlop {
-			this.LimitState = LimitState_e_equalLimits
-		} else if jointAngle <= this.LowerAngle {
-			if this.LimitState != LimitState_e_atLowerLimit {
-				this.Impulse.Z = 0.0
+	if joint.EnableLimit && !fixedRotation {
+		jointAngle := aB - aA - joint.ReferenceAngle
+		if AbsF(joint.UpperAngle-joint.LowerAngle) < 2.0*AngularSlop {
+			joint.LimitState = LimitState_e_equalLimits
+		} else if jointAngle <= joint.LowerAngle {
+			if joint.LimitState != LimitState_e_atLowerLimit {
+				joint.Impulse.Z = 0.0
 			}
-			this.LimitState = LimitState_e_atLowerLimit
-		} else if jointAngle >= this.UpperAngle {
-			if this.LimitState != LimitState_e_atUpperLimit {
-				this.Impulse.Z = 0.0
+			joint.LimitState = LimitState_e_atLowerLimit
+		} else if jointAngle >= joint.UpperAngle {
+			if joint.LimitState != LimitState_e_atUpperLimit {
+				joint.Impulse.Z = 0.0
 			}
-			this.LimitState = LimitState_e_atUpperLimit
+			joint.LimitState = LimitState_e_atUpperLimit
 		} else {
-			this.LimitState = LimitState_e_inactiveLimit
-			this.Impulse.Z = 0.0
+			joint.LimitState = LimitState_e_inactiveLimit
+			joint.Impulse.Z = 0.0
 		}
 	} else {
-		this.LimitState = LimitState_e_inactiveLimit
+		joint.LimitState = LimitState_e_inactiveLimit
 	}
 
 	if data.step.warmStarting {
 		// Scale impulses to support a variable time step.
-		this.Impulse.Mul(data.step.dtRatio)
-		this.MotorImpulse *= data.step.dtRatio
+		joint.Impulse.Mul(data.step.dtRatio)
+		joint.MotorImpulse *= data.step.dtRatio
 
-		P := Vec2{this.Impulse.X, this.Impulse.Y}
+		P := Vec2{joint.Impulse.X, joint.Impulse.Y}
 
 		vA.Sub(MulFV(mA, P))
-		wA -= iA * (CrossVV(this.RA, P) + this.MotorImpulse + this.Impulse.Z)
+		wA -= iA * (CrossVV(joint.RA, P) + joint.MotorImpulse + joint.Impulse.Z)
 
 		vB.Add(MulFV(mB, P))
-		wB += iB * (CrossVV(this.RB, P) + this.MotorImpulse + this.Impulse.Z)
+		wB += iB * (CrossVV(joint.RB, P) + joint.MotorImpulse + joint.Impulse.Z)
 	} else {
-		this.Impulse.SetZero()
-		this.MotorImpulse = 0.0
+		joint.Impulse.SetZero()
+		joint.MotorImpulse = 0.0
 	}
 
-	data.velocities[this.IndexA].v = vA
-	data.velocities[this.IndexA].w = wA
-	data.velocities[this.IndexB].v = vB
-	data.velocities[this.IndexB].w = wB
+	data.velocities[joint.IndexA].v = vA
+	data.velocities[joint.IndexA].w = wA
+	data.velocities[joint.IndexB].v = vB
+	data.velocities[joint.IndexB].w = wB
 }
 
-func (this *RevoluteJoint) SolveVelocityConstraints(data *solverData) {
-	vA := data.velocities[this.IndexA].v
-	wA := data.velocities[this.IndexA].w
-	vB := data.velocities[this.IndexB].v
-	wB := data.velocities[this.IndexB].w
+func (joint *RevoluteJoint) SolveVelocityConstraints(data *solverData) {
+	vA := data.velocities[joint.IndexA].v
+	wA := data.velocities[joint.IndexA].w
+	vB := data.velocities[joint.IndexB].v
+	wB := data.velocities[joint.IndexB].w
 
-	mA := this.InvMassA
-	mB := this.InvMassB
-	iA := this.InvIA
-	iB := this.InvIB
+	mA := joint.InvMassA
+	mB := joint.InvMassB
+	iA := joint.InvIA
+	iB := joint.InvIB
 
 	fixedRotation := (iA+iB == 0.0)
 
 	// Solve motor constraint.
-	if this.EnableMotor && this.LimitState != LimitState_e_equalLimits && !fixedRotation {
-		Cdot := wB - wA - this.MotorSpeed
-		impulse := -this.MotorMass * Cdot
-		oldImpulse := this.MotorImpulse
-		maxImpulse := data.step.dt * this.MaxMotorTorque
-		this.MotorImpulse = ClampF(this.MotorImpulse+impulse, -maxImpulse, maxImpulse)
-		impulse = this.MotorImpulse - oldImpulse
+	if joint.EnableMotor && joint.LimitState != LimitState_e_equalLimits && !fixedRotation {
+		Cdot := wB - wA - joint.MotorSpeed
+		impulse := -joint.MotorMass * Cdot
+		oldImpulse := joint.MotorImpulse
+		maxImpulse := data.step.dt * joint.MaxMotorTorque
+		joint.MotorImpulse = ClampF(joint.MotorImpulse+impulse, -maxImpulse, maxImpulse)
+		impulse = joint.MotorImpulse - oldImpulse
 
 		wA -= iA * impulse
 		wB += iB * impulse
 	}
 
 	// Solve limit constraint.
-	if this.EnableLimit && this.LimitState != LimitState_e_inactiveLimit && !fixedRotation {
-		Cdot1 := SubVV(AddVV(vB, CrossFV(wB, this.RB)), AddVV(vA, CrossFV(wA, this.RA)))
+	if joint.EnableLimit && joint.LimitState != LimitState_e_inactiveLimit && !fixedRotation {
+		Cdot1 := SubVV(AddVV(vB, CrossFV(wB, joint.RB)), AddVV(vA, CrossFV(wA, joint.RA)))
 		Cdot2 := wB - wA
 		Cdot := Vec3{Cdot1.X, Cdot1.Y, Cdot2}
 
-		impulse := this.Mass.Solve33(Cdot)
+		impulse := joint.Mass.Solve33(Cdot)
 		impulse = impulse.Minus()
 
-		if this.LimitState == LimitState_e_equalLimits {
-			this.Impulse.Add(impulse)
-		} else if this.LimitState == LimitState_e_atLowerLimit {
-			newImpulse := this.Impulse.Z + impulse.Z
+		if joint.LimitState == LimitState_e_equalLimits {
+			joint.Impulse.Add(impulse)
+		} else if joint.LimitState == LimitState_e_atLowerLimit {
+			newImpulse := joint.Impulse.Z + impulse.Z
 			if newImpulse < 0.0 {
-				rhs := AddVV(Cdot1.Minus(), MulFV(this.Impulse.Z, Vec2{this.Mass.Ez.X, this.Mass.Ez.Y}))
-				reduced := this.Mass.Solve22(rhs)
+				rhs := AddVV(Cdot1.Minus(), MulFV(joint.Impulse.Z, Vec2{joint.Mass.Ez.X, joint.Mass.Ez.Y}))
+				reduced := joint.Mass.Solve22(rhs)
 				impulse.X = reduced.X
 				impulse.Y = reduced.Y
-				impulse.Z = -this.Impulse.Z
-				this.Impulse.X += reduced.X
-				this.Impulse.Y += reduced.Y
-				this.Impulse.Z = 0.0
+				impulse.Z = -joint.Impulse.Z
+				joint.Impulse.X += reduced.X
+				joint.Impulse.Y += reduced.Y
+				joint.Impulse.Z = 0.0
 			} else {
-				this.Impulse.Add(impulse)
+				joint.Impulse.Add(impulse)
 			}
-		} else if this.LimitState == LimitState_e_atUpperLimit {
-			newImpulse := this.Impulse.Z + impulse.Z
+		} else if joint.LimitState == LimitState_e_atUpperLimit {
+			newImpulse := joint.Impulse.Z + impulse.Z
 			if newImpulse > 0.0 {
-				rhs := AddVV(Cdot1.Minus(), MulFV(this.Impulse.Z, Vec2{this.Mass.Ez.X, this.Mass.Ez.Y}))
-				reduced := this.Mass.Solve22(rhs)
+				rhs := AddVV(Cdot1.Minus(), MulFV(joint.Impulse.Z, Vec2{joint.Mass.Ez.X, joint.Mass.Ez.Y}))
+				reduced := joint.Mass.Solve22(rhs)
 				impulse.X = reduced.X
 				impulse.Y = reduced.Y
-				impulse.Z = -this.Impulse.Z
-				this.Impulse.X += reduced.X
-				this.Impulse.Y += reduced.Y
-				this.Impulse.Z = 0.0
+				impulse.Z = -joint.Impulse.Z
+				joint.Impulse.X += reduced.X
+				joint.Impulse.Y += reduced.Y
+				joint.Impulse.Z = 0.0
 			} else {
-				this.Impulse.Add(impulse)
+				joint.Impulse.Add(impulse)
 			}
 		}
 
 		P := Vec2{impulse.X, impulse.Y}
 
 		vA.Sub(MulFV(mA, P))
-		wA -= iA * (CrossVV(this.RA, P) + impulse.Z)
+		wA -= iA * (CrossVV(joint.RA, P) + impulse.Z)
 
 		vB.Add(MulFV(mB, P))
-		wB += iB * (CrossVV(this.RB, P) + impulse.Z)
+		wB += iB * (CrossVV(joint.RB, P) + impulse.Z)
 	} else {
 		// Solve point-to-point constraint
-		Cdot := SubVV(AddVV(vB, CrossFV(wB, this.RB)), AddVV(vA, CrossFV(wA, this.RA)))
-		impulse := this.Mass.Solve22(Cdot.Minus())
+		Cdot := SubVV(AddVV(vB, CrossFV(wB, joint.RB)), AddVV(vA, CrossFV(wA, joint.RA)))
+		impulse := joint.Mass.Solve22(Cdot.Minus())
 
-		this.Impulse.X += impulse.X
-		this.Impulse.Y += impulse.Y
+		joint.Impulse.X += impulse.X
+		joint.Impulse.Y += impulse.Y
 
 		vA.Sub(MulFV(mA, impulse))
-		wA -= iA * CrossVV(this.RA, impulse)
+		wA -= iA * CrossVV(joint.RA, impulse)
 
 		vB.Add(MulFV(mB, impulse))
-		wB += iB * CrossVV(this.RB, impulse)
+		wB += iB * CrossVV(joint.RB, impulse)
 	}
 
-	data.velocities[this.IndexA].v = vA
-	data.velocities[this.IndexA].w = wA
-	data.velocities[this.IndexB].v = vB
-	data.velocities[this.IndexB].w = wB
+	data.velocities[joint.IndexA].v = vA
+	data.velocities[joint.IndexA].w = wA
+	data.velocities[joint.IndexB].v = vB
+	data.velocities[joint.IndexB].w = wB
 }
 
-func (this *RevoluteJoint) SolvePositionConstraints(data *solverData) bool {
-	cA := data.positions[this.IndexA].c
-	aA := data.positions[this.IndexA].a
-	cB := data.positions[this.IndexB].c
-	aB := data.positions[this.IndexB].a
+func (joint *RevoluteJoint) SolvePositionConstraints(data *solverData) bool {
+	cA := data.positions[joint.IndexA].c
+	aA := data.positions[joint.IndexA].a
+	cB := data.positions[joint.IndexB].c
+	aB := data.positions[joint.IndexB].a
 
-	qA := NewRot(aA)
-	qB := NewRot(aB)
+	qA := MakeRot(aA)
+	qB := MakeRot(aB)
 
 	angularError := 0.0
 	positionError := 0.0
 
-	fixedRotation := (this.InvIA+this.InvIB == 0.0)
+	fixedRotation := (joint.InvIA+joint.InvIB == 0.0)
 
 	// Solve angular limit constraint.
-	if this.EnableLimit && this.LimitState != LimitState_e_inactiveLimit && !fixedRotation {
-		angle := aB - aA - this.ReferenceAngle
+	if joint.EnableLimit && joint.LimitState != LimitState_e_inactiveLimit && !fixedRotation {
+		angle := aB - aA - joint.ReferenceAngle
 		limitImpulse := 0.0
 
-		if this.LimitState == LimitState_e_equalLimits {
+		if joint.LimitState == LimitState_e_equalLimits {
 			// Prevent large angular corrections
-			C := ClampF(angle-this.LowerAngle, -MaxAngularCorrection, MaxAngularCorrection)
-			limitImpulse = -this.MotorMass * C
+			C := ClampF(angle-joint.LowerAngle, -MaxAngularCorrection, MaxAngularCorrection)
+			limitImpulse = -joint.MotorMass * C
 			angularError = AbsF(C)
-		} else if this.LimitState == LimitState_e_atLowerLimit {
-			C := angle - this.LowerAngle
+		} else if joint.LimitState == LimitState_e_atLowerLimit {
+			C := angle - joint.LowerAngle
 			angularError = -C
 
 			// Prevent large angular corrections and allow some slop.
 			C = ClampF(C+AngularSlop, -MaxAngularCorrection, 0.0)
-			limitImpulse = -this.MotorMass * C
-		} else if this.LimitState == LimitState_e_atUpperLimit {
-			C := angle - this.UpperAngle
+			limitImpulse = -joint.MotorMass * C
+		} else if joint.LimitState == LimitState_e_atUpperLimit {
+			C := angle - joint.UpperAngle
 			angularError = C
 
 			// Prevent large angular corrections and allow some slop.
 			C = ClampF(C-AngularSlop, 0.0, MaxAngularCorrection)
-			limitImpulse = -this.MotorMass * C
+			limitImpulse = -joint.MotorMass * C
 		}
 
-		aA -= this.InvIA * limitImpulse
-		aB += this.InvIB * limitImpulse
+		aA -= joint.InvIA * limitImpulse
+		aB += joint.InvIB * limitImpulse
 	}
 
 	// Solve point-to-point constraint.
 	{
 		qA.Set(aA)
 		qB.Set(aB)
-		rA := MulRV(qA, SubVV(this.LocalAnchorA, this.LocalCenterA))
-		rB := MulRV(qB, SubVV(this.LocalAnchorB, this.LocalCenterB))
+		rA := MulRV(qA, SubVV(joint.LocalAnchorA, joint.LocalCenterA))
+		rB := MulRV(qB, SubVV(joint.LocalAnchorB, joint.LocalCenterB))
 
 		C := SubVV(AddVV(cB, rB), AddVV(cA, rA))
 		positionError = C.Length()
 
-		mA := this.InvMassA
-		mB := this.InvMassB
-		iA := this.InvIA
-		iB := this.InvIB
+		mA := joint.InvMassA
+		mB := joint.InvMassB
+		iA := joint.InvIA
+		iB := joint.InvIB
 
 		var K Mat22
 		K.Ex.X = mA + mB + iA*rA.Y*rA.Y + iB*rB.Y*rB.Y
@@ -2116,33 +2115,33 @@ func (this *RevoluteJoint) SolvePositionConstraints(data *solverData) bool {
 		aB += iB * CrossVV(rB, impulse)
 	}
 
-	data.positions[this.IndexA].c = cA
-	data.positions[this.IndexA].a = aA
-	data.positions[this.IndexB].c = cB
-	data.positions[this.IndexB].a = aB
+	data.positions[joint.IndexA].c = cA
+	data.positions[joint.IndexA].a = aA
+	data.positions[joint.IndexB].c = cB
+	data.positions[joint.IndexB].a = aB
 
 	return positionError <= LinearSlop && angularError <= AngularSlop
 }
 
 /// Dump to b2Log.
-func (this *RevoluteJoint) Dump() {
-	indexA := this.BodyA.islandIndex
-	indexB := this.BodyB.islandIndex
+func (joint *RevoluteJoint) Dump() {
+	indexA := joint.BodyA.islandIndex
+	indexB := joint.BodyB.islandIndex
 
 	Log("  b2RevoluteJointDef jd;\n")
 	Log("  jd.bodyA = bodies[%d];\n", indexA)
 	Log("  jd.bodyB = bodies[%d];\n", indexB)
-	Log("  jd.collideConnected = bool(%d);\n", this.CollideConnected)
-	Log("  jd.localAnchorA.Set(%.15lef, %.15lef);\n", this.LocalAnchorA.X, this.LocalAnchorA.Y)
-	Log("  jd.localAnchorB.Set(%.15lef, %.15lef);\n", this.LocalAnchorB.X, this.LocalAnchorB.Y)
-	Log("  jd.referenceAngle = %.15lef;\n", this.ReferenceAngle)
-	Log("  jd.enableLimit = bool(%d);\n", this.EnableLimit)
-	Log("  jd.lowerAngle = %.15lef;\n", this.LowerAngle)
-	Log("  jd.upperAngle = %.15lef;\n", this.UpperAngle)
-	Log("  jd.enableMotor = bool(%d);\n", this.EnableMotor)
-	Log("  jd.motorSpeed = %.15lef;\n", this.MotorSpeed)
-	Log("  jd.maxMotorTorque = %.15lef;\n", this.MaxMotorTorque)
-	Log("  joints[%d] = m_world->CreateJoint(&jd);\n", this.Index)
+	Log("  jd.collideConnected = bool(%t);\n", joint.CollideConnected)
+	Log("  jd.localAnchorA.Set(%.15e, %.15e);\n", joint.LocalAnchorA.X, joint.LocalAnchorA.Y)
+	Log("  jd.localAnchorB.Set(%.15e, %.15e);\n", joint.LocalAnchorB.X, joint.LocalAnchorB.Y)
+	Log("  jd.referenceAngle = %.15e;\n", joint.ReferenceAngle)
+	Log("  jd.enableLimit = bool(%t);\n", joint.EnableLimit)
+	Log("  jd.lowerAngle = %.15e;\n", joint.LowerAngle)
+	Log("  jd.upperAngle = %.15e;\n", joint.UpperAngle)
+	Log("  jd.enableMotor = bool(%t);\n", joint.EnableMotor)
+	Log("  jd.motorSpeed = %.15e;\n", joint.MotorSpeed)
+	Log("  jd.maxMotorTorque = %.15e;\n", joint.MaxMotorTorque)
+	Log("  joints[%d] = m_world->CreateJoint(&jd);\n", joint.Index)
 }
 
 const minPulleyLength float64 = 2.0
@@ -2175,33 +2174,33 @@ type PulleyJointDef struct {
 }
 
 func NewPulleyJointDef() *PulleyJointDef {
-	this := new(PulleyJointDef)
-	this.Type = Joint_e_pulleyJoint
-	this.GroundAnchorA.Set(-1.0, 1.0)
-	this.GroundAnchorB.Set(1.0, 1.0)
-	this.LocalAnchorA.Set(-1.0, 0.0)
-	this.LocalAnchorB.Set(1.0, 0.0)
-	this.LengthA = 0.0
-	this.LengthB = 0.0
-	this.Ratio = 1.0
-	this.CollideConnected = true
-	return this
+	jd := new(PulleyJointDef)
+	jd.Type = Joint_e_pulleyJoint
+	jd.GroundAnchorA.Set(-1.0, 1.0)
+	jd.GroundAnchorB.Set(1.0, 1.0)
+	jd.LocalAnchorA.Set(-1.0, 0.0)
+	jd.LocalAnchorB.Set(1.0, 0.0)
+	jd.LengthA = 0.0
+	jd.LengthB = 0.0
+	jd.Ratio = 1.0
+	jd.CollideConnected = true
+	return jd
 }
 
 /// Initialize the bodies, anchors, lengths, max lengths, and ratio using the world anchors.
-func (this *PulleyJointDef) Initialize(bodyA *Body, bodyB *Body, groundAnchorA Vec2,
+func (jd *PulleyJointDef) Initialize(bodyA *Body, bodyB *Body, groundAnchorA Vec2,
 	groundAnchorB Vec2, anchorA Vec2, anchorB Vec2, ratio float64) {
-	this.BodyA = bodyA
-	this.BodyB = bodyB
-	this.GroundAnchorA = groundAnchorA
-	this.GroundAnchorB = groundAnchorB
-	this.LocalAnchorA = bodyA.GetLocalPoint(anchorA)
-	this.LocalAnchorB = bodyB.GetLocalPoint(anchorB)
+	jd.BodyA = bodyA
+	jd.BodyB = bodyB
+	jd.GroundAnchorA = groundAnchorA
+	jd.GroundAnchorB = groundAnchorB
+	jd.LocalAnchorA = bodyA.GetLocalPoint(anchorA)
+	jd.LocalAnchorB = bodyB.GetLocalPoint(anchorB)
 	dA := SubVV(anchorA, groundAnchorA)
-	this.LengthA = dA.Length()
+	jd.LengthA = dA.Length()
 	dB := SubVV(anchorB, groundAnchorB)
-	this.LengthB = dB.Length()
-	this.Ratio = ratio
+	jd.LengthB = dB.Length()
+	jd.Ratio = ratio
 	//b2Assert(ratio > b2_epsilon);
 }
 
@@ -2245,199 +2244,199 @@ type PulleyJoint struct {
 }
 
 func NewPulleyJoint(def *PulleyJointDef) *PulleyJoint {
-	this := new(PulleyJoint)
-	this.Type = def.Type
-	this.BodyA = def.BodyA
-	this.BodyB = def.BodyB
-	this.CollideConnected = def.CollideConnected
-	this.UserData = def.UserData
+	joint := new(PulleyJoint)
+	joint.Type = def.Type
+	joint.BodyA = def.BodyA
+	joint.BodyB = def.BodyB
+	joint.CollideConnected = def.CollideConnected
+	joint.UserData = def.UserData
 
-	this.GroundAnchorA = def.GroundAnchorA
-	this.GroundAnchorB = def.GroundAnchorB
-	this.LocalAnchorA = def.LocalAnchorA
-	this.LocalAnchorB = def.LocalAnchorB
+	joint.GroundAnchorA = def.GroundAnchorA
+	joint.GroundAnchorB = def.GroundAnchorB
+	joint.LocalAnchorA = def.LocalAnchorA
+	joint.LocalAnchorB = def.LocalAnchorB
 
-	this.LengthA = def.LengthA
-	this.LengthB = def.LengthB
+	joint.LengthA = def.LengthA
+	joint.LengthB = def.LengthB
 
 	//b2Assert(def->ratio != 0.0f);
-	this.Ratio = def.Ratio
+	joint.Ratio = def.Ratio
 
-	this.Constant = def.LengthA + this.Ratio*def.LengthB
+	joint.Constant = def.LengthA + joint.Ratio*def.LengthB
 
-	this.Impulse = 0.0
-	return this
+	joint.Impulse = 0.0
+	return joint
 }
 
-func (this *PulleyJoint) GetAnchorA() Vec2 {
-	return this.BodyA.GetWorldPoint(this.LocalAnchorA)
+func (joint *PulleyJoint) GetAnchorA() Vec2 {
+	return joint.BodyA.GetWorldPoint(joint.LocalAnchorA)
 }
 
-func (this *PulleyJoint) GetAnchorB() Vec2 {
-	return this.BodyB.GetWorldPoint(this.LocalAnchorB)
+func (joint *PulleyJoint) GetAnchorB() Vec2 {
+	return joint.BodyB.GetWorldPoint(joint.LocalAnchorB)
 }
 
-func (this *PulleyJoint) GetReactionForce(inv_dt float64) Vec2 {
-	P := MulFV(this.Impulse, this.UB)
+func (joint *PulleyJoint) GetReactionForce(inv_dt float64) Vec2 {
+	P := MulFV(joint.Impulse, joint.UB)
 	return MulFV(inv_dt, P)
 }
 
-func (this *PulleyJoint) GetReactionTorque(inv_dt float64) float64 {
+func (joint *PulleyJoint) GetReactionTorque(inv_dt float64) float64 {
 	return 0.0
 }
 
 /// Get the first ground anchor.
-func (this *PulleyJoint) GetGroundAnchorA() Vec2 {
-	return this.GroundAnchorA
+func (joint *PulleyJoint) GetGroundAnchorA() Vec2 {
+	return joint.GroundAnchorA
 }
 
 /// Get the second ground anchor.
-func (this *PulleyJoint) GetGroundAnchorB() Vec2 {
-	return this.GroundAnchorB
+func (joint *PulleyJoint) GetGroundAnchorB() Vec2 {
+	return joint.GroundAnchorB
 }
 
 /// Get the current length of the segment attached to bodyA.
-func (this *PulleyJoint) GetLengthA() float64 {
-	p := this.BodyA.GetWorldPoint(this.LocalAnchorA)
-	s := this.GroundAnchorA
+func (joint *PulleyJoint) GetLengthA() float64 {
+	p := joint.BodyA.GetWorldPoint(joint.LocalAnchorA)
+	s := joint.GroundAnchorA
 	d := SubVV(p, s)
 	return d.Length()
 }
 
 /// Get the current length of the segment attached to bodyB.
-func (this *PulleyJoint) GetLengthB() float64 {
-	p := this.BodyB.GetWorldPoint(this.LocalAnchorB)
-	s := this.GroundAnchorB
+func (joint *PulleyJoint) GetLengthB() float64 {
+	p := joint.BodyB.GetWorldPoint(joint.LocalAnchorB)
+	s := joint.GroundAnchorB
 	d := SubVV(p, s)
 	return d.Length()
 }
 
 /// Get the pulley ratio.
-func (this *PulleyJoint) GetRatio() float64 {
-	return this.Ratio
+func (joint *PulleyJoint) GetRatio() float64 {
+	return joint.Ratio
 }
 
-func (this *PulleyJoint) InitVelocityConstraints(data *solverData) {
-	this.IndexA = this.BodyA.islandIndex
-	this.IndexB = this.BodyB.islandIndex
-	this.LocalCenterA = this.BodyA.sweep.LocalCenter
-	this.LocalCenterB = this.BodyB.sweep.LocalCenter
-	this.InvMassA = this.BodyA.invMass
-	this.InvMassB = this.BodyB.invMass
-	this.InvIA = this.BodyA.invI
-	this.InvIB = this.BodyB.invI
+func (joint *PulleyJoint) InitVelocityConstraints(data *solverData) {
+	joint.IndexA = joint.BodyA.islandIndex
+	joint.IndexB = joint.BodyB.islandIndex
+	joint.LocalCenterA = joint.BodyA.sweep.LocalCenter
+	joint.LocalCenterB = joint.BodyB.sweep.LocalCenter
+	joint.InvMassA = joint.BodyA.invMass
+	joint.InvMassB = joint.BodyB.invMass
+	joint.InvIA = joint.BodyA.invI
+	joint.InvIB = joint.BodyB.invI
 
-	cA := data.positions[this.IndexA].c
-	aA := data.positions[this.IndexA].a
-	vA := data.velocities[this.IndexA].v
-	wA := data.velocities[this.IndexA].w
+	cA := data.positions[joint.IndexA].c
+	aA := data.positions[joint.IndexA].a
+	vA := data.velocities[joint.IndexA].v
+	wA := data.velocities[joint.IndexA].w
 
-	cB := data.positions[this.IndexB].c
-	aB := data.positions[this.IndexB].a
-	vB := data.velocities[this.IndexB].v
-	wB := data.velocities[this.IndexB].w
+	cB := data.positions[joint.IndexB].c
+	aB := data.positions[joint.IndexB].a
+	vB := data.velocities[joint.IndexB].v
+	wB := data.velocities[joint.IndexB].w
 
-	qA := NewRot(aA)
-	qB := NewRot(aB)
+	qA := MakeRot(aA)
+	qB := MakeRot(aB)
 
-	this.RA = MulRV(qA, SubVV(this.LocalAnchorA, this.LocalCenterA))
-	this.RB = MulRV(qB, SubVV(this.LocalAnchorB, this.LocalCenterB))
+	joint.RA = MulRV(qA, SubVV(joint.LocalAnchorA, joint.LocalCenterA))
+	joint.RB = MulRV(qB, SubVV(joint.LocalAnchorB, joint.LocalCenterB))
 
 	// Get the pulley axes.
-	this.UA = SubVV(AddVV(cA, this.RA), this.GroundAnchorA)
-	this.UB = SubVV(AddVV(cB, this.RB), this.GroundAnchorB)
+	joint.UA = SubVV(AddVV(cA, joint.RA), joint.GroundAnchorA)
+	joint.UB = SubVV(AddVV(cB, joint.RB), joint.GroundAnchorB)
 
-	lengthA := this.UA.Length()
-	lengthB := this.UB.Length()
+	lengthA := joint.UA.Length()
+	lengthB := joint.UB.Length()
 
 	if lengthA > 10.0*LinearSlop {
-		this.UA.Mul(1.0 / lengthA)
+		joint.UA.Mul(1.0 / lengthA)
 	} else {
-		this.UA.SetZero()
+		joint.UA.SetZero()
 	}
 
 	if lengthB > 10.0*LinearSlop {
-		this.UB.Mul(1.0 / lengthB)
+		joint.UB.Mul(1.0 / lengthB)
 	} else {
-		this.UB.SetZero()
+		joint.UB.SetZero()
 	}
 
 	// Compute effective mass.
-	ruA := CrossVV(this.RA, this.UA)
-	ruB := CrossVV(this.RB, this.UB)
+	ruA := CrossVV(joint.RA, joint.UA)
+	ruB := CrossVV(joint.RB, joint.UB)
 
-	mA := this.InvMassA + this.InvIA*ruA*ruA
-	mB := this.InvMassB + this.InvIB*ruB*ruB
+	mA := joint.InvMassA + joint.InvIA*ruA*ruA
+	mB := joint.InvMassB + joint.InvIB*ruB*ruB
 
-	this.Mass = mA + this.Ratio*this.Ratio*mB
+	joint.Mass = mA + joint.Ratio*joint.Ratio*mB
 
-	if this.Mass > 0.0 {
-		this.Mass = 1.0 / this.Mass
+	if joint.Mass > 0.0 {
+		joint.Mass = 1.0 / joint.Mass
 	}
 
 	if data.step.warmStarting {
 		// Scale impulses to support variable time steps.
-		this.Impulse *= data.step.dtRatio
+		joint.Impulse *= data.step.dtRatio
 
 		// Warm starting.
-		PA := MulFV(-this.Impulse, this.UA)
-		PB := MulFV((-this.Ratio * this.Impulse), this.UB)
+		PA := MulFV(-joint.Impulse, joint.UA)
+		PB := MulFV((-joint.Ratio * joint.Impulse), joint.UB)
 
-		vA.Add(MulFV(this.InvMassA, PA))
-		wA += this.InvIA * CrossVV(this.RA, PA)
-		vB.Add(MulFV(this.InvMassB, PB))
-		wB += this.InvIB * CrossVV(this.RB, PB)
+		vA.Add(MulFV(joint.InvMassA, PA))
+		wA += joint.InvIA * CrossVV(joint.RA, PA)
+		vB.Add(MulFV(joint.InvMassB, PB))
+		wB += joint.InvIB * CrossVV(joint.RB, PB)
 	} else {
-		this.Impulse = 0.0
+		joint.Impulse = 0.0
 	}
 
-	data.velocities[this.IndexA].v = vA
-	data.velocities[this.IndexA].w = wA
-	data.velocities[this.IndexB].v = vB
-	data.velocities[this.IndexB].w = wB
+	data.velocities[joint.IndexA].v = vA
+	data.velocities[joint.IndexA].w = wA
+	data.velocities[joint.IndexB].v = vB
+	data.velocities[joint.IndexB].w = wB
 }
 
-func (this *PulleyJoint) SolveVelocityConstraints(data *solverData) {
-	vA := data.velocities[this.IndexA].v
-	wA := data.velocities[this.IndexA].w
-	vB := data.velocities[this.IndexB].v
-	wB := data.velocities[this.IndexB].w
+func (joint *PulleyJoint) SolveVelocityConstraints(data *solverData) {
+	vA := data.velocities[joint.IndexA].v
+	wA := data.velocities[joint.IndexA].w
+	vB := data.velocities[joint.IndexB].v
+	wB := data.velocities[joint.IndexB].w
 
-	vpA := AddVV(vA, CrossFV(wA, this.RA))
-	vpB := AddVV(vB, CrossFV(wB, this.RB))
+	vpA := AddVV(vA, CrossFV(wA, joint.RA))
+	vpB := AddVV(vB, CrossFV(wB, joint.RB))
 
-	Cdot := -DotVV(this.UA, vpA) - this.Ratio*DotVV(this.UB, vpB)
-	impulse := -this.Mass * Cdot
-	this.Impulse += impulse
+	Cdot := -DotVV(joint.UA, vpA) - joint.Ratio*DotVV(joint.UB, vpB)
+	impulse := -joint.Mass * Cdot
+	joint.Impulse += impulse
 
-	PA := MulFV(-impulse, this.UA)
-	PB := MulFV(-this.Ratio*impulse, this.UB)
-	vA.Add(MulFV(this.InvMassA, PA))
-	wA += this.InvIA * CrossVV(this.RA, PA)
-	vB.Add(MulFV(this.InvMassB, PB))
-	wB += this.InvIB * CrossVV(this.RB, PB)
+	PA := MulFV(-impulse, joint.UA)
+	PB := MulFV(-joint.Ratio*impulse, joint.UB)
+	vA.Add(MulFV(joint.InvMassA, PA))
+	wA += joint.InvIA * CrossVV(joint.RA, PA)
+	vB.Add(MulFV(joint.InvMassB, PB))
+	wB += joint.InvIB * CrossVV(joint.RB, PB)
 
-	data.velocities[this.IndexA].v = vA
-	data.velocities[this.IndexA].w = wA
-	data.velocities[this.IndexB].v = vB
-	data.velocities[this.IndexB].w = wB
+	data.velocities[joint.IndexA].v = vA
+	data.velocities[joint.IndexA].w = wA
+	data.velocities[joint.IndexB].v = vB
+	data.velocities[joint.IndexB].w = wB
 }
 
-func (this *PulleyJoint) SolvePositionConstraints(data *solverData) bool {
-	cA := data.positions[this.IndexA].c
-	aA := data.positions[this.IndexA].a
-	cB := data.positions[this.IndexB].c
-	aB := data.positions[this.IndexB].a
+func (joint *PulleyJoint) SolvePositionConstraints(data *solverData) bool {
+	cA := data.positions[joint.IndexA].c
+	aA := data.positions[joint.IndexA].a
+	cB := data.positions[joint.IndexB].c
+	aB := data.positions[joint.IndexB].a
 
-	qA := NewRot(aA)
-	qB := NewRot(aB)
+	qA := MakeRot(aA)
+	qB := MakeRot(aB)
 
-	rA := MulRV(qA, SubVV(this.LocalAnchorA, this.LocalCenterA))
-	rB := MulRV(qB, SubVV(this.LocalAnchorB, this.LocalCenterB))
+	rA := MulRV(qA, SubVV(joint.LocalAnchorA, joint.LocalCenterA))
+	rB := MulRV(qB, SubVV(joint.LocalAnchorB, joint.LocalCenterB))
 
 	// Get the pulley axes.
-	uA := SubVV(AddVV(cA, rA), this.GroundAnchorA)
-	uB := SubVV(AddVV(cB, rB), this.GroundAnchorB)
+	uA := SubVV(AddVV(cA, rA), joint.GroundAnchorA)
+	uB := SubVV(AddVV(cB, rB), joint.GroundAnchorB)
 
 	lengthA := uA.Length()
 	lengthB := uB.Length()
@@ -2458,53 +2457,53 @@ func (this *PulleyJoint) SolvePositionConstraints(data *solverData) bool {
 	ruA := CrossVV(rA, uA)
 	ruB := CrossVV(rB, uB)
 
-	mA := this.InvMassA + this.InvIA*ruA*ruA
-	mB := this.InvMassB + this.InvIB*ruB*ruB
+	mA := joint.InvMassA + joint.InvIA*ruA*ruA
+	mB := joint.InvMassB + joint.InvIB*ruB*ruB
 
-	mass := mA + this.Ratio*this.Ratio*mB
+	mass := mA + joint.Ratio*joint.Ratio*mB
 
 	if mass > 0.0 {
 		mass = 1.0 / mass
 	}
 
-	C := this.Constant - lengthA - this.Ratio*lengthB
+	C := joint.Constant - lengthA - joint.Ratio*lengthB
 	linearError := AbsF(C)
 
 	impulse := -mass * C
 
 	PA := MulFV(-impulse, uA)
-	PB := MulFV(-this.Ratio*impulse, uB)
+	PB := MulFV(-joint.Ratio*impulse, uB)
 
-	cA.Add(MulFV(this.InvMassA, PA))
-	aA += this.InvIA * CrossVV(rA, PA)
-	cB.Add(MulFV(this.InvMassB, PB))
-	aB += this.InvIB * CrossVV(rB, PB)
+	cA.Add(MulFV(joint.InvMassA, PA))
+	aA += joint.InvIA * CrossVV(rA, PA)
+	cB.Add(MulFV(joint.InvMassB, PB))
+	aB += joint.InvIB * CrossVV(rB, PB)
 
-	data.positions[this.IndexA].c = cA
-	data.positions[this.IndexA].a = aA
-	data.positions[this.IndexB].c = cB
-	data.positions[this.IndexB].a = aB
+	data.positions[joint.IndexA].c = cA
+	data.positions[joint.IndexA].a = aA
+	data.positions[joint.IndexB].c = cB
+	data.positions[joint.IndexB].a = aB
 
 	return linearError < LinearSlop
 }
 
 /// Dump joint to dmLog
-func (this *PulleyJoint) Dump() {
-	indexA := this.BodyA.islandIndex
-	indexB := this.BodyB.islandIndex
+func (joint *PulleyJoint) Dump() {
+	indexA := joint.BodyA.islandIndex
+	indexB := joint.BodyB.islandIndex
 
 	Log("  b2PulleyJointDef jd;\n")
 	Log("  jd.bodyA = bodies[%d];\n", indexA)
 	Log("  jd.bodyB = bodies[%d];\n", indexB)
-	Log("  jd.collideConnected = bool(%d);\n", this.CollideConnected)
-	Log("  jd.groundAnchorA.Set(%.15lef, %.15lef);\n", this.GroundAnchorA.X, this.GroundAnchorA.Y)
-	Log("  jd.groundAnchorB.Set(%.15lef, %.15lef);\n", this.GroundAnchorB.X, this.GroundAnchorB.Y)
-	Log("  jd.localAnchorA.Set(%.15lef, %.15lef);\n", this.LocalAnchorA.X, this.LocalAnchorA.Y)
-	Log("  jd.localAnchorB.Set(%.15lef, %.15lef);\n", this.LocalAnchorB.X, this.LocalAnchorB.Y)
-	Log("  jd.lengthA = %.15lef;\n", this.LengthA)
-	Log("  jd.lengthB = %.15lef;\n", this.LengthB)
-	Log("  jd.ratio = %.15lef;\n", this.Ratio)
-	Log("  joints[%d] = m_world->CreateJoint(&jd);\n", this.Index)
+	Log("  jd.collideConnected = bool(%t);\n", joint.CollideConnected)
+	Log("  jd.groundAnchorA.Set(%.15e, %.15e);\n", joint.GroundAnchorA.X, joint.GroundAnchorA.Y)
+	Log("  jd.groundAnchorB.Set(%.15e, %.15e);\n", joint.GroundAnchorB.X, joint.GroundAnchorB.Y)
+	Log("  jd.localAnchorA.Set(%.15e, %.15e);\n", joint.LocalAnchorA.X, joint.LocalAnchorA.Y)
+	Log("  jd.localAnchorB.Set(%.15e, %.15e);\n", joint.LocalAnchorB.X, joint.LocalAnchorB.Y)
+	Log("  jd.lengthA = %.15e;\n", joint.LengthA)
+	Log("  jd.lengthB = %.15e;\n", joint.LengthB)
+	Log("  jd.ratio = %.15e;\n", joint.Ratio)
+	Log("  joints[%d] = m_world->CreateJoint(&jd);\n", joint.Index)
 }
 
 /// Gear joint definition. This definition requires two existing
@@ -2524,12 +2523,12 @@ type GearJointDef struct {
 }
 
 func NewGearJointDef() *GearJointDef {
-	this := new(GearJointDef)
-	this.Type = Joint_e_gearJoint
-	this.Joint1 = nil
-	this.Joint2 = nil
-	this.Ratio = 1.0
-	return this
+	jd := new(GearJointDef)
+	jd.Type = Joint_e_gearJoint
+	jd.Joint1 = nil
+	jd.Joint2 = nil
+	jd.Ratio = 1.0
+	return jd
 }
 
 /// A gear joint is used to connect two joints together. Either joint
@@ -2602,18 +2601,18 @@ type GearJoint struct {
 // K = J * invM * JT = invMass + invI * cross(r, ug)^2
 
 func NewGearJoint(def *GearJointDef) *GearJoint {
-	this := new(GearJoint)
-	this.Type = def.Type
-	this.BodyA = def.BodyA
-	this.BodyB = def.BodyB
-	this.CollideConnected = def.CollideConnected
-	this.UserData = def.UserData
+	joint := new(GearJoint)
+	joint.Type = def.Type
+	joint.BodyA = def.BodyA
+	joint.BodyB = def.BodyB
+	joint.CollideConnected = def.CollideConnected
+	joint.UserData = def.UserData
 
-	this.Joint1 = def.Joint1
-	this.Joint2 = def.Joint2
+	joint.Joint1 = def.Joint1
+	joint.Joint2 = def.Joint2
 
-	this.TypeA = this.Joint1.GetType()
-	this.TypeB = this.Joint2.GetType()
+	joint.TypeA = joint.Joint1.GetType()
+	joint.TypeB = joint.Joint2.GetType()
 
 	//b2Assert(m_typeA == e_revoluteJoint || m_typeA == e_prismaticJoint);
 	//b2Assert(m_typeB == e_revoluteJoint || m_typeB == e_prismaticJoint);
@@ -2622,256 +2621,256 @@ func NewGearJoint(def *GearJointDef) *GearJoint {
 
 	// TODO_ERIN there might be some problem with the joint edges in b2Joint.
 
-	this.BodyC = this.Joint1.GetBodyA()
-	this.BodyA = this.Joint1.GetBodyB()
+	joint.BodyC = joint.Joint1.GetBodyA()
+	joint.BodyA = joint.Joint1.GetBodyB()
 
 	// Get geometry of joint1
-	xfA := this.BodyA.xf
-	aA := this.BodyA.sweep.A
-	xfC := this.BodyC.xf
-	aC := this.BodyC.sweep.A
+	xfA := joint.BodyA.xf
+	aA := joint.BodyA.sweep.A
+	xfC := joint.BodyC.xf
+	aC := joint.BodyC.sweep.A
 
-	if this.TypeA == Joint_e_revoluteJoint {
+	if joint.TypeA == Joint_e_revoluteJoint {
 		revolute := def.Joint1.(*RevoluteJoint)
-		this.LocalAnchorC = revolute.LocalAnchorA
-		this.LocalAnchorA = revolute.LocalAnchorB
-		this.ReferenceAngleA = revolute.ReferenceAngle
-		this.LocalAxisC.SetZero()
+		joint.LocalAnchorC = revolute.LocalAnchorA
+		joint.LocalAnchorA = revolute.LocalAnchorB
+		joint.ReferenceAngleA = revolute.ReferenceAngle
+		joint.LocalAxisC.SetZero()
 
-		coordinateA = aA - aC - this.ReferenceAngleA
+		coordinateA = aA - aC - joint.ReferenceAngleA
 	} else {
 		prismatic := def.Joint1.(*PrismaticJoint)
-		this.LocalAnchorC = prismatic.LocalAnchorA
-		this.LocalAnchorA = prismatic.LocalAnchorB
-		this.ReferenceAngleA = prismatic.ReferenceAngle
-		this.LocalAxisC = prismatic.LocalXAxisA
+		joint.LocalAnchorC = prismatic.LocalAnchorA
+		joint.LocalAnchorA = prismatic.LocalAnchorB
+		joint.ReferenceAngleA = prismatic.ReferenceAngle
+		joint.LocalAxisC = prismatic.LocalXAxisA
 
-		pC := this.LocalAnchorC
-		pA := MulTRV(xfC.Q, AddVV(MulRV(xfA.Q, this.LocalAnchorA), SubVV(xfA.P, xfC.P)))
-		coordinateA = DotVV(SubVV(pA, pC), this.LocalAxisC)
+		pC := joint.LocalAnchorC
+		pA := MulTRV(xfC.Q, AddVV(MulRV(xfA.Q, joint.LocalAnchorA), SubVV(xfA.P, xfC.P)))
+		coordinateA = DotVV(SubVV(pA, pC), joint.LocalAxisC)
 	}
 
-	this.BodyD = this.Joint2.GetBodyA()
-	this.BodyB = this.Joint2.GetBodyB()
+	joint.BodyD = joint.Joint2.GetBodyA()
+	joint.BodyB = joint.Joint2.GetBodyB()
 
 	// Get geometry of joint2
-	xfB := this.BodyB.xf
-	aB := this.BodyB.sweep.A
-	xfD := this.BodyD.xf
-	aD := this.BodyD.sweep.A
+	xfB := joint.BodyB.xf
+	aB := joint.BodyB.sweep.A
+	xfD := joint.BodyD.xf
+	aD := joint.BodyD.sweep.A
 
-	if this.TypeB == Joint_e_revoluteJoint {
+	if joint.TypeB == Joint_e_revoluteJoint {
 		revolute := def.Joint2.(*RevoluteJoint)
-		this.LocalAnchorD = revolute.LocalAnchorA
-		this.LocalAnchorB = revolute.LocalAnchorB
-		this.ReferenceAngleB = revolute.ReferenceAngle
-		this.LocalAxisD.SetZero()
+		joint.LocalAnchorD = revolute.LocalAnchorA
+		joint.LocalAnchorB = revolute.LocalAnchorB
+		joint.ReferenceAngleB = revolute.ReferenceAngle
+		joint.LocalAxisD.SetZero()
 
-		coordinateB = aB - aD - this.ReferenceAngleB
+		coordinateB = aB - aD - joint.ReferenceAngleB
 	} else {
 		prismatic := def.Joint2.(*PrismaticJoint)
-		this.LocalAnchorD = prismatic.LocalAnchorA
-		this.LocalAnchorB = prismatic.LocalAnchorB
-		this.ReferenceAngleB = prismatic.ReferenceAngle
-		this.LocalAxisD = prismatic.LocalXAxisA
+		joint.LocalAnchorD = prismatic.LocalAnchorA
+		joint.LocalAnchorB = prismatic.LocalAnchorB
+		joint.ReferenceAngleB = prismatic.ReferenceAngle
+		joint.LocalAxisD = prismatic.LocalXAxisA
 
-		pD := this.LocalAnchorD
-		pB := MulTRV(xfD.Q, AddVV(MulRV(xfB.Q, this.LocalAnchorB), AddVV(xfB.P, xfD.P)))
-		coordinateB = DotVV(SubVV(pB, pD), this.LocalAxisD)
+		pD := joint.LocalAnchorD
+		pB := MulTRV(xfD.Q, AddVV(MulRV(xfB.Q, joint.LocalAnchorB), AddVV(xfB.P, xfD.P)))
+		coordinateB = DotVV(SubVV(pB, pD), joint.LocalAxisD)
 	}
 
-	this.Ratio = def.Ratio
+	joint.Ratio = def.Ratio
 
-	this.Constant = coordinateA + this.Ratio*coordinateB
+	joint.Constant = coordinateA + joint.Ratio*coordinateB
 
-	this.Impulse = 0.0
-	return this
+	joint.Impulse = 0.0
+	return joint
 }
 
-func (this *GearJoint) GetAnchorA() Vec2 {
-	return this.BodyA.GetWorldPoint(this.LocalAnchorA)
+func (joint *GearJoint) GetAnchorA() Vec2 {
+	return joint.BodyA.GetWorldPoint(joint.LocalAnchorA)
 }
 
-func (this *GearJoint) GetAnchorB() Vec2 {
-	return this.BodyB.GetWorldPoint(this.LocalAnchorB)
+func (joint *GearJoint) GetAnchorB() Vec2 {
+	return joint.BodyB.GetWorldPoint(joint.LocalAnchorB)
 }
 
-func (this *GearJoint) GetReactionForce(inv_dt float64) Vec2 {
-	P := MulFV(this.Impulse, this.JvAC)
+func (joint *GearJoint) GetReactionForce(inv_dt float64) Vec2 {
+	P := MulFV(joint.Impulse, joint.JvAC)
 	return MulFV(inv_dt, P)
 }
 
-func (this *GearJoint) GetReactionTorque(inv_dt float64) float64 {
-	L := this.Impulse * this.JwA
+func (joint *GearJoint) GetReactionTorque(inv_dt float64) float64 {
+	L := joint.Impulse * joint.JwA
 	return inv_dt * L
 }
 
 /// Get the first joint.
-func (this *GearJoint) GetJoint1() IJoint {
-	return this.Joint1
+func (joint *GearJoint) GetJoint1() IJoint {
+	return joint.Joint1
 }
 
 /// Get the second joint.
-func (this *GearJoint) GetJoint2() IJoint {
-	return this.Joint2
+func (joint *GearJoint) GetJoint2() IJoint {
+	return joint.Joint2
 }
 
 /// Set/Get the gear ratio.
-func (this *GearJoint) SetRatio(ratio float64) {
-	this.Ratio = ratio
+func (joint *GearJoint) SetRatio(ratio float64) {
+	joint.Ratio = ratio
 }
 
-func (this *GearJoint) GetRatio() float64 {
-	return this.Ratio
+func (joint *GearJoint) GetRatio() float64 {
+	return joint.Ratio
 }
 
-func (this *GearJoint) InitVelocityConstraints(data *solverData) {
-	this.IndexA = this.BodyA.islandIndex
-	this.IndexB = this.BodyB.islandIndex
-	this.IndexC = this.BodyC.islandIndex
-	this.IndexD = this.BodyD.islandIndex
-	this.LcA = this.BodyA.sweep.LocalCenter
-	this.LcB = this.BodyB.sweep.LocalCenter
-	this.LcC = this.BodyC.sweep.LocalCenter
-	this.LcD = this.BodyD.sweep.LocalCenter
-	this.MA = this.BodyA.invMass
-	this.MB = this.BodyB.invMass
-	this.MC = this.BodyC.invMass
-	this.MD = this.BodyD.invMass
-	this.IA = this.BodyA.invI
-	this.IB = this.BodyB.invI
-	this.IC = this.BodyC.invI
-	this.ID = this.BodyD.invI
+func (joint *GearJoint) InitVelocityConstraints(data *solverData) {
+	joint.IndexA = joint.BodyA.islandIndex
+	joint.IndexB = joint.BodyB.islandIndex
+	joint.IndexC = joint.BodyC.islandIndex
+	joint.IndexD = joint.BodyD.islandIndex
+	joint.LcA = joint.BodyA.sweep.LocalCenter
+	joint.LcB = joint.BodyB.sweep.LocalCenter
+	joint.LcC = joint.BodyC.sweep.LocalCenter
+	joint.LcD = joint.BodyD.sweep.LocalCenter
+	joint.MA = joint.BodyA.invMass
+	joint.MB = joint.BodyB.invMass
+	joint.MC = joint.BodyC.invMass
+	joint.MD = joint.BodyD.invMass
+	joint.IA = joint.BodyA.invI
+	joint.IB = joint.BodyB.invI
+	joint.IC = joint.BodyC.invI
+	joint.ID = joint.BodyD.invI
 
-	//cA := data.positions[this.IndexA].c
-	aA := data.positions[this.IndexA].a
-	vA := data.velocities[this.IndexA].v
-	wA := data.velocities[this.IndexA].w
+	//cA := data.positions[joint.IndexA].c
+	aA := data.positions[joint.IndexA].a
+	vA := data.velocities[joint.IndexA].v
+	wA := data.velocities[joint.IndexA].w
 
-	//cB := data.positions[this.IndexB].c
-	aB := data.positions[this.IndexB].a
-	vB := data.velocities[this.IndexB].v
-	wB := data.velocities[this.IndexB].w
+	//cB := data.positions[joint.IndexB].c
+	aB := data.positions[joint.IndexB].a
+	vB := data.velocities[joint.IndexB].v
+	wB := data.velocities[joint.IndexB].w
 
-	//cC := data.positions[this.IndexC].c
-	aC := data.positions[this.IndexC].a
-	vC := data.velocities[this.IndexC].v
-	wC := data.velocities[this.IndexC].w
+	//cC := data.positions[joint.IndexC].c
+	aC := data.positions[joint.IndexC].a
+	vC := data.velocities[joint.IndexC].v
+	wC := data.velocities[joint.IndexC].w
 
-	//cD := data.positions[this.IndexD].c
-	aD := data.positions[this.IndexD].a
-	vD := data.velocities[this.IndexD].v
-	wD := data.velocities[this.IndexD].w
+	//cD := data.positions[joint.IndexD].c
+	aD := data.positions[joint.IndexD].a
+	vD := data.velocities[joint.IndexD].v
+	wD := data.velocities[joint.IndexD].w
 
-	qA, qB, qC, qD := NewRot(aA), NewRot(aB), NewRot(aC), NewRot(aD)
+	qA, qB, qC, qD := MakeRot(aA), MakeRot(aB), MakeRot(aC), MakeRot(aD)
 
-	this.Mass = 0.0
+	joint.Mass = 0.0
 
-	if this.TypeA == Joint_e_revoluteJoint {
-		this.JvAC.SetZero()
-		this.JwA = 1.0
-		this.JwC = 1.0
-		this.Mass += this.IA + this.IC
+	if joint.TypeA == Joint_e_revoluteJoint {
+		joint.JvAC.SetZero()
+		joint.JwA = 1.0
+		joint.JwC = 1.0
+		joint.Mass += joint.IA + joint.IC
 	} else {
-		u := MulRV(qC, this.LocalAxisC)
-		rC := MulRV(qC, SubVV(this.LocalAnchorC, this.LcC))
-		rA := MulRV(qA, SubVV(this.LocalAnchorA, this.LcA))
-		this.JvAC = u
-		this.JwC = CrossVV(rC, u)
-		this.JwA = CrossVV(rA, u)
-		this.Mass += this.MC + this.MA + this.IC*this.JwC*this.JwC + this.IA*this.JwA*this.JwA
+		u := MulRV(qC, joint.LocalAxisC)
+		rC := MulRV(qC, SubVV(joint.LocalAnchorC, joint.LcC))
+		rA := MulRV(qA, SubVV(joint.LocalAnchorA, joint.LcA))
+		joint.JvAC = u
+		joint.JwC = CrossVV(rC, u)
+		joint.JwA = CrossVV(rA, u)
+		joint.Mass += joint.MC + joint.MA + joint.IC*joint.JwC*joint.JwC + joint.IA*joint.JwA*joint.JwA
 	}
 
-	if this.TypeB == Joint_e_revoluteJoint {
-		this.JvBD.SetZero()
-		this.JwB = this.Ratio
-		this.JwD = this.Ratio
-		this.Mass += this.Ratio * this.Ratio * (this.IB + this.ID)
+	if joint.TypeB == Joint_e_revoluteJoint {
+		joint.JvBD.SetZero()
+		joint.JwB = joint.Ratio
+		joint.JwD = joint.Ratio
+		joint.Mass += joint.Ratio * joint.Ratio * (joint.IB + joint.ID)
 	} else {
-		u := MulRV(qD, this.LocalAxisD)
-		rD := MulRV(qD, SubVV(this.LocalAnchorD, this.LcD))
-		rB := MulRV(qB, SubVV(this.LocalAnchorB, this.LcB))
-		this.JvBD = MulFV(this.Ratio, u)
-		this.JwD = this.Ratio * CrossVV(rD, u)
-		this.JwB = this.Ratio * CrossVV(rB, u)
-		this.Mass += this.Ratio*this.Ratio*(this.MD+this.MB) + this.ID*this.JwD*this.JwD + this.IB*this.JwB*this.JwB
+		u := MulRV(qD, joint.LocalAxisD)
+		rD := MulRV(qD, SubVV(joint.LocalAnchorD, joint.LcD))
+		rB := MulRV(qB, SubVV(joint.LocalAnchorB, joint.LcB))
+		joint.JvBD = MulFV(joint.Ratio, u)
+		joint.JwD = joint.Ratio * CrossVV(rD, u)
+		joint.JwB = joint.Ratio * CrossVV(rB, u)
+		joint.Mass += joint.Ratio*joint.Ratio*(joint.MD+joint.MB) + joint.ID*joint.JwD*joint.JwD + joint.IB*joint.JwB*joint.JwB
 	}
 
 	// Compute effective mass.
-	this.Mass = 0.0
-	if this.Mass > 0.0 {
-		this.Mass = 1.0 / this.Mass
+	joint.Mass = 0.0
+	if joint.Mass > 0.0 {
+		joint.Mass = 1.0 / joint.Mass
 	}
 
 	if data.step.warmStarting {
-		vA.Add(MulFV(this.MA*this.Impulse, this.JvAC))
-		wA += this.IA * this.Impulse * this.JwA
-		vB.Add(MulFV(this.MB*this.Impulse, this.JvBD))
-		wB += this.IB * this.Impulse * this.JwB
-		vC.Sub(MulFV(this.MC*this.Impulse, this.JvAC))
-		wC -= this.IC * this.Impulse * this.JwC
-		vD.Sub(MulFV(this.MD*this.Impulse, this.JvBD))
-		wD -= this.ID * this.Impulse * this.JwD
+		vA.Add(MulFV(joint.MA*joint.Impulse, joint.JvAC))
+		wA += joint.IA * joint.Impulse * joint.JwA
+		vB.Add(MulFV(joint.MB*joint.Impulse, joint.JvBD))
+		wB += joint.IB * joint.Impulse * joint.JwB
+		vC.Sub(MulFV(joint.MC*joint.Impulse, joint.JvAC))
+		wC -= joint.IC * joint.Impulse * joint.JwC
+		vD.Sub(MulFV(joint.MD*joint.Impulse, joint.JvBD))
+		wD -= joint.ID * joint.Impulse * joint.JwD
 	} else {
-		this.Impulse = 0.0
+		joint.Impulse = 0.0
 	}
 
-	data.velocities[this.IndexA].v = vA
-	data.velocities[this.IndexA].w = wA
-	data.velocities[this.IndexB].v = vB
-	data.velocities[this.IndexB].w = wB
-	data.velocities[this.IndexC].v = vC
-	data.velocities[this.IndexC].w = wC
-	data.velocities[this.IndexD].v = vD
-	data.velocities[this.IndexD].w = wD
+	data.velocities[joint.IndexA].v = vA
+	data.velocities[joint.IndexA].w = wA
+	data.velocities[joint.IndexB].v = vB
+	data.velocities[joint.IndexB].w = wB
+	data.velocities[joint.IndexC].v = vC
+	data.velocities[joint.IndexC].w = wC
+	data.velocities[joint.IndexD].v = vD
+	data.velocities[joint.IndexD].w = wD
 }
 
-func (this *GearJoint) SolveVelocityConstraints(data *solverData) {
-	vA := data.velocities[this.IndexA].v
-	wA := data.velocities[this.IndexA].w
-	vB := data.velocities[this.IndexB].v
-	wB := data.velocities[this.IndexB].w
-	vC := data.velocities[this.IndexC].v
-	wC := data.velocities[this.IndexC].w
-	vD := data.velocities[this.IndexD].v
-	wD := data.velocities[this.IndexD].w
+func (joint *GearJoint) SolveVelocityConstraints(data *solverData) {
+	vA := data.velocities[joint.IndexA].v
+	wA := data.velocities[joint.IndexA].w
+	vB := data.velocities[joint.IndexB].v
+	wB := data.velocities[joint.IndexB].w
+	vC := data.velocities[joint.IndexC].v
+	wC := data.velocities[joint.IndexC].w
+	vD := data.velocities[joint.IndexD].v
+	wD := data.velocities[joint.IndexD].w
 
-	Cdot := DotVV(this.JvAC, SubVV(vA, vC)) + DotVV(this.JvBD, SubVV(vB, vD))
-	Cdot += (this.JwA*wA - this.JwC*wC) + (this.JwB*wB - this.JwD*wD)
+	Cdot := DotVV(joint.JvAC, SubVV(vA, vC)) + DotVV(joint.JvBD, SubVV(vB, vD))
+	Cdot += (joint.JwA*wA - joint.JwC*wC) + (joint.JwB*wB - joint.JwD*wD)
 
-	impulse := -this.Mass * Cdot
-	this.Impulse += impulse
+	impulse := -joint.Mass * Cdot
+	joint.Impulse += impulse
 
-	vA.Add(MulFV(this.MA*impulse, this.JvAC))
-	wA += this.IA * impulse * this.JwA
-	vB.Add(MulFV(this.MB*impulse, this.JvBD))
-	wB += this.IB * impulse * this.JwB
-	vC.Sub(MulFV(this.MC*impulse, this.JvAC))
-	wC -= this.IC * impulse * this.JwC
-	vD.Sub(MulFV(this.MD*impulse, this.JvBD))
-	wD -= this.ID * impulse * this.JwD
+	vA.Add(MulFV(joint.MA*impulse, joint.JvAC))
+	wA += joint.IA * impulse * joint.JwA
+	vB.Add(MulFV(joint.MB*impulse, joint.JvBD))
+	wB += joint.IB * impulse * joint.JwB
+	vC.Sub(MulFV(joint.MC*impulse, joint.JvAC))
+	wC -= joint.IC * impulse * joint.JwC
+	vD.Sub(MulFV(joint.MD*impulse, joint.JvBD))
+	wD -= joint.ID * impulse * joint.JwD
 
-	data.velocities[this.IndexA].v = vA
-	data.velocities[this.IndexA].w = wA
-	data.velocities[this.IndexB].v = vB
-	data.velocities[this.IndexB].w = wB
-	data.velocities[this.IndexC].v = vC
-	data.velocities[this.IndexC].w = wC
-	data.velocities[this.IndexD].v = vD
-	data.velocities[this.IndexD].w = wD
+	data.velocities[joint.IndexA].v = vA
+	data.velocities[joint.IndexA].w = wA
+	data.velocities[joint.IndexB].v = vB
+	data.velocities[joint.IndexB].w = wB
+	data.velocities[joint.IndexC].v = vC
+	data.velocities[joint.IndexC].w = wC
+	data.velocities[joint.IndexD].v = vD
+	data.velocities[joint.IndexD].w = wD
 }
 
-func (this *GearJoint) SolvePositionConstraints(data *solverData) bool {
-	cA := data.positions[this.IndexA].c
-	aA := data.positions[this.IndexA].a
-	cB := data.positions[this.IndexB].c
-	aB := data.positions[this.IndexB].a
-	cC := data.positions[this.IndexC].c
-	aC := data.positions[this.IndexC].a
-	cD := data.positions[this.IndexD].c
-	aD := data.positions[this.IndexD].a
+func (joint *GearJoint) SolvePositionConstraints(data *solverData) bool {
+	cA := data.positions[joint.IndexA].c
+	aA := data.positions[joint.IndexA].a
+	cB := data.positions[joint.IndexB].c
+	aB := data.positions[joint.IndexB].a
+	cC := data.positions[joint.IndexC].c
+	aC := data.positions[joint.IndexC].a
+	cD := data.positions[joint.IndexD].c
+	aD := data.positions[joint.IndexD].a
 
-	qA, qB, qC, qD := NewRot(aA), NewRot(aB), NewRot(aC), NewRot(aD)
+	qA, qB, qC, qD := MakeRot(aA), MakeRot(aB), MakeRot(aC), MakeRot(aD)
 
 	linearError := 0.0
 
@@ -2881,93 +2880,93 @@ func (this *GearJoint) SolvePositionConstraints(data *solverData) bool {
 	var JwA, JwB, JwC, JwD float64
 	mass := 0.0
 
-	if this.TypeA == Joint_e_revoluteJoint {
+	if joint.TypeA == Joint_e_revoluteJoint {
 		JvAC.SetZero()
 		JwA = 1.0
 		JwC = 1.0
-		mass += this.IA + this.IC
+		mass += joint.IA + joint.IC
 
-		coordinateA = aA - aC - this.ReferenceAngleA
+		coordinateA = aA - aC - joint.ReferenceAngleA
 	} else {
-		u := MulRV(qC, this.LocalAxisC)
-		rC := MulRV(qC, SubVV(this.LocalAnchorC, this.LcC))
-		rA := MulRV(qA, SubVV(this.LocalAnchorA, this.LcA))
+		u := MulRV(qC, joint.LocalAxisC)
+		rC := MulRV(qC, SubVV(joint.LocalAnchorC, joint.LcC))
+		rA := MulRV(qA, SubVV(joint.LocalAnchorA, joint.LcA))
 		JvAC = u
 		JwC = CrossVV(rC, u)
 		JwA = CrossVV(rA, u)
-		mass += this.MC + this.MA + this.IC*JwC*JwC + this.IA*JwA*JwA
+		mass += joint.MC + joint.MA + joint.IC*JwC*JwC + joint.IA*JwA*JwA
 
-		pC := SubVV(this.LocalAnchorC, this.LcC)
+		pC := SubVV(joint.LocalAnchorC, joint.LcC)
 		pA := MulTRV(qC, AddVV(rA, SubVV(cA, cC)))
-		coordinateA = DotVV(SubVV(pA, pC), this.LocalAxisC)
+		coordinateA = DotVV(SubVV(pA, pC), joint.LocalAxisC)
 	}
 
-	if this.TypeB == Joint_e_revoluteJoint {
+	if joint.TypeB == Joint_e_revoluteJoint {
 		JvBD.SetZero()
-		JwB = this.Ratio
-		JwD = this.Ratio
-		mass += this.Ratio * this.Ratio * (this.IB + this.ID)
+		JwB = joint.Ratio
+		JwD = joint.Ratio
+		mass += joint.Ratio * joint.Ratio * (joint.IB + joint.ID)
 
-		coordinateB = aB - aD - this.ReferenceAngleB
+		coordinateB = aB - aD - joint.ReferenceAngleB
 	} else {
-		u := MulRV(qD, this.LocalAxisD)
-		rD := MulRV(qD, SubVV(this.LocalAnchorD, this.LcD))
-		rB := MulRV(qB, SubVV(this.LocalAnchorB, this.LcB))
-		JvBD = MulFV(this.Ratio, u)
-		JwD = this.Ratio * CrossVV(rD, u)
-		JwB = this.Ratio * CrossVV(rB, u)
-		mass += this.Ratio*this.Ratio*(this.MD+this.MB) + this.ID*JwD*JwD + this.IB*JwB*JwB
+		u := MulRV(qD, joint.LocalAxisD)
+		rD := MulRV(qD, SubVV(joint.LocalAnchorD, joint.LcD))
+		rB := MulRV(qB, SubVV(joint.LocalAnchorB, joint.LcB))
+		JvBD = MulFV(joint.Ratio, u)
+		JwD = joint.Ratio * CrossVV(rD, u)
+		JwB = joint.Ratio * CrossVV(rB, u)
+		mass += joint.Ratio*joint.Ratio*(joint.MD+joint.MB) + joint.ID*JwD*JwD + joint.IB*JwB*JwB
 
-		pD := SubVV(this.LocalAnchorD, this.LcD)
+		pD := SubVV(joint.LocalAnchorD, joint.LcD)
 		pB := MulTRV(qD, AddVV(rB, SubVV(cB, cD)))
-		coordinateB = DotVV(SubVV(pB, pD), this.LocalAxisD)
+		coordinateB = DotVV(SubVV(pB, pD), joint.LocalAxisD)
 	}
 
-	C := (coordinateA + this.Ratio*coordinateB) - this.Constant
+	C := (coordinateA + joint.Ratio*coordinateB) - joint.Constant
 
 	impulse := 0.0
 	if mass > 0.0 {
 		impulse = -C / mass
 	}
 
-	cA.Add(MulFV(this.MA*impulse, JvAC))
-	aA += this.IA * impulse * JwA
-	cB.Add(MulFV(this.MB*impulse, JvBD))
-	aB += this.IB * impulse * JwB
-	cC.Sub(MulFV(this.MC*impulse, JvAC))
-	aC -= this.IC * impulse * JwC
-	cD.Sub(MulFV(this.MD*impulse, JvBD))
-	aD -= this.ID * impulse * JwD
+	cA.Add(MulFV(joint.MA*impulse, JvAC))
+	aA += joint.IA * impulse * JwA
+	cB.Add(MulFV(joint.MB*impulse, JvBD))
+	aB += joint.IB * impulse * JwB
+	cC.Sub(MulFV(joint.MC*impulse, JvAC))
+	aC -= joint.IC * impulse * JwC
+	cD.Sub(MulFV(joint.MD*impulse, JvBD))
+	aD -= joint.ID * impulse * JwD
 
-	data.positions[this.IndexA].c = cA
-	data.positions[this.IndexA].a = aA
-	data.positions[this.IndexB].c = cB
-	data.positions[this.IndexB].a = aB
-	data.positions[this.IndexC].c = cC
-	data.positions[this.IndexC].a = aC
-	data.positions[this.IndexD].c = cD
-	data.positions[this.IndexD].a = aD
+	data.positions[joint.IndexA].c = cA
+	data.positions[joint.IndexA].a = aA
+	data.positions[joint.IndexB].c = cB
+	data.positions[joint.IndexB].a = aB
+	data.positions[joint.IndexC].c = cC
+	data.positions[joint.IndexC].a = aC
+	data.positions[joint.IndexD].c = cD
+	data.positions[joint.IndexD].a = aD
 
 	// TODO_ERIN not implemented
 	return linearError < LinearSlop
 }
 
 /// Dump joint to dmLog
-func (this *GearJoint) Dump() {
-	indexA := this.BodyA.islandIndex
-	indexB := this.BodyB.islandIndex
+func (joint *GearJoint) Dump() {
+	indexA := joint.BodyA.islandIndex
+	indexB := joint.BodyB.islandIndex
 
-	index1 := this.Joint1.GetIndex()
-	index2 := this.Joint2.GetIndex()
+	index1 := joint.Joint1.GetIndex()
+	index2 := joint.Joint2.GetIndex()
 
 	Log("  b2GearJointDef jd;\n")
 	Log("  jd.bodyA = bodies[%d];\n", indexA)
 	Log("  jd.bodyB = bodies[%d];\n", indexB)
-	Log("  jd.collideConnected = bool(%d);\n", this.CollideConnected)
+	Log("  jd.collideConnected = bool(%t);\n", joint.CollideConnected)
 	Log("  jd.joint1 = joints[%d];\n", index1)
 	Log("  jd.joint2 = joints[%d];\n", index2)
-	Log("  jd.ratio = %.15lef;\n", this.Ratio)
-	Log("  joints[%d] = m_world->CreateJoint(&jd);\n", this.Index)
+	Log("  jd.ratio = %.15e;\n", joint.Ratio)
+	Log("  joints[%d] = m_world->CreateJoint(&jd);\n", joint.Index)
 }
 
 /// Wheel joint definition. This requires defining a line of
@@ -3081,296 +3080,296 @@ type WheelJoint struct {
 }
 
 func NewWheelJoint(def *WheelJointDef) *WheelJoint {
-	this := new(WheelJoint)
-	this.Type = def.Type
-	this.BodyA = def.BodyA
-	this.BodyB = def.BodyB
-	this.CollideConnected = def.CollideConnected
-	this.UserData = def.UserData
+	joint := new(WheelJoint)
+	joint.Type = def.Type
+	joint.BodyA = def.BodyA
+	joint.BodyB = def.BodyB
+	joint.CollideConnected = def.CollideConnected
+	joint.UserData = def.UserData
 
-	this.LocalAnchorA = def.LocalAnchorA
-	this.LocalAnchorB = def.LocalAnchorB
-	this.LocalXAxisA = def.LocalAxisA
-	this.LocalYAxisA = CrossFV(1.0, this.LocalXAxisA)
+	joint.LocalAnchorA = def.LocalAnchorA
+	joint.LocalAnchorB = def.LocalAnchorB
+	joint.LocalXAxisA = def.LocalAxisA
+	joint.LocalYAxisA = CrossFV(1.0, joint.LocalXAxisA)
 
-	this.Mass = 0.0
-	this.Impulse = 0.0
-	this.MotorMass = 0.0
-	this.MotorImpulse = 0.0
-	this.SpringMass = 0.0
-	this.SpringImpulse = 0.0
+	joint.Mass = 0.0
+	joint.Impulse = 0.0
+	joint.MotorMass = 0.0
+	joint.MotorImpulse = 0.0
+	joint.SpringMass = 0.0
+	joint.SpringImpulse = 0.0
 
-	this.MaxMotorTorque = def.MaxMotorTorque
-	this.MotorSpeed = def.MotorSpeed
-	this.EnableMotor = def.EnableMotor
+	joint.MaxMotorTorque = def.MaxMotorTorque
+	joint.MotorSpeed = def.MotorSpeed
+	joint.EnableMotor = def.EnableMotor
 
-	this.FrequencyHz = def.FrequencyHz
-	this.DampingRatio = def.DampingRatio
+	joint.FrequencyHz = def.FrequencyHz
+	joint.DampingRatio = def.DampingRatio
 
-	this.Bias = 0.0
-	this.Gamma = 0.0
+	joint.Bias = 0.0
+	joint.Gamma = 0.0
 
-	this.Ax.SetZero()
-	this.Ay.SetZero()
-	return this
+	joint.Ax.SetZero()
+	joint.Ay.SetZero()
+	return joint
 }
 
-func (this *WheelJoint) GetAnchorA() Vec2 {
-	return this.BodyA.GetWorldPoint(this.LocalAnchorA)
+func (joint *WheelJoint) GetAnchorA() Vec2 {
+	return joint.BodyA.GetWorldPoint(joint.LocalAnchorA)
 }
 
-func (this *WheelJoint) GetAnchorB() Vec2 {
-	return this.BodyB.GetWorldPoint(this.LocalAnchorB)
+func (joint *WheelJoint) GetAnchorB() Vec2 {
+	return joint.BodyB.GetWorldPoint(joint.LocalAnchorB)
 }
 
-func (this *WheelJoint) GetReactionForce(inv_dt float64) Vec2 {
-	return MulFV(inv_dt, AddVV(MulFV(this.Impulse, this.Ay), MulFV(this.SpringImpulse, this.Ax)))
+func (joint *WheelJoint) GetReactionForce(inv_dt float64) Vec2 {
+	return MulFV(inv_dt, AddVV(MulFV(joint.Impulse, joint.Ay), MulFV(joint.SpringImpulse, joint.Ax)))
 }
 
-func (this *WheelJoint) GetReactionTorque(inv_dt float64) float64 {
-	return inv_dt * this.MotorImpulse
+func (joint *WheelJoint) GetReactionTorque(inv_dt float64) float64 {
+	return inv_dt * joint.MotorImpulse
 }
 
 /// The local anchor point relative to bodyA's origin.
-func (this *WheelJoint) GetLocalAnchorA() Vec2 {
-	return this.LocalAnchorA
+func (joint *WheelJoint) GetLocalAnchorA() Vec2 {
+	return joint.LocalAnchorA
 }
 
 /// The local anchor point relative to bodyB's origin.
-func (this *WheelJoint) GetLocalAnchorB() Vec2 {
-	return this.LocalAnchorB
+func (joint *WheelJoint) GetLocalAnchorB() Vec2 {
+	return joint.LocalAnchorB
 }
 
 /// The local joint axis relative to bodyA.
-func (this *WheelJoint) GetLocalAxisA() Vec2 {
-	return this.LocalXAxisA
+func (joint *WheelJoint) GetLocalAxisA() Vec2 {
+	return joint.LocalXAxisA
 }
 
 /// Get the current joint translation, usually in meters.
-func (this *WheelJoint) GetJointTranslation() float64 {
-	bA := this.BodyA
-	bB := this.BodyB
+func (joint *WheelJoint) GetJointTranslation() float64 {
+	bA := joint.BodyA
+	bB := joint.BodyB
 
-	pA := bA.GetWorldPoint(this.LocalAnchorA)
-	pB := bB.GetWorldPoint(this.LocalAnchorB)
+	pA := bA.GetWorldPoint(joint.LocalAnchorA)
+	pB := bB.GetWorldPoint(joint.LocalAnchorB)
 	d := SubVV(pB, pA)
-	axis := bA.GetWorldVector(this.LocalXAxisA)
+	axis := bA.GetWorldVector(joint.LocalXAxisA)
 
 	translation := DotVV(d, axis)
 	return translation
 }
 
 /// Get the current joint translation speed, usually in meters per second.
-func (this *WheelJoint) GetJointSpeed() float64 {
-	wA := this.BodyA.angularVelocity
-	wB := this.BodyB.angularVelocity
+func (joint *WheelJoint) GetJointSpeed() float64 {
+	wA := joint.BodyA.angularVelocity
+	wB := joint.BodyB.angularVelocity
 	return wB - wA
 }
 
 /// Is the joint motor enabled?
-func (this *WheelJoint) IsMotorEnabled() bool {
-	return this.EnableMotor
+func (joint *WheelJoint) IsMotorEnabled() bool {
+	return joint.EnableMotor
 }
 
 /// Enable/disable the joint motor.
-func (this *WheelJoint) SetEnableMotor(flag bool) {
-	this.BodyA.SetAwake(true)
-	this.BodyB.SetAwake(true)
-	this.EnableMotor = flag
+func (joint *WheelJoint) SetEnableMotor(flag bool) {
+	joint.BodyA.SetAwake(true)
+	joint.BodyB.SetAwake(true)
+	joint.EnableMotor = flag
 }
 
 /// Set the motor speed, usually in radians per second.
-func (this *WheelJoint) SetMotorSpeed(speed float64) {
-	this.BodyA.SetAwake(true)
-	this.BodyB.SetAwake(true)
-	this.MotorSpeed = speed
+func (joint *WheelJoint) SetMotorSpeed(speed float64) {
+	joint.BodyA.SetAwake(true)
+	joint.BodyB.SetAwake(true)
+	joint.MotorSpeed = speed
 }
 
 /// Get the motor speed, usually in radians per second.
-func (this *WheelJoint) GetMotorSpeed() float64 {
-	return this.MotorSpeed
+func (joint *WheelJoint) GetMotorSpeed() float64 {
+	return joint.MotorSpeed
 }
 
 /// Set/Get the maximum motor force, usually in N-m.
-func (this *WheelJoint) SetMaxMotorTorque(torque float64) {
-	this.BodyA.SetAwake(true)
-	this.BodyB.SetAwake(true)
-	this.MaxMotorTorque = torque
+func (joint *WheelJoint) SetMaxMotorTorque(torque float64) {
+	joint.BodyA.SetAwake(true)
+	joint.BodyB.SetAwake(true)
+	joint.MaxMotorTorque = torque
 }
 
-func (this *WheelJoint) GetMaxMotorTorque() float64 {
-	return this.MaxMotorTorque
+func (joint *WheelJoint) GetMaxMotorTorque() float64 {
+	return joint.MaxMotorTorque
 }
 
 /// Get the current motor torque given the inverse time step, usually in N-m.
-func (this *WheelJoint) GetMotorTorque(inv_dt float64) float64 {
-	return inv_dt * this.MotorImpulse
+func (joint *WheelJoint) GetMotorTorque(inv_dt float64) float64 {
+	return inv_dt * joint.MotorImpulse
 }
 
 /// Set/Get the spring frequency in hertz. Setting the frequency to zero disables the spring.
-func (this *WheelJoint) SetSpringFrequencyHz(hz float64) {
-	this.FrequencyHz = hz
+func (joint *WheelJoint) SetSpringFrequencyHz(hz float64) {
+	joint.FrequencyHz = hz
 }
 
-func (this *WheelJoint) GetSpringFrequencyHz() float64 {
-	return this.FrequencyHz
+func (joint *WheelJoint) GetSpringFrequencyHz() float64 {
+	return joint.FrequencyHz
 }
 
 /// Set/Get the spring damping ratio
-func (this *WheelJoint) SetSpringDampingRatio(ratio float64) {
-	this.DampingRatio = ratio
+func (joint *WheelJoint) SetSpringDampingRatio(ratio float64) {
+	joint.DampingRatio = ratio
 }
 
-func (this *WheelJoint) GetSpringDampingRatio() float64 {
-	return this.DampingRatio
+func (joint *WheelJoint) GetSpringDampingRatio() float64 {
+	return joint.DampingRatio
 }
 
-func (this *WheelJoint) InitVelocityConstraints(data *solverData) {
-	this.IndexA = this.BodyA.islandIndex
-	this.IndexB = this.BodyB.islandIndex
-	this.LocalCenterA = this.BodyA.sweep.LocalCenter
-	this.LocalCenterB = this.BodyB.sweep.LocalCenter
-	this.InvMassA = this.BodyA.invMass
-	this.InvMassB = this.BodyB.invMass
-	this.InvIA = this.BodyA.invI
-	this.InvIB = this.BodyB.invI
+func (joint *WheelJoint) InitVelocityConstraints(data *solverData) {
+	joint.IndexA = joint.BodyA.islandIndex
+	joint.IndexB = joint.BodyB.islandIndex
+	joint.LocalCenterA = joint.BodyA.sweep.LocalCenter
+	joint.LocalCenterB = joint.BodyB.sweep.LocalCenter
+	joint.InvMassA = joint.BodyA.invMass
+	joint.InvMassB = joint.BodyB.invMass
+	joint.InvIA = joint.BodyA.invI
+	joint.InvIB = joint.BodyB.invI
 
-	mA := this.InvMassA
-	mB := this.InvMassB
-	iA := this.InvIA
-	iB := this.InvIB
+	mA := joint.InvMassA
+	mB := joint.InvMassB
+	iA := joint.InvIA
+	iB := joint.InvIB
 
-	cA := data.positions[this.IndexA].c
-	aA := data.positions[this.IndexA].a
-	vA := data.velocities[this.IndexA].v
-	wA := data.velocities[this.IndexA].w
+	cA := data.positions[joint.IndexA].c
+	aA := data.positions[joint.IndexA].a
+	vA := data.velocities[joint.IndexA].v
+	wA := data.velocities[joint.IndexA].w
 
-	cB := data.positions[this.IndexB].c
-	aB := data.positions[this.IndexB].a
-	vB := data.velocities[this.IndexB].v
-	wB := data.velocities[this.IndexB].w
+	cB := data.positions[joint.IndexB].c
+	aB := data.positions[joint.IndexB].a
+	vB := data.velocities[joint.IndexB].v
+	wB := data.velocities[joint.IndexB].w
 
-	qA, qB := NewRot(aA), NewRot(aB)
+	qA, qB := MakeRot(aA), MakeRot(aB)
 
 	// Compute the effective masses.
-	rA := MulRV(qA, SubVV(this.LocalAnchorA, this.LocalCenterA))
-	rB := MulRV(qB, SubVV(this.LocalAnchorB, this.LocalCenterB))
+	rA := MulRV(qA, SubVV(joint.LocalAnchorA, joint.LocalCenterA))
+	rB := MulRV(qB, SubVV(joint.LocalAnchorB, joint.LocalCenterB))
 	d := SubVV(AddVV(cB, rB), AddVV(cA, rA))
 
 	// Point to line constraint
 	{
-		this.Ay = MulRV(qA, this.LocalYAxisA)
-		this.SAy = CrossVV(AddVV(d, rA), this.Ay)
-		this.SBy = CrossVV(rB, this.Ay)
+		joint.Ay = MulRV(qA, joint.LocalYAxisA)
+		joint.SAy = CrossVV(AddVV(d, rA), joint.Ay)
+		joint.SBy = CrossVV(rB, joint.Ay)
 
-		this.Mass = mA + mB + iA*this.SAy*this.SAy + iB*this.SBy*this.SBy
+		joint.Mass = mA + mB + iA*joint.SAy*joint.SAy + iB*joint.SBy*joint.SBy
 
-		if this.Mass > 0.0 {
-			this.Mass = 1.0 / this.Mass
+		if joint.Mass > 0.0 {
+			joint.Mass = 1.0 / joint.Mass
 		}
 	}
 
 	// Spring constraint
-	this.SpringMass = 0.0
-	this.Bias = 0.0
-	this.Gamma = 0.0
-	if this.FrequencyHz > 0.0 {
-		this.Ax = MulRV(qA, this.LocalXAxisA)
-		this.SAx = CrossVV(AddVV(d, rA), this.Ax)
-		this.SBx = CrossVV(rB, this.Ax)
+	joint.SpringMass = 0.0
+	joint.Bias = 0.0
+	joint.Gamma = 0.0
+	if joint.FrequencyHz > 0.0 {
+		joint.Ax = MulRV(qA, joint.LocalXAxisA)
+		joint.SAx = CrossVV(AddVV(d, rA), joint.Ax)
+		joint.SBx = CrossVV(rB, joint.Ax)
 
-		invMass := mA + mB + iA*this.SAx*this.SAx + iB*this.SBx*this.SBx
+		invMass := mA + mB + iA*joint.SAx*joint.SAx + iB*joint.SBx*joint.SBx
 
 		if invMass > 0.0 {
-			this.SpringMass = 1.0 / invMass
+			joint.SpringMass = 1.0 / invMass
 
-			C := DotVV(d, this.Ax)
+			C := DotVV(d, joint.Ax)
 
 			// Frequency
-			omega := 2.0 * Pi * this.FrequencyHz
+			omega := 2.0 * Pi * joint.FrequencyHz
 
 			// Damping coefficient
-			d := 2.0 * this.SpringMass * this.DampingRatio * omega
+			d := 2.0 * joint.SpringMass * joint.DampingRatio * omega
 
 			// Spring stiffness
-			k := this.SpringMass * omega * omega
+			k := joint.SpringMass * omega * omega
 
 			// magic formulas
 			h := data.step.dt
-			this.Gamma = h * (d + h*k)
-			if this.Gamma > 0.0 {
-				this.Gamma = 1.0 / this.Gamma
+			joint.Gamma = h * (d + h*k)
+			if joint.Gamma > 0.0 {
+				joint.Gamma = 1.0 / joint.Gamma
 			}
 
-			this.Bias = C * h * k * this.Gamma
+			joint.Bias = C * h * k * joint.Gamma
 
-			this.SpringMass = invMass + this.Gamma
-			if this.SpringMass > 0.0 {
-				this.SpringMass = 1.0 / this.SpringMass
+			joint.SpringMass = invMass + joint.Gamma
+			if joint.SpringMass > 0.0 {
+				joint.SpringMass = 1.0 / joint.SpringMass
 			}
 		}
 	} else {
-		this.SpringImpulse = 0.0
+		joint.SpringImpulse = 0.0
 	}
 
 	// Rotational motor
-	if this.EnableMotor {
-		this.MotorMass = iA + iB
-		if this.MotorMass > 0.0 {
-			this.MotorMass = 1.0 / this.MotorMass
+	if joint.EnableMotor {
+		joint.MotorMass = iA + iB
+		if joint.MotorMass > 0.0 {
+			joint.MotorMass = 1.0 / joint.MotorMass
 		}
 	} else {
-		this.MotorMass = 0.0
-		this.MotorImpulse = 0.0
+		joint.MotorMass = 0.0
+		joint.MotorImpulse = 0.0
 	}
 
 	if data.step.warmStarting {
 		// Account for variable time step.
-		this.Impulse *= data.step.dtRatio
-		this.SpringImpulse *= data.step.dtRatio
-		this.MotorImpulse *= data.step.dtRatio
+		joint.Impulse *= data.step.dtRatio
+		joint.SpringImpulse *= data.step.dtRatio
+		joint.MotorImpulse *= data.step.dtRatio
 
-		P := AddVV(MulFV(this.Impulse, this.Ay), MulFV(this.SpringImpulse, this.Ax))
-		LA := this.Impulse*this.SAy + this.SpringImpulse*this.SAx + this.MotorImpulse
-		LB := this.Impulse*this.SBy + this.SpringImpulse*this.SBx + this.MotorImpulse
+		P := AddVV(MulFV(joint.Impulse, joint.Ay), MulFV(joint.SpringImpulse, joint.Ax))
+		LA := joint.Impulse*joint.SAy + joint.SpringImpulse*joint.SAx + joint.MotorImpulse
+		LB := joint.Impulse*joint.SBy + joint.SpringImpulse*joint.SBx + joint.MotorImpulse
 
-		vA.Sub(MulFV(this.InvMassA, P))
-		wA -= this.InvIA * LA
+		vA.Sub(MulFV(joint.InvMassA, P))
+		wA -= joint.InvIA * LA
 
-		vB.Add(MulFV(this.InvMassB, P))
-		wB += this.InvIB * LB
+		vB.Add(MulFV(joint.InvMassB, P))
+		wB += joint.InvIB * LB
 	} else {
-		this.Impulse = 0.0
-		this.SpringImpulse = 0.0
-		this.MotorImpulse = 0.0
+		joint.Impulse = 0.0
+		joint.SpringImpulse = 0.0
+		joint.MotorImpulse = 0.0
 	}
 
-	data.velocities[this.IndexA].v = vA
-	data.velocities[this.IndexA].w = wA
-	data.velocities[this.IndexB].v = vB
-	data.velocities[this.IndexB].w = wB
+	data.velocities[joint.IndexA].v = vA
+	data.velocities[joint.IndexA].w = wA
+	data.velocities[joint.IndexB].v = vB
+	data.velocities[joint.IndexB].w = wB
 }
 
-func (this *WheelJoint) SolveVelocityConstraints(data *solverData) {
-	mA := this.InvMassA
-	mB := this.InvMassB
-	iA := this.InvIA
-	iB := this.InvIB
+func (joint *WheelJoint) SolveVelocityConstraints(data *solverData) {
+	mA := joint.InvMassA
+	mB := joint.InvMassB
+	iA := joint.InvIA
+	iB := joint.InvIB
 
-	vA := data.velocities[this.IndexA].v
-	wA := data.velocities[this.IndexA].w
-	vB := data.velocities[this.IndexB].v
-	wB := data.velocities[this.IndexB].w
+	vA := data.velocities[joint.IndexA].v
+	wA := data.velocities[joint.IndexA].w
+	vB := data.velocities[joint.IndexB].v
+	wB := data.velocities[joint.IndexB].w
 
 	// Solve spring constraint
 	{
-		Cdot := DotVV(this.Ax, SubVV(vB, vA)) + this.SBx*wB - this.SAx*wA
-		impulse := -this.SpringMass * (Cdot + this.Bias + this.Gamma*this.SpringImpulse)
-		this.SpringImpulse += impulse
+		Cdot := DotVV(joint.Ax, SubVV(vB, vA)) + joint.SBx*wB - joint.SAx*wA
+		impulse := -joint.SpringMass * (Cdot + joint.Bias + joint.Gamma*joint.SpringImpulse)
+		joint.SpringImpulse += impulse
 
-		P := MulFV(impulse, this.Ax)
-		LA := impulse * this.SAx
-		LB := impulse * this.SBx
+		P := MulFV(impulse, joint.Ax)
+		LA := impulse * joint.SAx
+		LB := impulse * joint.SBx
 
 		vA.Sub(MulFV(mA, P))
 		wA -= iA * LA
@@ -3381,13 +3380,13 @@ func (this *WheelJoint) SolveVelocityConstraints(data *solverData) {
 
 	// Solve rotational motor constraint
 	{
-		Cdot := wB - wA - this.MotorSpeed
-		impulse := -this.MotorMass * Cdot
+		Cdot := wB - wA - joint.MotorSpeed
+		impulse := -joint.MotorMass * Cdot
 
-		oldImpulse := this.MotorImpulse
-		maxImpulse := data.step.dt * this.MaxMotorTorque
-		this.MotorImpulse = ClampF(this.MotorImpulse+impulse, -maxImpulse, maxImpulse)
-		impulse = this.MotorImpulse - oldImpulse
+		oldImpulse := joint.MotorImpulse
+		maxImpulse := data.step.dt * joint.MaxMotorTorque
+		joint.MotorImpulse = ClampF(joint.MotorImpulse+impulse, -maxImpulse, maxImpulse)
+		impulse = joint.MotorImpulse - oldImpulse
 
 		wA -= iA * impulse
 		wB += iB * impulse
@@ -3395,13 +3394,13 @@ func (this *WheelJoint) SolveVelocityConstraints(data *solverData) {
 
 	// Solve point to line constraint
 	{
-		Cdot := DotVV(this.Ay, SubVV(vB, vA)) + this.SBy*wB - this.SAy*wA
-		impulse := -this.Mass * Cdot
-		this.Impulse += impulse
+		Cdot := DotVV(joint.Ay, SubVV(vB, vA)) + joint.SBy*wB - joint.SAy*wA
+		impulse := -joint.Mass * Cdot
+		joint.Impulse += impulse
 
-		P := MulFV(impulse, this.Ay)
-		LA := impulse * this.SAy
-		LB := impulse * this.SBy
+		P := MulFV(impulse, joint.Ay)
+		LA := impulse * joint.SAy
+		LB := impulse * joint.SBy
 
 		vA.Sub(MulFV(mA, P))
 		wA -= iA * LA
@@ -3410,32 +3409,32 @@ func (this *WheelJoint) SolveVelocityConstraints(data *solverData) {
 		wB += iB * LB
 	}
 
-	data.velocities[this.IndexA].v = vA
-	data.velocities[this.IndexA].w = wA
-	data.velocities[this.IndexB].v = vB
-	data.velocities[this.IndexB].w = wB
+	data.velocities[joint.IndexA].v = vA
+	data.velocities[joint.IndexA].w = wA
+	data.velocities[joint.IndexB].v = vB
+	data.velocities[joint.IndexB].w = wB
 }
 
-func (this *WheelJoint) SolvePositionConstraints(data *solverData) bool {
-	cA := data.positions[this.IndexA].c
-	aA := data.positions[this.IndexA].a
-	cB := data.positions[this.IndexB].c
-	aB := data.positions[this.IndexB].a
+func (joint *WheelJoint) SolvePositionConstraints(data *solverData) bool {
+	cA := data.positions[joint.IndexA].c
+	aA := data.positions[joint.IndexA].a
+	cB := data.positions[joint.IndexB].c
+	aB := data.positions[joint.IndexB].a
 
-	qA, qB := NewRot(aA), NewRot(aB)
+	qA, qB := MakeRot(aA), MakeRot(aB)
 
-	rA := MulRV(qA, SubVV(this.LocalAnchorA, this.LocalCenterA))
-	rB := MulRV(qB, SubVV(this.LocalAnchorB, this.LocalCenterB))
+	rA := MulRV(qA, SubVV(joint.LocalAnchorA, joint.LocalCenterA))
+	rB := MulRV(qB, SubVV(joint.LocalAnchorB, joint.LocalCenterB))
 	d := AddVV(SubVV(cB, cA), SubVV(rB, rA))
 
-	ay := MulRV(qA, this.LocalYAxisA)
+	ay := MulRV(qA, joint.LocalYAxisA)
 
 	sAy := CrossVV(AddVV(d, rA), ay)
 	sBy := CrossVV(rB, ay)
 
 	C := DotVV(d, ay)
 
-	k := this.InvMassA + this.InvMassB + this.InvIA*this.SAy*this.SAy + this.InvIB*this.SBy*this.SBy
+	k := joint.InvMassA + joint.InvMassB + joint.InvIA*joint.SAy*joint.SAy + joint.InvIB*joint.SBy*joint.SBy
 
 	var impulse float64
 	if k != 0.0 {
@@ -3448,37 +3447,37 @@ func (this *WheelJoint) SolvePositionConstraints(data *solverData) bool {
 	LA := impulse * sAy
 	LB := impulse * sBy
 
-	cA.Sub(MulFV(this.InvMassA, P))
-	aA -= this.InvIA * LA
-	cB.Add(MulFV(this.InvMassB, P))
-	aB += this.InvIB * LB
+	cA.Sub(MulFV(joint.InvMassA, P))
+	aA -= joint.InvIA * LA
+	cB.Add(MulFV(joint.InvMassB, P))
+	aB += joint.InvIB * LB
 
-	data.positions[this.IndexA].c = cA
-	data.positions[this.IndexA].a = aA
-	data.positions[this.IndexB].c = cB
-	data.positions[this.IndexB].a = aB
+	data.positions[joint.IndexA].c = cA
+	data.positions[joint.IndexA].a = aA
+	data.positions[joint.IndexB].c = cB
+	data.positions[joint.IndexB].a = aB
 
 	return AbsF(C) <= LinearSlop
 }
 
 /// Dump to b2Log
-func (this *WheelJoint) Dump() {
-	indexA := this.BodyA.islandIndex
-	indexB := this.BodyB.islandIndex
+func (joint *WheelJoint) Dump() {
+	indexA := joint.BodyA.islandIndex
+	indexB := joint.BodyB.islandIndex
 
 	Log("  b2WheelJointDef jd;\n")
 	Log("  jd.bodyA = bodies[%d];\n", indexA)
 	Log("  jd.bodyB = bodies[%d];\n", indexB)
-	Log("  jd.collideConnected = bool(%d);\n", this.CollideConnected)
-	Log("  jd.localAnchorA.Set(%.15lef, %.15lef);\n", this.LocalAnchorA.X, this.LocalAnchorA.Y)
-	Log("  jd.localAnchorB.Set(%.15lef, %.15lef);\n", this.LocalAnchorB.X, this.LocalAnchorB.Y)
-	Log("  jd.localAxisA.Set(%.15lef, %.15lef);\n", this.LocalXAxisA.X, this.LocalXAxisA.Y)
-	Log("  jd.enableMotor = bool(%d);\n", this.EnableMotor)
-	Log("  jd.motorSpeed = %.15lef;\n", this.MotorSpeed)
-	Log("  jd.maxMotorTorque = %.15lef;\n", this.MaxMotorTorque)
-	Log("  jd.frequencyHz = %.15lef;\n", this.FrequencyHz)
-	Log("  jd.dampingRatio = %.15lef;\n", this.DampingRatio)
-	Log("  joints[%d] = m_world->CreateJoint(&jd);\n", this.Index)
+	Log("  jd.collideConnected = bool(%t);\n", joint.CollideConnected)
+	Log("  jd.localAnchorA.Set(%.15e, %.15e);\n", joint.LocalAnchorA.X, joint.LocalAnchorA.Y)
+	Log("  jd.localAnchorB.Set(%.15e, %.15e);\n", joint.LocalAnchorB.X, joint.LocalAnchorB.Y)
+	Log("  jd.localAxisA.Set(%.15e, %.15e);\n", joint.LocalXAxisA.X, joint.LocalXAxisA.Y)
+	Log("  jd.enableMotor = bool(%t);\n", joint.EnableMotor)
+	Log("  jd.motorSpeed = %.15e;\n", joint.MotorSpeed)
+	Log("  jd.maxMotorTorque = %.15e;\n", joint.MaxMotorTorque)
+	Log("  jd.frequencyHz = %.15e;\n", joint.FrequencyHz)
+	Log("  jd.dampingRatio = %.15e;\n", joint.DampingRatio)
+	Log("  joints[%d] = m_world->CreateJoint(&jd);\n", joint.Index)
 }
 
 /// Weld joint definition. You need to specify local anchor points
@@ -3505,24 +3504,24 @@ type WeldJointDef struct {
 }
 
 func NewWeldJointDef() *WeldJointDef {
-	this := new(WeldJointDef)
-	this.Type = Joint_e_weldJoint
-	this.LocalAnchorA.Set(0.0, 0.0)
-	this.LocalAnchorB.Set(0.0, 0.0)
-	this.ReferenceAngle = 0.0
-	this.FrequencyHz = 0.0
-	this.DampingRatio = 0.0
-	return this
+	jd := new(WeldJointDef)
+	jd.Type = Joint_e_weldJoint
+	jd.LocalAnchorA.Set(0.0, 0.0)
+	jd.LocalAnchorB.Set(0.0, 0.0)
+	jd.ReferenceAngle = 0.0
+	jd.FrequencyHz = 0.0
+	jd.DampingRatio = 0.0
+	return jd
 }
 
 /// Initialize the bodies, anchors, and reference angle using a world
 /// anchor point.
-func (this *WeldJointDef) Initialize(bodyA *Body, bodyB *Body, anchor Vec2) {
-	this.BodyA = bodyA
-	this.BodyB = bodyB
-	this.LocalAnchorA = bodyA.GetLocalPoint(anchor)
-	this.LocalAnchorB = bodyB.GetLocalPoint(anchor)
-	this.ReferenceAngle = bodyB.GetAngle() - bodyA.GetAngle()
+func (jd *WeldJointDef) Initialize(bodyA *Body, bodyB *Body, anchor Vec2) {
+	jd.BodyA = bodyA
+	jd.BodyB = bodyB
+	jd.LocalAnchorA = bodyA.GetLocalPoint(anchor)
+	jd.LocalAnchorB = bodyB.GetLocalPoint(anchor)
+	jd.ReferenceAngle = bodyB.GetAngle() - bodyA.GetAngle()
 }
 
 /// A weld joint essentially glues two bodies together. A weld joint may
@@ -3570,97 +3569,97 @@ type WeldJoint struct {
 // K = invI1 + invI2
 
 func NewWeldJoint(def *WeldJointDef) *WeldJoint {
-	this := new(WeldJoint)
-	this.Type = def.Type
-	this.BodyA = def.BodyA
-	this.BodyB = def.BodyB
-	this.CollideConnected = def.CollideConnected
-	this.UserData = def.UserData
+	joint := new(WeldJoint)
+	joint.Type = def.Type
+	joint.BodyA = def.BodyA
+	joint.BodyB = def.BodyB
+	joint.CollideConnected = def.CollideConnected
+	joint.UserData = def.UserData
 
-	this.LocalAnchorA = def.LocalAnchorA
-	this.LocalAnchorB = def.LocalAnchorB
-	this.ReferenceAngle = def.ReferenceAngle
-	this.FrequencyHz = def.FrequencyHz
-	this.DampingRatio = def.DampingRatio
+	joint.LocalAnchorA = def.LocalAnchorA
+	joint.LocalAnchorB = def.LocalAnchorB
+	joint.ReferenceAngle = def.ReferenceAngle
+	joint.FrequencyHz = def.FrequencyHz
+	joint.DampingRatio = def.DampingRatio
 
-	this.Impulse.SetZero()
-	return this
+	joint.Impulse.SetZero()
+	return joint
 }
 
-func (this *WeldJoint) GetAnchorA() Vec2 {
-	return this.BodyA.GetWorldPoint(this.LocalAnchorA)
+func (joint *WeldJoint) GetAnchorA() Vec2 {
+	return joint.BodyA.GetWorldPoint(joint.LocalAnchorA)
 }
 
-func (this *WeldJoint) GetAnchorB() Vec2 {
-	return this.BodyB.GetWorldPoint(this.LocalAnchorB)
+func (joint *WeldJoint) GetAnchorB() Vec2 {
+	return joint.BodyB.GetWorldPoint(joint.LocalAnchorB)
 }
 
-func (this *WeldJoint) GetReactionForce(inv_dt float64) Vec2 {
-	P := Vec2{this.Impulse.X, this.Impulse.Y}
+func (joint *WeldJoint) GetReactionForce(inv_dt float64) Vec2 {
+	P := Vec2{joint.Impulse.X, joint.Impulse.Y}
 	return MulFV(inv_dt, P)
 }
 
-func (this *WeldJoint) GetReactionTorque(inv_dt float64) float64 {
-	return inv_dt * this.Impulse.Z
+func (joint *WeldJoint) GetReactionTorque(inv_dt float64) float64 {
+	return inv_dt * joint.Impulse.Z
 }
 
 /// The local anchor point relative to bodyA's origin.
-func (this *WeldJoint) GetLocalAnchorA() Vec2 {
-	return this.LocalAnchorA
+func (joint *WeldJoint) GetLocalAnchorA() Vec2 {
+	return joint.LocalAnchorA
 }
 
 /// The local anchor point relative to bodyB's origin.
-func (this *WeldJoint) GetLocalAnchorB() Vec2 {
-	return this.LocalAnchorB
+func (joint *WeldJoint) GetLocalAnchorB() Vec2 {
+	return joint.LocalAnchorB
 }
 
 /// Get the reference angle.
-func (this *WeldJoint) GetReferenceAngle() float64 {
-	return this.ReferenceAngle
+func (joint *WeldJoint) GetReferenceAngle() float64 {
+	return joint.ReferenceAngle
 }
 
 /// Set/get frequency in Hz.
-func (this *WeldJoint) SetFrequency(hz float64) {
-	this.FrequencyHz = hz
+func (joint *WeldJoint) SetFrequency(hz float64) {
+	joint.FrequencyHz = hz
 }
 
-func (this *WeldJoint) GetFrequency() float64 {
-	return this.FrequencyHz
+func (joint *WeldJoint) GetFrequency() float64 {
+	return joint.FrequencyHz
 }
 
 /// Set/get damping ratio.
-func (this *WeldJoint) SetDampingRatio(ratio float64) {
-	this.DampingRatio = ratio
+func (joint *WeldJoint) SetDampingRatio(ratio float64) {
+	joint.DampingRatio = ratio
 }
 
-func (this *WeldJoint) GetDampingRatio() float64 {
-	return this.DampingRatio
+func (joint *WeldJoint) GetDampingRatio() float64 {
+	return joint.DampingRatio
 }
 
-func (this *WeldJoint) InitVelocityConstraints(data *solverData) {
-	this.IndexA = this.BodyA.islandIndex
-	this.IndexB = this.BodyB.islandIndex
-	this.LocalCenterA = this.BodyA.sweep.LocalCenter
-	this.LocalCenterB = this.BodyB.sweep.LocalCenter
-	this.InvMassA = this.BodyA.invMass
-	this.InvMassB = this.BodyB.invMass
-	this.InvIA = this.BodyA.invI
-	this.InvIB = this.BodyB.invI
+func (joint *WeldJoint) InitVelocityConstraints(data *solverData) {
+	joint.IndexA = joint.BodyA.islandIndex
+	joint.IndexB = joint.BodyB.islandIndex
+	joint.LocalCenterA = joint.BodyA.sweep.LocalCenter
+	joint.LocalCenterB = joint.BodyB.sweep.LocalCenter
+	joint.InvMassA = joint.BodyA.invMass
+	joint.InvMassB = joint.BodyB.invMass
+	joint.InvIA = joint.BodyA.invI
+	joint.InvIB = joint.BodyB.invI
 
-	//cA := data.positions[this.IndexA].c
-	aA := data.positions[this.IndexA].a
-	vA := data.velocities[this.IndexA].v
-	wA := data.velocities[this.IndexA].w
+	//cA := data.positions[joint.IndexA].c
+	aA := data.positions[joint.IndexA].a
+	vA := data.velocities[joint.IndexA].v
+	wA := data.velocities[joint.IndexA].w
 
-	//cB := data.positions[this.IndexB].c
-	aB := data.positions[this.IndexB].a
-	vB := data.velocities[this.IndexB].v
-	wB := data.velocities[this.IndexB].w
+	//cB := data.positions[joint.IndexB].c
+	aB := data.positions[joint.IndexB].a
+	vB := data.velocities[joint.IndexB].v
+	wB := data.velocities[joint.IndexB].w
 
-	qA, qB := NewRot(aA), NewRot(aB)
+	qA, qB := MakeRot(aA), MakeRot(aB)
 
-	this.RA = MulRV(qA, SubVV(this.LocalAnchorA, this.LocalCenterA))
-	this.RB = MulRV(qB, SubVV(this.LocalAnchorB, this.LocalCenterB))
+	joint.RA = MulRV(qA, SubVV(joint.LocalAnchorA, joint.LocalCenterA))
+	joint.RB = MulRV(qB, SubVV(joint.LocalAnchorB, joint.LocalCenterB))
 
 	// J = [-I -r1_skew I r2_skew]
 	//     [ 0       -1 0       1]
@@ -3671,25 +3670,25 @@ func (this *WeldJoint) InitVelocityConstraints(data *solverData) {
 	//     [  -r1y*iA*r1x-r2y*iB*r2x, mA+r1x^2*iA+mB+r2x^2*iB,           r1x*iA+r2x*iB]
 	//     [          -r1y*iA-r2y*iB,           r1x*iA+r2x*iB,                   iA+iB]
 
-	mA := this.InvMassA
-	mB := this.InvMassB
-	iA := this.InvIA
-	iB := this.InvIB
+	mA := joint.InvMassA
+	mB := joint.InvMassB
+	iA := joint.InvIA
+	iB := joint.InvIB
 
 	var K Mat33
-	K.Ex.X = mA + mB + this.RA.Y*this.RA.Y*iA + this.RB.Y*this.RB.Y*iB
-	K.Ex.X = mA + mB + this.RA.Y*this.RA.Y*iA + this.RB.Y*this.RB.Y*iB
-	K.Ey.X = -this.RA.Y*this.RA.X*iA - this.RB.Y*this.RB.X*iB
-	K.Ez.X = -this.RA.Y*iA - this.RB.Y*iB
+	K.Ex.X = mA + mB + joint.RA.Y*joint.RA.Y*iA + joint.RB.Y*joint.RB.Y*iB
+	K.Ex.X = mA + mB + joint.RA.Y*joint.RA.Y*iA + joint.RB.Y*joint.RB.Y*iB
+	K.Ey.X = -joint.RA.Y*joint.RA.X*iA - joint.RB.Y*joint.RB.X*iB
+	K.Ez.X = -joint.RA.Y*iA - joint.RB.Y*iB
 	K.Ex.Y = K.Ey.X
-	K.Ey.Y = mA + mB + this.RA.X*this.RA.X*iA + this.RB.X*this.RB.X*iB
-	K.Ez.Y = this.RA.X*iA + this.RB.X*iB
+	K.Ey.Y = mA + mB + joint.RA.X*joint.RA.X*iA + joint.RB.X*joint.RB.X*iB
+	K.Ez.Y = joint.RA.X*iA + joint.RB.X*iB
 	K.Ex.Z = K.Ez.X
 	K.Ey.Z = K.Ez.Y
 	K.Ez.Z = iA + iB
 
-	if this.FrequencyHz > 0.0 {
-		K.GetInverse22(&this.Mass)
+	if joint.FrequencyHz > 0.0 {
+		K.GetInverse22(&joint.Mass)
 
 		invM := iA + iB
 		m := 0.0
@@ -3697,131 +3696,131 @@ func (this *WeldJoint) InitVelocityConstraints(data *solverData) {
 			m = 1.0 / invM
 		}
 
-		C := aB - aA - this.ReferenceAngle
+		C := aB - aA - joint.ReferenceAngle
 
 		// Frequency
-		omega := 2.0 * Pi * this.FrequencyHz
+		omega := 2.0 * Pi * joint.FrequencyHz
 
 		// Damping coefficient
-		d := 2.0 * m * this.DampingRatio * omega
+		d := 2.0 * m * joint.DampingRatio * omega
 
 		// Spring stiffness
 		k := m * omega * omega
 
 		// magic formulas
 		h := data.step.dt
-		this.Gamma = h * (d + h*k)
-		this.Gamma = 0.0
-		if this.Gamma != 0.0 {
-			this.Gamma = 1.0 / this.Gamma
+		joint.Gamma = h * (d + h*k)
+		joint.Gamma = 0.0
+		if joint.Gamma != 0.0 {
+			joint.Gamma = 1.0 / joint.Gamma
 		}
-		this.Bias = C * h * k * this.Gamma
+		joint.Bias = C * h * k * joint.Gamma
 
-		invM += this.Gamma
-		this.Mass.Ez.Z = 0.0
+		invM += joint.Gamma
+		joint.Mass.Ez.Z = 0.0
 		if invM != 0.0 {
 			invM = 1.0 / invM
 		}
 	} else {
-		K.GetSymInverse33(&this.Mass)
-		this.Gamma = 0.0
-		this.Bias = 0.0
+		K.GetSymInverse33(&joint.Mass)
+		joint.Gamma = 0.0
+		joint.Bias = 0.0
 	}
 
 	if data.step.warmStarting {
 		// Scale impulses to support a variable time step.
-		this.Impulse.Mul(data.step.dtRatio)
+		joint.Impulse.Mul(data.step.dtRatio)
 
-		P := Vec2{this.Impulse.X, this.Impulse.Y}
+		P := Vec2{joint.Impulse.X, joint.Impulse.Y}
 
 		vA.Sub(MulFV(mA, P))
-		wA -= iA * (CrossVV(this.RA, P) + this.Impulse.Z)
+		wA -= iA * (CrossVV(joint.RA, P) + joint.Impulse.Z)
 
 		vB.Add(MulFV(mB, P))
-		wB += iB * (CrossVV(this.RB, P) + this.Impulse.Z)
+		wB += iB * (CrossVV(joint.RB, P) + joint.Impulse.Z)
 	} else {
-		this.Impulse.SetZero()
+		joint.Impulse.SetZero()
 	}
 
-	data.velocities[this.IndexA].v = vA
-	data.velocities[this.IndexA].w = wA
-	data.velocities[this.IndexB].v = vB
-	data.velocities[this.IndexB].w = wB
+	data.velocities[joint.IndexA].v = vA
+	data.velocities[joint.IndexA].w = wA
+	data.velocities[joint.IndexB].v = vB
+	data.velocities[joint.IndexB].w = wB
 }
 
-func (this *WeldJoint) SolveVelocityConstraints(data *solverData) {
-	vA := data.velocities[this.IndexA].v
-	wA := data.velocities[this.IndexA].w
-	vB := data.velocities[this.IndexB].v
-	wB := data.velocities[this.IndexB].w
+func (joint *WeldJoint) SolveVelocityConstraints(data *solverData) {
+	vA := data.velocities[joint.IndexA].v
+	wA := data.velocities[joint.IndexA].w
+	vB := data.velocities[joint.IndexB].v
+	wB := data.velocities[joint.IndexB].w
 
-	mA := this.InvMassA
-	mB := this.InvMassB
-	iA := this.InvIA
-	iB := this.InvIB
+	mA := joint.InvMassA
+	mB := joint.InvMassB
+	iA := joint.InvIA
+	iB := joint.InvIB
 
-	if this.FrequencyHz > 0.0 {
+	if joint.FrequencyHz > 0.0 {
 		Cdot2 := wB - wA
 
-		impulse2 := -this.Mass.Ez.Z * (Cdot2 + this.Bias + this.Gamma*this.Impulse.Z)
-		this.Impulse.Z += impulse2
+		impulse2 := -joint.Mass.Ez.Z * (Cdot2 + joint.Bias + joint.Gamma*joint.Impulse.Z)
+		joint.Impulse.Z += impulse2
 
 		wA -= iA * impulse2
 		wB += iB * impulse2
 
-		Cdot1 := SubVV(AddVV(vB, CrossFV(wB, this.RB)), AddVV(vA, CrossFV(wA, this.RA)))
+		Cdot1 := SubVV(AddVV(vB, CrossFV(wB, joint.RB)), AddVV(vA, CrossFV(wA, joint.RA)))
 
-		impulse1 := MulM3V(this.Mass, Cdot1)
+		impulse1 := MulM3V(joint.Mass, Cdot1)
 		impulse1 = impulse1.Minus()
-		this.Impulse.X += impulse1.X
-		this.Impulse.Y += impulse1.Y
+		joint.Impulse.X += impulse1.X
+		joint.Impulse.Y += impulse1.Y
 
 		P := impulse1
 
 		vA.Sub(MulFV(mA, P))
-		wA -= iA * CrossVV(this.RA, P)
+		wA -= iA * CrossVV(joint.RA, P)
 
 		vB.Add(MulFV(mB, P))
-		wB += iB * CrossVV(this.RB, P)
+		wB += iB * CrossVV(joint.RB, P)
 	} else {
-		Cdot1 := SubVV(AddVV(vB, CrossFV(wB, this.RB)), AddVV(vA, CrossFV(wA, this.RA)))
+		Cdot1 := SubVV(AddVV(vB, CrossFV(wB, joint.RB)), AddVV(vA, CrossFV(wA, joint.RA)))
 		Cdot2 := wB - wA
 		Cdot := Vec3{Cdot1.X, Cdot1.Y, Cdot2}
 
-		impulse := MulM3V3(this.Mass, Cdot)
+		impulse := MulM3V3(joint.Mass, Cdot)
 		impulse = impulse.Minus()
-		this.Impulse.Add(impulse)
+		joint.Impulse.Add(impulse)
 
 		P := Vec2{impulse.X, impulse.Y}
 
 		vA.Sub(MulFV(mA, P))
-		wA -= iA * (CrossVV(this.RA, P) + impulse.Z)
+		wA -= iA * (CrossVV(joint.RA, P) + impulse.Z)
 
 		vB.Add(MulFV(mB, P))
-		wB += iB * (CrossVV(this.RB, P) + impulse.Z)
+		wB += iB * (CrossVV(joint.RB, P) + impulse.Z)
 	}
 
-	data.velocities[this.IndexA].v = vA
-	data.velocities[this.IndexA].w = wA
-	data.velocities[this.IndexB].v = vB
-	data.velocities[this.IndexB].w = wB
+	data.velocities[joint.IndexA].v = vA
+	data.velocities[joint.IndexA].w = wA
+	data.velocities[joint.IndexB].v = vB
+	data.velocities[joint.IndexB].w = wB
 }
 
-func (this *WeldJoint) SolvePositionConstraints(data *solverData) bool {
-	cA := data.positions[this.IndexA].c
-	aA := data.positions[this.IndexA].a
-	cB := data.positions[this.IndexB].c
-	aB := data.positions[this.IndexB].a
+func (joint *WeldJoint) SolvePositionConstraints(data *solverData) bool {
+	cA := data.positions[joint.IndexA].c
+	aA := data.positions[joint.IndexA].a
+	cB := data.positions[joint.IndexB].c
+	aB := data.positions[joint.IndexB].a
 
-	qA, qB := NewRot(aA), NewRot(aB)
+	qA, qB := MakeRot(aA), MakeRot(aB)
 
-	mA := this.InvMassA
-	mB := this.InvMassB
-	iA := this.InvIA
-	iB := this.InvIB
+	mA := joint.InvMassA
+	mB := joint.InvMassB
+	iA := joint.InvIA
+	iB := joint.InvIB
 
-	rA := MulRV(qA, SubVV(this.LocalAnchorA, this.LocalCenterA))
-	rB := MulRV(qB, SubVV(this.LocalAnchorB, this.LocalCenterB))
+	rA := MulRV(qA, SubVV(joint.LocalAnchorA, joint.LocalCenterA))
+	rB := MulRV(qB, SubVV(joint.LocalAnchorB, joint.LocalCenterB))
 
 	var positionError, angularError float64
 
@@ -3836,7 +3835,7 @@ func (this *WeldJoint) SolvePositionConstraints(data *solverData) bool {
 	K.Ey.Y = K.Ez.Y
 	K.Ez.Y = iA + iB
 
-	if this.FrequencyHz > 0.0 {
+	if joint.FrequencyHz > 0.0 {
 		C1 := SubVV(AddVV(cB, rB), AddVV(cA, rA))
 
 		positionError = C1.Length()
@@ -3852,7 +3851,7 @@ func (this *WeldJoint) SolvePositionConstraints(data *solverData) bool {
 		aB += iB * CrossVV(rB, P)
 	} else {
 		C1 := SubVV(AddVV(cB, rB), AddVV(cA, rA))
-		C2 := aB - aA - this.ReferenceAngle
+		C2 := aB - aA - joint.ReferenceAngle
 
 		positionError = C1.Length()
 		angularError = AbsF(C2)
@@ -3870,29 +3869,29 @@ func (this *WeldJoint) SolvePositionConstraints(data *solverData) bool {
 		aB += iB * (CrossVV(rB, P) + impulse.Z)
 	}
 
-	data.positions[this.IndexA].c = cA
-	data.positions[this.IndexA].a = aA
-	data.positions[this.IndexB].c = cB
-	data.positions[this.IndexB].a = aB
+	data.positions[joint.IndexA].c = cA
+	data.positions[joint.IndexA].a = aA
+	data.positions[joint.IndexB].c = cB
+	data.positions[joint.IndexB].a = aB
 
 	return positionError <= LinearSlop && angularError <= AngularSlop
 }
 
 /// Dump to b2Log
-func (this *WeldJoint) Dump() {
-	indexA := this.BodyA.islandIndex
-	indexB := this.BodyB.islandIndex
+func (joint *WeldJoint) Dump() {
+	indexA := joint.BodyA.islandIndex
+	indexB := joint.BodyB.islandIndex
 
 	Log("  b2WeldJointDef jd;\n")
 	Log("  jd.bodyA = bodies[%d];\n", indexA)
 	Log("  jd.bodyB = bodies[%d];\n", indexB)
-	Log("  jd.collideConnected = bool(%d);\n", this.CollideConnected)
-	Log("  jd.localAnchorA.Set(%.15lef, %.15lef);\n", this.LocalAnchorA.X, this.LocalAnchorA.Y)
-	Log("  jd.localAnchorB.Set(%.15lef, %.15lef);\n", this.LocalAnchorB.X, this.LocalAnchorB.Y)
-	Log("  jd.referenceAngle = %.15lef;\n", this.ReferenceAngle)
-	Log("  jd.frequencyHz = %.15lef;\n", this.FrequencyHz)
-	Log("  jd.dampingRatio = %.15lef;\n", this.DampingRatio)
-	Log("  joints[%d] = m_world->CreateJoint(&jd);\n", this.Index)
+	Log("  jd.collideConnected = bool(%t);\n", joint.CollideConnected)
+	Log("  jd.localAnchorA.Set(%.15e, %.15e);\n", joint.LocalAnchorA.X, joint.LocalAnchorA.Y)
+	Log("  jd.localAnchorB.Set(%.15e, %.15e);\n", joint.LocalAnchorB.X, joint.LocalAnchorB.Y)
+	Log("  jd.referenceAngle = %.15e;\n", joint.ReferenceAngle)
+	Log("  jd.frequencyHz = %.15e;\n", joint.FrequencyHz)
+	Log("  jd.dampingRatio = %.15e;\n", joint.DampingRatio)
+	Log("  joints[%d] = m_world->CreateJoint(&jd);\n", joint.Index)
 }
 
 /// Friction joint definition.
@@ -3913,25 +3912,25 @@ type FrictionJointDef struct {
 }
 
 func NewFrictionJointDef() *FrictionJointDef {
-	this := new(FrictionJointDef)
-	this.Type = Joint_e_frictionJoint
-	this.LocalAnchorA.SetZero()
-	this.LocalAnchorB.SetZero()
-	this.MaxForce = 0.0
-	this.MaxTorque = 0.0
-	return this
+	jd := new(FrictionJointDef)
+	jd.Type = Joint_e_frictionJoint
+	jd.LocalAnchorA.SetZero()
+	jd.LocalAnchorB.SetZero()
+	jd.MaxForce = 0.0
+	jd.MaxTorque = 0.0
+	return jd
 }
 
 /// Initialize the bodies, anchors, axis, and reference angle using the world
 /// anchor and world axis.
-func (this *FrictionJointDef) Initialize(bodyA *Body, bodyB *Body, anchor Vec2) {
-	this.BodyA = bodyA
-	this.BodyB = bodyB
-	this.LocalAnchorA = bodyA.GetLocalPoint(anchor)
-	this.LocalAnchorB = bodyB.GetLocalPoint(anchor)
+func (jd *FrictionJointDef) Initialize(bodyA *Body, bodyB *Body, anchor Vec2) {
+	jd.BodyA = bodyA
+	jd.BodyB = bodyB
+	jd.LocalAnchorA = bodyA.GetLocalPoint(anchor)
+	jd.LocalAnchorB = bodyB.GetLocalPoint(anchor)
 }
 
-/// Friction joint. This is used for top-down friction.
+/// Friction joint. jd is used for top-down friction.
 /// It provides 2D translational friction and angular friction.
 type FrictionJoint struct {
 	Joint
@@ -3973,93 +3972,93 @@ type FrictionJoint struct {
 // K = invI1 + invI2
 
 func NewFrictionJoint(def *FrictionJointDef) *FrictionJoint {
-	this := new(FrictionJoint)
-	this.Type = def.Type
-	this.BodyA = def.BodyA
-	this.BodyB = def.BodyB
-	this.CollideConnected = def.CollideConnected
-	this.UserData = def.UserData
+	joint := new(FrictionJoint)
+	joint.Type = def.Type
+	joint.BodyA = def.BodyA
+	joint.BodyB = def.BodyB
+	joint.CollideConnected = def.CollideConnected
+	joint.UserData = def.UserData
 
-	this.LocalAnchorA = def.LocalAnchorA
-	this.LocalAnchorB = def.LocalAnchorB
+	joint.LocalAnchorA = def.LocalAnchorA
+	joint.LocalAnchorB = def.LocalAnchorB
 
-	this.LinearImpulse.SetZero()
-	this.AngularImpulse = 0.0
+	joint.LinearImpulse.SetZero()
+	joint.AngularImpulse = 0.0
 
-	this.MaxForce = def.MaxForce
-	this.MaxTorque = def.MaxTorque
-	return this
+	joint.MaxForce = def.MaxForce
+	joint.MaxTorque = def.MaxTorque
+	return joint
 }
 
-func (this *FrictionJoint) GetAnchorA() Vec2 {
-	return this.BodyA.GetWorldPoint(this.LocalAnchorA)
+func (joint *FrictionJoint) GetAnchorA() Vec2 {
+	return joint.BodyA.GetWorldPoint(joint.LocalAnchorA)
 }
 
-func (this *FrictionJoint) GetAnchorB() Vec2 {
-	return this.BodyB.GetWorldPoint(this.LocalAnchorB)
+func (joint *FrictionJoint) GetAnchorB() Vec2 {
+	return joint.BodyB.GetWorldPoint(joint.LocalAnchorB)
 }
 
-func (this *FrictionJoint) GetReactionForce(inv_dt float64) Vec2 {
-	return MulFV(inv_dt, this.LinearImpulse)
+func (joint *FrictionJoint) GetReactionForce(inv_dt float64) Vec2 {
+	return MulFV(inv_dt, joint.LinearImpulse)
 }
 
-func (this *FrictionJoint) GetReactionTorque(inv_dt float64) float64 {
-	return inv_dt * this.AngularImpulse
+func (joint *FrictionJoint) GetReactionTorque(inv_dt float64) float64 {
+	return inv_dt * joint.AngularImpulse
 }
 
 /// The local anchor point relative to bodyA's origin.
-func (this *FrictionJoint) GetLocalAnchorA() Vec2 {
-	return this.LocalAnchorA
+func (joint *FrictionJoint) GetLocalAnchorA() Vec2 {
+	return joint.LocalAnchorA
 }
 
 /// The local anchor point relative to bodyB's origin.
-func (this *FrictionJoint) GetLocalAnchorB() Vec2 {
-	return this.LocalAnchorB
+func (joint *FrictionJoint) GetLocalAnchorB() Vec2 {
+	return joint.LocalAnchorB
 }
 
 /// Set the maximum friction force in N.
-func (this *FrictionJoint) SetMaxForce(force float64) {
-	this.MaxForce = force
+func (joint *FrictionJoint) SetMaxForce(force float64) {
+	joint.MaxForce = force
 }
 
 /// Get the maximum friction force in N.
-func (this *FrictionJoint) GetMaxForce() float64 {
-	return this.MaxForce
+func (joint *FrictionJoint) GetMaxForce() float64 {
+	return joint.MaxForce
 }
 
 /// Set the maximum friction torque in N*m.
-func (this *FrictionJoint) SetMaxTorque(torque float64) {
-	this.MaxTorque = torque
+func (joint *FrictionJoint) SetMaxTorque(torque float64) {
+	joint.MaxTorque = torque
 }
 
 /// Get the maximum friction torque in N*m.
-func (this *FrictionJoint) GetMaxTorque() float64 {
-	return this.MaxTorque
+func (joint *FrictionJoint) GetMaxTorque() float64 {
+	return joint.MaxTorque
 }
 
-func (this *FrictionJoint) InitVelocityConstraints(data *solverData) {
-	this.IndexA = this.BodyA.islandIndex
-	this.IndexB = this.BodyB.islandIndex
-	this.LocalCenterA = this.BodyA.sweep.LocalCenter
-	this.LocalCenterB = this.BodyB.sweep.LocalCenter
-	this.InvMassA = this.BodyA.invMass
-	this.InvMassB = this.BodyB.invMass
-	this.InvIA = this.BodyA.invI
-	this.InvIB = this.BodyB.invI
+func (joint *FrictionJoint) InitVelocityConstraints(data *solverData) {
+	joint.IndexA = joint.BodyA.islandIndex
+	joint.IndexB = joint.BodyB.islandIndex
+	joint.LocalCenterA = joint.BodyA.sweep.LocalCenter
+	joint.LocalCenterB = joint.BodyB.sweep.LocalCenter
+	joint.InvMassA = joint.BodyA.invMass
+	joint.InvMassB = joint.BodyB.invMass
+	joint.InvIA = joint.BodyA.invI
+	joint.InvIB = joint.BodyB.invI
 
-	aA := data.positions[this.IndexA].a
-	vA := data.velocities[this.IndexA].v
-	wA := data.velocities[this.IndexA].w
+	aA := data.positions[joint.IndexA].a
+	vA := data.velocities[joint.IndexA].v
+	wA := data.velocities[joint.IndexA].w
 
-	aB := data.positions[this.IndexB].a
-	vB := data.velocities[this.IndexB].v
-	wB := data.velocities[this.IndexB].w
+	aB := data.positions[joint.IndexB].a
+	vB := data.velocities[joint.IndexB].v
+	wB := data.velocities[joint.IndexB].w
 
-	qA, qB := NewRot(aA), NewRot(aB)
+	qA, qB := MakeRot(aA), MakeRot(aB)
 
 	// Compute the effective mass matrix.
-	this.RA = MulRV(qA, SubVV(this.LocalAnchorA, this.LocalCenterA))
-	this.RB = MulRV(qB, SubVV(this.LocalAnchorB, this.LocalCenterB))
+	joint.RA = MulRV(qA, SubVV(joint.LocalAnchorA, joint.LocalCenterA))
+	joint.RB = MulRV(qB, SubVV(joint.LocalAnchorB, joint.LocalCenterB))
 
 	// J = [-I -r1_skew I r2_skew]
 	//     [ 0       -1 0       1]
@@ -4070,67 +4069,67 @@ func (this *FrictionJoint) InitVelocityConstraints(data *solverData) {
 	//     [  -r1y*iA*r1x-r2y*iB*r2x, mA+r1x^2*iA+mB+r2x^2*iB,           r1x*iA+r2x*iB]
 	//     [          -r1y*iA-r2y*iB,           r1x*iA+r2x*iB,                   iA+iB]
 
-	mA := this.InvMassA
-	mB := this.InvMassB
-	iA := this.InvIA
-	iB := this.InvIB
+	mA := joint.InvMassA
+	mB := joint.InvMassB
+	iA := joint.InvIA
+	iB := joint.InvIB
 
 	var K Mat22
-	K.Ex.X = mA + mB + iA*this.RA.Y*this.RA.Y + iB*this.RB.Y*this.RB.Y
-	K.Ex.Y = -iA*this.RA.X*this.RA.Y - iB*this.RB.X*this.RB.Y
+	K.Ex.X = mA + mB + iA*joint.RA.Y*joint.RA.Y + iB*joint.RB.Y*joint.RB.Y
+	K.Ex.Y = -iA*joint.RA.X*joint.RA.Y - iB*joint.RB.X*joint.RB.Y
 	K.Ey.X = K.Ex.Y
-	K.Ey.Y = mA + mB + iA*this.RA.X*this.RA.X + iB*this.RB.X*this.RB.X
+	K.Ey.Y = mA + mB + iA*joint.RA.X*joint.RA.X + iB*joint.RB.X*joint.RB.X
 
-	this.LinearMass = K.GetInverse()
+	joint.LinearMass = K.GetInverse()
 
-	this.AngularMass = iA + iB
-	if this.AngularMass > 0.0 {
-		this.AngularMass = 1.0 / this.AngularMass
+	joint.AngularMass = iA + iB
+	if joint.AngularMass > 0.0 {
+		joint.AngularMass = 1.0 / joint.AngularMass
 	}
 
 	if data.step.warmStarting {
 		// Scale impulses to support a variable time step.
-		this.LinearImpulse.Mul(data.step.dtRatio)
-		this.AngularImpulse *= data.step.dtRatio
+		joint.LinearImpulse.Mul(data.step.dtRatio)
+		joint.AngularImpulse *= data.step.dtRatio
 
-		P := Vec2{this.LinearImpulse.X, this.LinearImpulse.Y}
+		P := Vec2{joint.LinearImpulse.X, joint.LinearImpulse.Y}
 		vA.Sub(MulFV(mA, P))
-		wA -= iA * (CrossVV(this.RA, P) + this.AngularImpulse)
+		wA -= iA * (CrossVV(joint.RA, P) + joint.AngularImpulse)
 		vB.Add(MulFV(mB, P))
-		wB += iB * (CrossVV(this.RB, P) + this.AngularImpulse)
+		wB += iB * (CrossVV(joint.RB, P) + joint.AngularImpulse)
 	} else {
-		this.LinearImpulse.SetZero()
-		this.AngularImpulse = 0.0
+		joint.LinearImpulse.SetZero()
+		joint.AngularImpulse = 0.0
 	}
 
-	data.velocities[this.IndexA].v = vA
-	data.velocities[this.IndexA].w = wA
-	data.velocities[this.IndexB].v = vB
-	data.velocities[this.IndexB].w = wB
+	data.velocities[joint.IndexA].v = vA
+	data.velocities[joint.IndexA].w = wA
+	data.velocities[joint.IndexB].v = vB
+	data.velocities[joint.IndexB].w = wB
 }
 
-func (this *FrictionJoint) SolveVelocityConstraints(data *solverData) {
-	vA := data.velocities[this.IndexA].v
-	wA := data.velocities[this.IndexA].w
-	vB := data.velocities[this.IndexB].v
-	wB := data.velocities[this.IndexB].w
+func (joint *FrictionJoint) SolveVelocityConstraints(data *solverData) {
+	vA := data.velocities[joint.IndexA].v
+	wA := data.velocities[joint.IndexA].w
+	vB := data.velocities[joint.IndexB].v
+	wB := data.velocities[joint.IndexB].w
 
-	mA := this.InvMassA
-	mB := this.InvMassB
-	iA := this.InvIA
-	iB := this.InvIB
+	mA := joint.InvMassA
+	mB := joint.InvMassB
+	iA := joint.InvIA
+	iB := joint.InvIB
 
 	h := data.step.dt
 
 	// Solve angular friction
 	{
 		Cdot := wB - wA
-		impulse := -this.AngularMass * Cdot
+		impulse := -joint.AngularMass * Cdot
 
-		oldImpulse := this.AngularImpulse
-		maxImpulse := h * this.MaxTorque
-		this.AngularImpulse = ClampF(this.AngularImpulse+impulse, -maxImpulse, maxImpulse)
-		impulse = this.AngularImpulse - oldImpulse
+		oldImpulse := joint.AngularImpulse
+		maxImpulse := h * joint.MaxTorque
+		joint.AngularImpulse = ClampF(joint.AngularImpulse+impulse, -maxImpulse, maxImpulse)
+		impulse = joint.AngularImpulse - oldImpulse
 
 		wA -= iA * impulse
 		wB += iB * impulse
@@ -4138,53 +4137,53 @@ func (this *FrictionJoint) SolveVelocityConstraints(data *solverData) {
 
 	// Solve linear friction
 	{
-		Cdot := SubVV(AddVV(vB, CrossFV(wB, this.RB)), AddVV(vA, CrossFV(wA, this.RA)))
+		Cdot := SubVV(AddVV(vB, CrossFV(wB, joint.RB)), AddVV(vA, CrossFV(wA, joint.RA)))
 
-		impulse := MulMV(this.LinearMass, Cdot)
+		impulse := MulMV(joint.LinearMass, Cdot)
 		impulse = impulse.Minus()
-		oldImpulse := this.LinearImpulse
-		this.LinearImpulse.Add(impulse)
+		oldImpulse := joint.LinearImpulse
+		joint.LinearImpulse.Add(impulse)
 
-		maxImpulse := h * this.MaxForce
+		maxImpulse := h * joint.MaxForce
 
-		if this.LinearImpulse.LengthSquared() > maxImpulse*maxImpulse {
-			this.LinearImpulse.Normalize()
-			this.LinearImpulse.Mul(maxImpulse)
+		if joint.LinearImpulse.LengthSquared() > maxImpulse*maxImpulse {
+			joint.LinearImpulse.Normalize()
+			joint.LinearImpulse.Mul(maxImpulse)
 		}
 
-		impulse = SubVV(this.LinearImpulse, oldImpulse)
+		impulse = SubVV(joint.LinearImpulse, oldImpulse)
 
 		vA.Sub(MulFV(mA, impulse))
-		wA -= iA * CrossVV(this.RA, impulse)
+		wA -= iA * CrossVV(joint.RA, impulse)
 
 		vB.Add(MulFV(mB, impulse))
-		wB += iB * CrossVV(this.RB, impulse)
+		wB += iB * CrossVV(joint.RB, impulse)
 	}
 
-	data.velocities[this.IndexA].v = vA
-	data.velocities[this.IndexA].w = wA
-	data.velocities[this.IndexB].v = vB
-	data.velocities[this.IndexB].w = wB
+	data.velocities[joint.IndexA].v = vA
+	data.velocities[joint.IndexA].w = wA
+	data.velocities[joint.IndexB].v = vB
+	data.velocities[joint.IndexB].w = wB
 }
 
-func (this *FrictionJoint) SolvePositionConstraints(data *solverData) bool {
+func (joint *FrictionJoint) SolvePositionConstraints(data *solverData) bool {
 	return true
 }
 
 /// Dump joint to b2Log
-func (this *FrictionJoint) Dump() {
-	indexA := this.BodyA.islandIndex
-	indexB := this.BodyB.islandIndex
+func (joint *FrictionJoint) Dump() {
+	indexA := joint.BodyA.islandIndex
+	indexB := joint.BodyB.islandIndex
 
 	Log("  b2FrictionJointDef jd;\n")
 	Log("  jd.bodyA = bodies[%d];\n", indexA)
 	Log("  jd.bodyB = bodies[%d];\n", indexB)
-	Log("  jd.collideConnected = bool(%d);\n", this.CollideConnected)
-	Log("  jd.localAnchorA.Set(%.15lef, %.15lef);\n", this.LocalAnchorA.X, this.LocalAnchorA.Y)
-	Log("  jd.localAnchorB.Set(%.15lef, %.15lef);\n", this.LocalAnchorB.X, this.LocalAnchorB.Y)
-	Log("  jd.maxForce = %.15lef;\n", this.MaxForce)
-	Log("  jd.maxTorque = %.15lef;\n", this.MaxTorque)
-	Log("  joints[%d] = m_world->CreateJoint(&jd);\n", this.Index)
+	Log("  jd.collideConnected = bool(%t);\n", joint.CollideConnected)
+	Log("  jd.localAnchorA.Set(%.15e, %.15e);\n", joint.LocalAnchorA.X, joint.LocalAnchorA.Y)
+	Log("  jd.localAnchorB.Set(%.15e, %.15e);\n", joint.LocalAnchorB.X, joint.LocalAnchorB.Y)
+	Log("  jd.maxForce = %.15e;\n", joint.MaxForce)
+	Log("  jd.maxTorque = %.15e;\n", joint.MaxTorque)
+	Log("  joints[%d] = m_world->CreateJoint(&jd);\n", joint.Index)
 }
 
 /// Rope joint definition. This requires two body anchor points and
@@ -4207,12 +4206,12 @@ type RopeJointDef struct {
 }
 
 func NewRopeJointDef() *RopeJointDef {
-	this := new(RopeJointDef)
-	this.Type = Joint_e_ropeJoint
-	this.LocalAnchorA.Set(-1.0, 0.0)
-	this.LocalAnchorB.Set(1.0, 0.0)
-	this.MaxLength = 0.0
-	return this
+	jd := new(RopeJointDef)
+	jd.Type = Joint_e_ropeJoint
+	jd.LocalAnchorA.Set(-1.0, 0.0)
+	jd.LocalAnchorB.Set(1.0, 0.0)
+	jd.MaxLength = 0.0
+	return jd
 }
 
 /// A rope joint enforces a maximum distance between two points
@@ -4258,216 +4257,216 @@ type RopeJoint struct {
 //   = invMassA + invIA * cross(rA, u)^2 + invMassB + invIB * cross(rB, u)^2
 
 func NewRopeJoint(def *RopeJointDef) *RopeJoint {
-	this := new(RopeJoint)
-	this.Type = def.Type
-	this.BodyA = def.BodyA
-	this.BodyB = def.BodyB
-	this.CollideConnected = def.CollideConnected
-	this.UserData = def.UserData
+	joint := new(RopeJoint)
+	joint.Type = def.Type
+	joint.BodyA = def.BodyA
+	joint.BodyB = def.BodyB
+	joint.CollideConnected = def.CollideConnected
+	joint.UserData = def.UserData
 
-	this.LocalAnchorA = def.LocalAnchorA
-	this.LocalAnchorB = def.LocalAnchorB
+	joint.LocalAnchorA = def.LocalAnchorA
+	joint.LocalAnchorB = def.LocalAnchorB
 
-	this.MaxLength = def.MaxLength
+	joint.MaxLength = def.MaxLength
 
-	this.Mass = 0.0
-	this.Impulse = 0.0
-	this.State = LimitState_e_inactiveLimit
-	this.Length = 0.0
-	return this
+	joint.Mass = 0.0
+	joint.Impulse = 0.0
+	joint.State = LimitState_e_inactiveLimit
+	joint.Length = 0.0
+	return joint
 }
 
-func (this *RopeJoint) GetAnchorA() Vec2 {
-	return this.BodyA.GetWorldPoint(this.LocalAnchorA)
+func (joint *RopeJoint) GetAnchorA() Vec2 {
+	return joint.BodyA.GetWorldPoint(joint.LocalAnchorA)
 }
 
-func (this *RopeJoint) GetAnchorB() Vec2 {
-	return this.BodyB.GetWorldPoint(this.LocalAnchorB)
+func (joint *RopeJoint) GetAnchorB() Vec2 {
+	return joint.BodyB.GetWorldPoint(joint.LocalAnchorB)
 }
 
-func (this *RopeJoint) GetReactionForce(inv_dt float64) Vec2 {
-	F := MulFV((inv_dt * this.Impulse), this.U)
+func (joint *RopeJoint) GetReactionForce(inv_dt float64) Vec2 {
+	F := MulFV((inv_dt * joint.Impulse), joint.U)
 	return F
 }
 
-func (this *RopeJoint) GetReactionTorque(inv_dt float64) float64 {
+func (joint *RopeJoint) GetReactionTorque(inv_dt float64) float64 {
 	return 0.0
 }
 
 /// The local anchor point relative to bodyA's origin.
-func (this *RopeJoint) GetLocalAnchorA() Vec2 {
-	return this.LocalAnchorA
+func (joint *RopeJoint) GetLocalAnchorA() Vec2 {
+	return joint.LocalAnchorA
 }
 
 /// The local anchor point relative to bodyB's origin.
-func (this *RopeJoint) GetLocalAnchorB() Vec2 {
-	return this.LocalAnchorB
+func (joint *RopeJoint) GetLocalAnchorB() Vec2 {
+	return joint.LocalAnchorB
 }
 
 /// Set/Get the maximum length of the rope.
-func (this *RopeJoint) SetMaxLength(length float64) {
-	this.MaxLength = length
+func (joint *RopeJoint) SetMaxLength(length float64) {
+	joint.MaxLength = length
 }
 
-func (this *RopeJoint) GetMaxLength() float64 {
-	return this.MaxLength
+func (joint *RopeJoint) GetMaxLength() float64 {
+	return joint.MaxLength
 }
 
-func (this *RopeJoint) GetLimitState() LimitState {
-	return this.State
+func (joint *RopeJoint) GetLimitState() LimitState {
+	return joint.State
 }
 
-func (this *RopeJoint) InitVelocityConstraints(data *solverData) {
-	this.IndexA = this.BodyA.islandIndex
-	this.IndexB = this.BodyB.islandIndex
-	this.LocalCenterA = this.BodyA.sweep.LocalCenter
-	this.LocalCenterB = this.BodyB.sweep.LocalCenter
-	this.InvMassA = this.BodyA.invMass
-	this.InvMassB = this.BodyB.invMass
-	this.InvIA = this.BodyA.invI
-	this.InvIB = this.BodyB.invI
+func (joint *RopeJoint) InitVelocityConstraints(data *solverData) {
+	joint.IndexA = joint.BodyA.islandIndex
+	joint.IndexB = joint.BodyB.islandIndex
+	joint.LocalCenterA = joint.BodyA.sweep.LocalCenter
+	joint.LocalCenterB = joint.BodyB.sweep.LocalCenter
+	joint.InvMassA = joint.BodyA.invMass
+	joint.InvMassB = joint.BodyB.invMass
+	joint.InvIA = joint.BodyA.invI
+	joint.InvIB = joint.BodyB.invI
 
-	cA := data.positions[this.IndexA].c
-	aA := data.positions[this.IndexA].a
-	vA := data.velocities[this.IndexA].v
-	wA := data.velocities[this.IndexA].w
+	cA := data.positions[joint.IndexA].c
+	aA := data.positions[joint.IndexA].a
+	vA := data.velocities[joint.IndexA].v
+	wA := data.velocities[joint.IndexA].w
 
-	cB := data.positions[this.IndexB].c
-	aB := data.positions[this.IndexB].a
-	vB := data.velocities[this.IndexB].v
-	wB := data.velocities[this.IndexB].w
+	cB := data.positions[joint.IndexB].c
+	aB := data.positions[joint.IndexB].a
+	vB := data.velocities[joint.IndexB].v
+	wB := data.velocities[joint.IndexB].w
 
-	qA, qB := NewRot(aA), NewRot(aB)
+	qA, qB := MakeRot(aA), MakeRot(aB)
 
-	this.RA = MulRV(qA, SubVV(this.LocalAnchorA, this.LocalCenterA))
-	this.RB = MulRV(qB, SubVV(this.LocalAnchorB, this.LocalCenterB))
-	this.U = SubVV(AddVV(cB, this.RB), AddVV(cA, this.RA))
+	joint.RA = MulRV(qA, SubVV(joint.LocalAnchorA, joint.LocalCenterA))
+	joint.RB = MulRV(qB, SubVV(joint.LocalAnchorB, joint.LocalCenterB))
+	joint.U = SubVV(AddVV(cB, joint.RB), AddVV(cA, joint.RA))
 
-	this.Length = this.U.Length()
+	joint.Length = joint.U.Length()
 
-	C := this.Length - this.MaxLength
+	C := joint.Length - joint.MaxLength
 	if C > 0.0 {
-		this.State = LimitState_e_atUpperLimit
+		joint.State = LimitState_e_atUpperLimit
 	} else {
-		this.State = LimitState_e_inactiveLimit
+		joint.State = LimitState_e_inactiveLimit
 	}
 
-	if this.Length > LinearSlop {
-		this.U.Mul(1.0 / this.Length)
+	if joint.Length > LinearSlop {
+		joint.U.Mul(1.0 / joint.Length)
 	} else {
-		this.U.SetZero()
-		this.Mass = 0.0
-		this.Impulse = 0.0
+		joint.U.SetZero()
+		joint.Mass = 0.0
+		joint.Impulse = 0.0
 		return
 	}
 
 	// Compute effective mass.
-	crA := CrossVV(this.RA, this.U)
-	crB := CrossVV(this.RB, this.U)
-	invMass := this.InvMassA + this.InvIA*crA*crA + this.InvMassB + this.InvIB*crB*crB
+	crA := CrossVV(joint.RA, joint.U)
+	crB := CrossVV(joint.RB, joint.U)
+	invMass := joint.InvMassA + joint.InvIA*crA*crA + joint.InvMassB + joint.InvIB*crB*crB
 
-	this.Mass = 0.0
+	joint.Mass = 0.0
 	if invMass != 0.0 {
-		this.Mass = 1.0 / invMass
+		joint.Mass = 1.0 / invMass
 	}
 
 	if data.step.warmStarting {
 		// Scale the impulse to support a variable time step.
-		this.Impulse *= data.step.dtRatio
+		joint.Impulse *= data.step.dtRatio
 
-		P := MulFV(this.Impulse, this.U)
-		vA.Sub(MulFV(this.InvMassA, P))
-		wA -= this.InvIA * CrossVV(this.RA, P)
-		vB.Add(MulFV(this.InvMassB, P))
-		wB += this.InvIB * CrossVV(this.RB, P)
+		P := MulFV(joint.Impulse, joint.U)
+		vA.Sub(MulFV(joint.InvMassA, P))
+		wA -= joint.InvIA * CrossVV(joint.RA, P)
+		vB.Add(MulFV(joint.InvMassB, P))
+		wB += joint.InvIB * CrossVV(joint.RB, P)
 	} else {
-		this.Impulse = 0.0
+		joint.Impulse = 0.0
 	}
 
-	data.velocities[this.IndexA].v = vA
-	data.velocities[this.IndexA].w = wA
-	data.velocities[this.IndexB].v = vB
-	data.velocities[this.IndexB].w = wB
+	data.velocities[joint.IndexA].v = vA
+	data.velocities[joint.IndexA].w = wA
+	data.velocities[joint.IndexB].v = vB
+	data.velocities[joint.IndexB].w = wB
 }
 
-func (this *RopeJoint) SolveVelocityConstraints(data *solverData) {
-	vA := data.velocities[this.IndexA].v
-	wA := data.velocities[this.IndexA].w
-	vB := data.velocities[this.IndexB].v
-	wB := data.velocities[this.IndexB].w
+func (joint *RopeJoint) SolveVelocityConstraints(data *solverData) {
+	vA := data.velocities[joint.IndexA].v
+	wA := data.velocities[joint.IndexA].w
+	vB := data.velocities[joint.IndexB].v
+	wB := data.velocities[joint.IndexB].w
 
 	// Cdot = dot(u, v + cross(w, r))
-	vpA := AddVV(vA, CrossFV(wA, this.RA))
-	vpB := AddVV(vB, CrossFV(wB, this.RB))
-	C := this.Length - this.MaxLength
-	Cdot := DotVV(this.U, SubVV(vpB, vpA))
+	vpA := AddVV(vA, CrossFV(wA, joint.RA))
+	vpB := AddVV(vB, CrossFV(wB, joint.RB))
+	C := joint.Length - joint.MaxLength
+	Cdot := DotVV(joint.U, SubVV(vpB, vpA))
 
 	// Predictive constraint.
 	if C < 0.0 {
 		Cdot += data.step.inv_dt * C
 	}
 
-	impulse := -this.Mass * Cdot
-	oldImpulse := this.Impulse
-	this.Impulse = MinF(0.0, this.Impulse+impulse)
-	impulse = this.Impulse - oldImpulse
+	impulse := -joint.Mass * Cdot
+	oldImpulse := joint.Impulse
+	joint.Impulse = MinF(0.0, joint.Impulse+impulse)
+	impulse = joint.Impulse - oldImpulse
 
-	P := MulFV(impulse, this.U)
-	vA.Sub(MulFV(this.InvMassA, P))
-	wA -= this.InvIA * CrossVV(this.RA, P)
-	vB.Add(MulFV(this.InvMassB, P))
-	wB += this.InvIB * CrossVV(this.RB, P)
+	P := MulFV(impulse, joint.U)
+	vA.Sub(MulFV(joint.InvMassA, P))
+	wA -= joint.InvIA * CrossVV(joint.RA, P)
+	vB.Add(MulFV(joint.InvMassB, P))
+	wB += joint.InvIB * CrossVV(joint.RB, P)
 
-	data.velocities[this.IndexA].v = vA
-	data.velocities[this.IndexA].w = wA
-	data.velocities[this.IndexB].v = vB
-	data.velocities[this.IndexB].w = wB
+	data.velocities[joint.IndexA].v = vA
+	data.velocities[joint.IndexA].w = wA
+	data.velocities[joint.IndexB].v = vB
+	data.velocities[joint.IndexB].w = wB
 }
 
-func (this *RopeJoint) SolvePositionConstraints(data *solverData) bool {
-	cA := data.positions[this.IndexA].c
-	aA := data.positions[this.IndexA].a
-	cB := data.positions[this.IndexB].c
-	aB := data.positions[this.IndexB].a
+func (joint *RopeJoint) SolvePositionConstraints(data *solverData) bool {
+	cA := data.positions[joint.IndexA].c
+	aA := data.positions[joint.IndexA].a
+	cB := data.positions[joint.IndexB].c
+	aB := data.positions[joint.IndexB].a
 
-	qA, qB := NewRot(aA), NewRot(aB)
+	qA, qB := MakeRot(aA), MakeRot(aB)
 
-	rA := MulRV(qA, SubVV(this.LocalAnchorA, this.LocalCenterA))
-	rB := MulRV(qB, SubVV(this.LocalAnchorB, this.LocalCenterB))
+	rA := MulRV(qA, SubVV(joint.LocalAnchorA, joint.LocalCenterA))
+	rB := MulRV(qB, SubVV(joint.LocalAnchorB, joint.LocalCenterB))
 	u := SubVV(AddVV(cB, rB), AddVV(cA, rA))
 
 	length := u.Normalize()
-	C := length - this.MaxLength
+	C := length - joint.MaxLength
 
 	C = ClampF(C, 0.0, MaxLinearCorrection)
 
-	impulse := -this.Mass * C
+	impulse := -joint.Mass * C
 	P := MulFV(impulse, u)
 
-	cA.Sub(MulFV(this.InvMassA, P))
-	aA -= this.InvIA * CrossVV(rA, P)
-	cB.Add(MulFV(this.InvMassB, P))
-	aB += this.InvIB * CrossVV(rB, P)
+	cA.Sub(MulFV(joint.InvMassA, P))
+	aA -= joint.InvIA * CrossVV(rA, P)
+	cB.Add(MulFV(joint.InvMassB, P))
+	aB += joint.InvIB * CrossVV(rB, P)
 
-	data.positions[this.IndexA].c = cA
-	data.positions[this.IndexA].a = aA
-	data.positions[this.IndexB].c = cB
-	data.positions[this.IndexB].a = aB
+	data.positions[joint.IndexA].c = cA
+	data.positions[joint.IndexA].a = aA
+	data.positions[joint.IndexB].c = cB
+	data.positions[joint.IndexB].a = aB
 
-	return length-this.MaxLength < LinearSlop
+	return length-joint.MaxLength < LinearSlop
 }
 
 /// Dump joint to b2Log
-func (this *RopeJoint) Dump() {
-	indexA := this.BodyA.islandIndex
-	indexB := this.BodyB.islandIndex
+func (joint *RopeJoint) Dump() {
+	indexA := joint.BodyA.islandIndex
+	indexB := joint.BodyB.islandIndex
 
 	Log("  b2RopeJointDef jd;\n")
 	Log("  jd.bodyA = bodies[%d];\n", indexA)
 	Log("  jd.bodyB = bodies[%d];\n", indexB)
-	Log("  jd.collideConnected = bool(%d);\n", this.CollideConnected)
-	Log("  jd.localAnchorA.Set(%.15lef, %.15lef);\n", this.LocalAnchorA.X, this.LocalAnchorA.Y)
-	Log("  jd.localAnchorB.Set(%.15lef, %.15lef);\n", this.LocalAnchorB.X, this.LocalAnchorB.Y)
-	Log("  jd.maxLength = %.15lef;\n", this.MaxLength)
-	Log("  joints[%d] = m_world->CreateJoint(&jd);\n", this.Index)
+	Log("  jd.collideConnected = bool(%t);\n", joint.CollideConnected)
+	Log("  jd.localAnchorA.Set(%.15e, %.15e);\n", joint.LocalAnchorA.X, joint.LocalAnchorA.Y)
+	Log("  jd.localAnchorB.Set(%.15e, %.15e);\n", joint.LocalAnchorB.X, joint.LocalAnchorB.Y)
+	Log("  jd.maxLength = %.15e;\n", joint.MaxLength)
+	Log("  joints[%d] = m_world->CreateJoint(&jd);\n", joint.Index)
 }
