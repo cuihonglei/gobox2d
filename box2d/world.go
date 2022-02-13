@@ -338,7 +338,7 @@ func (w *World) DestroyJoint(j IJoint) {
 // @param velocityIterations for the velocity constraint solver.
 // @param positionIterations for the position constraint solver.
 func (w *World) Step(dt float64, velocityIterations int, positionIterations int) {
-	stepTimer := NewTimer()
+	stepTimer := MakeTimer()
 
 	// If new fixtures were added, we need to find the new contacts.
 	if (w.flags & world_e_newFixture) != 0 {
@@ -364,21 +364,21 @@ func (w *World) Step(dt float64, velocityIterations int, positionIterations int)
 
 	// Update contacts. This is where some contacts are destroyed.
 	{
-		timer := NewTimer()
+		timer := MakeTimer()
 		w.contactManager.Collide()
 		w.profile.collide = timer.GetMilliseconds()
 	}
 
 	// Integrate velocities, solve velocity constraints, and integrate positions.
 	if w.stepComplete && step.dt > 0.0 {
-		timer := NewTimer()
+		timer := MakeTimer()
 		w.solve(&step)
 		w.profile.solve = timer.GetMilliseconds()
 	}
 
 	// Handle TOI events.
 	if w.continuousPhysics && step.dt > 0.0 {
-		timer := NewTimer()
+		timer := MakeTimer()
 		w.solveTOI(&step)
 		w.profile.solveTOI = timer.GetMilliseconds()
 	}
