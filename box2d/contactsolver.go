@@ -58,18 +58,18 @@ type ContactSolver struct {
 }
 
 func NewContactSolver(def *ContactSolverDef) *ContactSolver {
-	this := new(ContactSolver)
-	this.Step = def.Step
-	this.Count = def.Count
-	this.PositionConstraints = make([]ContactPositionConstraint, this.Count, this.Count)
-	this.VelocityConstraints = make([]ContactVelocityConstraint, this.Count, this.Count)
-	this.Positions = def.Positions
-	this.Velocities = def.Velocities
-	this.Contacts = def.Contacts
+	cs := new(ContactSolver)
+	cs.Step = def.Step
+	cs.Count = def.Count
+	cs.PositionConstraints = make([]ContactPositionConstraint, cs.Count)
+	cs.VelocityConstraints = make([]ContactVelocityConstraint, cs.Count)
+	cs.Positions = def.Positions
+	cs.Velocities = def.Velocities
+	cs.Contacts = def.Contacts
 
 	// Initialize position independent portions of the constraints.
-	for i := 0; i < this.Count; i++ {
-		contact := this.Contacts[i]
+	for i := 0; i < cs.Count; i++ {
+		contact := cs.Contacts[i]
 
 		fixtureA := contact.GetFixtureA()
 		fixtureB := contact.GetFixtureB()
@@ -83,7 +83,7 @@ func NewContactSolver(def *ContactSolverDef) *ContactSolver {
 
 		pointCount := manifold.PointCount
 
-		vc := &this.VelocityConstraints[i]
+		vc := &cs.VelocityConstraints[i]
 		vc.Friction = contact.GetFriction()
 		vc.Restitution = contact.GetRestitution()
 		vc.IndexA = bodyA.islandIndex
@@ -97,7 +97,7 @@ func NewContactSolver(def *ContactSolverDef) *ContactSolver {
 		vc.K.SetZero()
 		vc.NormalMass.SetZero()
 
-		pc := &this.PositionConstraints[i]
+		pc := &cs.PositionConstraints[i]
 		pc.IndexA = bodyA.islandIndex
 		pc.IndexB = bodyB.islandIndex
 		pc.InvMassA = bodyA.invMass
@@ -117,9 +117,9 @@ func NewContactSolver(def *ContactSolverDef) *ContactSolver {
 			cp := &manifold.Points[j]
 			vcp := &vc.Points[j]
 
-			if this.Step.warmStarting {
-				vcp.NormalImpulse = this.Step.dtRatio * cp.NormalImpulse
-				vcp.TangentImpulse = this.Step.dtRatio * cp.TangentImpulse
+			if cs.Step.warmStarting {
+				vcp.NormalImpulse = cs.Step.dtRatio * cp.NormalImpulse
+				vcp.TangentImpulse = cs.Step.dtRatio * cp.TangentImpulse
 			} else {
 				vcp.NormalImpulse = 0.0
 				vcp.TangentImpulse = 0.0
@@ -134,17 +134,17 @@ func NewContactSolver(def *ContactSolverDef) *ContactSolver {
 			pc.LocalPoints[j] = cp.LocalPoint
 		}
 	}
-	return this
+	return cs
 }
 
-func (this *ContactSolver) InitializeVelocityConstraints() {
-	for i := 0; i < this.Count; i++ {
-		vc := &this.VelocityConstraints[i]
-		pc := &this.PositionConstraints[i]
+func (cs *ContactSolver) InitializeVelocityConstraints() {
+	for i := 0; i < cs.Count; i++ {
+		vc := &cs.VelocityConstraints[i]
+		pc := &cs.PositionConstraints[i]
 
 		radiusA := pc.RadiusA
 		radiusB := pc.RadiusB
-		manifold := this.Contacts[vc.ContactIndex].GetManifold()
+		manifold := cs.Contacts[vc.ContactIndex].GetManifold()
 
 		indexA := vc.IndexA
 		indexB := vc.IndexB
@@ -156,15 +156,15 @@ func (this *ContactSolver) InitializeVelocityConstraints() {
 		localCenterA := pc.LocalCenterA
 		localCenterB := pc.LocalCenterB
 
-		cA := this.Positions[indexA].c
-		aA := this.Positions[indexA].a
-		vA := this.Velocities[indexA].v
-		wA := this.Velocities[indexA].w
+		cA := cs.Positions[indexA].c
+		aA := cs.Positions[indexA].a
+		vA := cs.Velocities[indexA].v
+		wA := cs.Velocities[indexA].w
 
-		cB := this.Positions[indexB].c
-		aB := this.Positions[indexB].a
-		vB := this.Velocities[indexB].v
-		wB := this.Velocities[indexB].w
+		cB := cs.Positions[indexB].c
+		aB := cs.Positions[indexB].a
+		vB := cs.Velocities[indexB].v
+		wB := cs.Velocities[indexB].w
 
 		var xfA, xfB Transform
 		xfA.Q.Set(aA)
@@ -244,10 +244,10 @@ func (this *ContactSolver) InitializeVelocityConstraints() {
 	}
 }
 
-func (this *ContactSolver) WarmStart() {
+func (cs *ContactSolver) WarmStart() {
 	// Warm start.
-	for i := 0; i < this.Count; i++ {
-		vc := &this.VelocityConstraints[i]
+	for i := 0; i < cs.Count; i++ {
+		vc := &cs.VelocityConstraints[i]
 
 		indexA := vc.IndexA
 		indexB := vc.IndexB
@@ -257,10 +257,10 @@ func (this *ContactSolver) WarmStart() {
 		iB := vc.InvIB
 		pointCount := vc.PointCount
 
-		vA := this.Velocities[indexA].v
-		wA := this.Velocities[indexA].w
-		vB := this.Velocities[indexB].v
-		wB := this.Velocities[indexB].w
+		vA := cs.Velocities[indexA].v
+		wA := cs.Velocities[indexA].w
+		vB := cs.Velocities[indexB].v
+		wB := cs.Velocities[indexB].w
 
 		normal := vc.Normal
 		tangent := CrossVF(normal, 1.0)
@@ -274,16 +274,16 @@ func (this *ContactSolver) WarmStart() {
 			vB.Add(MulFV(mB, P))
 		}
 
-		this.Velocities[indexA].v = vA
-		this.Velocities[indexA].w = wA
-		this.Velocities[indexB].v = vB
-		this.Velocities[indexB].w = wB
+		cs.Velocities[indexA].v = vA
+		cs.Velocities[indexA].w = wA
+		cs.Velocities[indexB].v = vB
+		cs.Velocities[indexB].w = wB
 	}
 }
 
-func (this *ContactSolver) SolveVelocityConstraints() {
-	for i := 0; i < this.Count; i++ {
-		vc := &this.VelocityConstraints[i]
+func (cs *ContactSolver) SolveVelocityConstraints() {
+	for i := 0; i < cs.Count; i++ {
+		vc := &cs.VelocityConstraints[i]
 
 		indexA := vc.IndexA
 		indexB := vc.IndexB
@@ -293,10 +293,10 @@ func (this *ContactSolver) SolveVelocityConstraints() {
 		iB := vc.InvIB
 		pointCount := vc.PointCount
 
-		vA := this.Velocities[indexA].v
-		wA := this.Velocities[indexA].w
-		vB := this.Velocities[indexB].v
-		wB := this.Velocities[indexB].w
+		vA := cs.Velocities[indexA].v
+		wA := cs.Velocities[indexA].w
+		vB := cs.Velocities[indexB].v
+		wB := cs.Velocities[indexB].w
 
 		normal := vc.Normal
 		tangent := CrossVF(normal, 1.0)
@@ -570,17 +570,17 @@ func (this *ContactSolver) SolveVelocityConstraints() {
 			}
 		}
 
-		this.Velocities[indexA].v = vA
-		this.Velocities[indexA].w = wA
-		this.Velocities[indexB].v = vB
-		this.Velocities[indexB].w = wB
+		cs.Velocities[indexA].v = vA
+		cs.Velocities[indexA].w = wA
+		cs.Velocities[indexB].v = vB
+		cs.Velocities[indexB].w = wB
 	}
 }
 
-func (this *ContactSolver) StoreImpulses() {
-	for i := 0; i < this.Count; i++ {
-		vc := &this.VelocityConstraints[i]
-		manifold := this.Contacts[vc.ContactIndex].GetManifold()
+func (cs *ContactSolver) StoreImpulses() {
+	for i := 0; i < cs.Count; i++ {
+		vc := &cs.VelocityConstraints[i]
+		manifold := cs.Contacts[vc.ContactIndex].GetManifold()
 
 		for j := 0; j < vc.PointCount; j++ {
 			manifold.Points[j].NormalImpulse = vc.Points[j].NormalImpulse
@@ -595,43 +595,43 @@ type PositionSolverManifold struct {
 	Separation float64
 }
 
-func (this *PositionSolverManifold) Initialize(pc *ContactPositionConstraint, xfA, xfB Transform, index int) {
+func (psm *PositionSolverManifold) Initialize(pc *ContactPositionConstraint, xfA, xfB Transform, index int) {
 	//Assert(pc.PointCount > 0)
 	switch pc.Type {
 	case Manifold_e_circles:
 		pointA := MulX(xfA, pc.LocalPoint)
 		pointB := MulX(xfB, pc.LocalPoints[0])
-		this.Normal = SubVV(pointB, pointA)
-		this.Normal.Normalize()
-		this.Point = MulFV(0.5, AddVV(pointA, pointB))
-		this.Separation = DotVV(SubVV(pointB, pointA), this.Normal) - pc.RadiusA - pc.RadiusB
+		psm.Normal = SubVV(pointB, pointA)
+		psm.Normal.Normalize()
+		psm.Point = MulFV(0.5, AddVV(pointA, pointB))
+		psm.Separation = DotVV(SubVV(pointB, pointA), psm.Normal) - pc.RadiusA - pc.RadiusB
 
 	case Manifold_e_faceA:
-		this.Normal = MulRV(xfA.Q, pc.LocalNormal)
+		psm.Normal = MulRV(xfA.Q, pc.LocalNormal)
 		planePoint := MulX(xfA, pc.LocalPoint)
 
 		clipPoint := MulX(xfB, pc.LocalPoints[index])
-		this.Separation = DotVV(SubVV(clipPoint, planePoint), this.Normal) - pc.RadiusA - pc.RadiusB
-		this.Point = clipPoint
+		psm.Separation = DotVV(SubVV(clipPoint, planePoint), psm.Normal) - pc.RadiusA - pc.RadiusB
+		psm.Point = clipPoint
 
 	case Manifold_e_faceB:
-		this.Normal = MulRV(xfB.Q, pc.LocalNormal)
+		psm.Normal = MulRV(xfB.Q, pc.LocalNormal)
 		planePoint := MulX(xfB, pc.LocalPoint)
 
 		clipPoint := MulX(xfA, pc.LocalPoints[index])
-		this.Separation = DotVV(SubVV(clipPoint, planePoint), this.Normal) - pc.RadiusA - pc.RadiusB
-		this.Point = clipPoint
+		psm.Separation = DotVV(SubVV(clipPoint, planePoint), psm.Normal) - pc.RadiusA - pc.RadiusB
+		psm.Point = clipPoint
 
 		// Ensure normal points from A to B
-		this.Normal = this.Normal.Minus()
+		psm.Normal = psm.Normal.Minus()
 	}
 }
 
-func (this *ContactSolver) SolvePositionConstraints() bool {
+func (cs *ContactSolver) SolvePositionConstraints() bool {
 	minSeparation := 0.0
 
-	for i := 0; i < this.Count; i++ {
-		pc := &this.PositionConstraints[i]
+	for i := 0; i < cs.Count; i++ {
+		pc := &cs.PositionConstraints[i]
 
 		indexA := pc.IndexA
 		indexB := pc.IndexB
@@ -643,11 +643,11 @@ func (this *ContactSolver) SolvePositionConstraints() bool {
 		iB := pc.InvIB
 		pointCount := pc.PointCount
 
-		cA := this.Positions[indexA].c
-		aA := this.Positions[indexA].a
+		cA := cs.Positions[indexA].c
+		aA := cs.Positions[indexA].a
 
-		cB := this.Positions[indexB].c
-		aB := this.Positions[indexB].a
+		cB := cs.Positions[indexB].c
+		aB := cs.Positions[indexB].a
 
 		// Solve normal constraints
 		for j := 0; j < pointCount; j++ {
@@ -693,11 +693,11 @@ func (this *ContactSolver) SolvePositionConstraints() bool {
 			aB += iB * CrossVV(rB, P)
 		}
 
-		this.Positions[indexA].c = cA
-		this.Positions[indexA].a = aA
+		cs.Positions[indexA].c = cA
+		cs.Positions[indexA].a = aA
 
-		this.Positions[indexB].c = cB
-		this.Positions[indexB].a = aB
+		cs.Positions[indexB].c = cB
+		cs.Positions[indexB].a = aB
 	}
 
 	// We can't expect minSpeparation >= -b2_linearSlop because we don't
@@ -705,11 +705,11 @@ func (this *ContactSolver) SolvePositionConstraints() bool {
 	return minSeparation >= -3.0*LinearSlop
 }
 
-func (this *ContactSolver) SolveTOIPositionConstraints(toiIndexA, toiIndexB int) bool {
+func (cs *ContactSolver) SolveTOIPositionConstraints(toiIndexA, toiIndexB int) bool {
 	minSeparation := 0.0
 
-	for i := 0; i < this.Count; i++ {
-		pc := &this.PositionConstraints[i]
+	for i := 0; i < cs.Count; i++ {
+		pc := &cs.PositionConstraints[i]
 
 		indexA := pc.IndexA
 		indexB := pc.IndexB
@@ -731,11 +731,11 @@ func (this *ContactSolver) SolveTOIPositionConstraints(toiIndexA, toiIndexB int)
 			iB = pc.InvIB
 		}
 
-		cA := this.Positions[indexA].c
-		aA := this.Positions[indexA].a
+		cA := cs.Positions[indexA].c
+		aA := cs.Positions[indexA].a
 
-		cB := this.Positions[indexB].c
-		aB := this.Positions[indexB].a
+		cB := cs.Positions[indexB].c
+		aB := cs.Positions[indexB].a
 
 		// Solve normal constraints
 		for j := 0; j < pointCount; j++ {
@@ -781,11 +781,11 @@ func (this *ContactSolver) SolveTOIPositionConstraints(toiIndexA, toiIndexB int)
 			aB += iB * CrossVV(rB, P)
 		}
 
-		this.Positions[indexA].c = cA
-		this.Positions[indexA].a = aA
+		cs.Positions[indexA].c = cA
+		cs.Positions[indexA].a = aA
 
-		this.Positions[indexB].c = cB
-		this.Positions[indexB].a = aB
+		cs.Positions[indexB].c = cB
+		cs.Positions[indexB].a = aB
 	}
 
 	// We can't expect minSpeparation >= -b2_linearSlop because we don't

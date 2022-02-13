@@ -71,18 +71,18 @@ type Draw struct {
 	DrawFlags uint
 }
 
-func (this *Draw) SetFlags(flags uint) {
-	this.DrawFlags = flags
+func (d *Draw) SetFlags(flags uint) {
+	d.DrawFlags = flags
 }
 
-func (this *Draw) GetFlags() uint {
-	return this.DrawFlags
+func (d *Draw) GetFlags() uint {
+	return d.DrawFlags
 }
 
-func (this *Draw) AppendFlags(flags uint) {
-	this.DrawFlags |= flags
+func (d *Draw) AppendFlags(flags uint) {
+	d.DrawFlags |= flags
 }
 
-func (this *Draw) ClearFlags(flags uint) {
-	this.DrawFlags &= ^flags
+func (d *Draw) ClearFlags(flags uint) {
+	d.DrawFlags &= ^flags
 }

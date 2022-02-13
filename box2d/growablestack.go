@@ -9,27 +9,27 @@ type GrowableStack struct {
 func NewGrowableStack(capacity int) *GrowableStack {
 	this := new(GrowableStack)
 	this.Capacity = capacity
-	this.Stack = make([]interface{}, capacity, capacity)
+	this.Stack = make([]interface{}, capacity)
 	return this
 }
 
-func (this *GrowableStack) Push(element interface{}) {
-	if this.Count == this.Capacity {
-		old := this.Stack
-		this.Capacity *= 2
-		this.Stack = make([]interface{}, this.Capacity, this.Capacity)
-		copy(this.Stack, old)
+func (gs *GrowableStack) Push(element interface{}) {
+	if gs.Count == gs.Capacity {
+		old := gs.Stack
+		gs.Capacity *= 2
+		gs.Stack = make([]interface{}, gs.Capacity)
+		copy(gs.Stack, old)
 	}
 
-	this.Stack[this.Count] = element
-	this.Count++
+	gs.Stack[gs.Count] = element
+	gs.Count++
 }
 
-func (this *GrowableStack) Pop() interface{} {
-	this.Count--
-	return this.Stack[this.Count]
+func (gs *GrowableStack) Pop() interface{} {
+	gs.Count--
+	return gs.Stack[gs.Count]
 }
 
-func (this *GrowableStack) GetCount() int {
-	return this.Count
+func (gs *GrowableStack) GetCount() int {
+	return gs.Count
 }

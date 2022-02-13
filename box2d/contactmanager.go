@@ -10,15 +10,15 @@ type ContactManager struct {
 }
 
 func NewContactManager() *ContactManager {
-	this := new(ContactManager)
-	this.BroadPhase = NewBroadPhase()
-	this.ContactFilter = NewContactFilter()
-	this.ContactListener = NewContactListener()
-	return this
+	cm := new(ContactManager)
+	cm.BroadPhase = NewBroadPhase()
+	cm.ContactFilter = NewContactFilter()
+	cm.ContactListener = NewContactListener()
+	return cm
 }
 
 // Broad-phase callback.
-func (this *ContactManager) AddPair(proxyUserDataA interface{}, proxyUserDataB interface{}) {
+func (cm *ContactManager) AddPair(proxyUserDataA interface{}, proxyUserDataB interface{}) {
 	proxyA := proxyUserDataA.(*FixtureProxy)
 	proxyB := proxyUserDataB.(*FixtureProxy)
 
@@ -67,7 +67,7 @@ func (this *ContactManager) AddPair(proxyUserDataA interface{}, proxyUserDataB i
 	}
 
 	// Check user filtering.
-	if this.ContactFilter != nil && !this.ContactFilter.ShouldCollide(fixtureA, fixtureB) {
+	if cm.ContactFilter != nil && !cm.ContactFilter.ShouldCollide(fixtureA, fixtureB) {
 		return
 	}
 
@@ -80,18 +80,18 @@ func (this *ContactManager) AddPair(proxyUserDataA interface{}, proxyUserDataB i
 	// Contact creation may swap fixtures.
 	fixtureA = c.GetFixtureA()
 	fixtureB = c.GetFixtureB()
-	indexA = c.GetChildIndexA()
-	indexB = c.GetChildIndexB()
+	/*indexA =*/ c.GetChildIndexA()
+	/*indexB =*/ c.GetChildIndexB()
 	bodyA = fixtureA.GetBody()
 	bodyB = fixtureB.GetBody()
 
 	// Insert into the world.
 	c.SetPrev(nil)
-	c.SetNext(this.ContactList)
-	if this.ContactList != nil {
-		this.ContactList.SetPrev(c)
+	c.SetNext(cm.ContactList)
+	if cm.ContactList != nil {
+		cm.ContactList.SetPrev(c)
 	}
-	this.ContactList = c
+	cm.ContactList = c
 
 	// Connect to island graph.
 
@@ -121,21 +121,21 @@ func (this *ContactManager) AddPair(proxyUserDataA interface{}, proxyUserDataB i
 	bodyA.SetAwake(true)
 	bodyB.SetAwake(true)
 
-	this.ContactCount++
+	cm.ContactCount++
 }
 
-func (this *ContactManager) FindNewContacts() {
-	this.BroadPhase.UpdatePairs(this.AddPair)
+func (cm *ContactManager) FindNewContacts() {
+	cm.BroadPhase.UpdatePairs(cm.AddPair)
 }
 
-func (this *ContactManager) Destroy(c IContact) {
+func (cm *ContactManager) Destroy(c IContact) {
 	fixtureA := c.GetFixtureA()
 	fixtureB := c.GetFixtureB()
 	bodyA := fixtureA.GetBody()
 	bodyB := fixtureB.GetBody()
 
-	if this.ContactListener != nil && c.IsTouching() {
-		this.ContactListener.EndContact(c)
+	if cm.ContactListener != nil && c.IsTouching() {
+		cm.ContactListener.EndContact(c)
 	}
 
 	// Remove from the world.
@@ -147,8 +147,8 @@ func (this *ContactManager) Destroy(c IContact) {
 		c.GetNext().SetPrev(c.GetPrev())
 	}
 
-	if c == this.ContactList {
-		this.ContactList = c.GetNext()
+	if c == cm.ContactList {
+		cm.ContactList = c.GetNext()
 	}
 	// Remove from body 1
 	if c.GetNodeA().Prev != nil {
@@ -178,15 +178,15 @@ func (this *ContactManager) Destroy(c IContact) {
 
 	// Call the factory.
 	//c.Destroy()
-	this.ContactCount--
+	cm.ContactCount--
 }
 
 // This is the top level collision call for the time step. Here
 // all the narrow phase collision is processed for the world
 // contact list.
-func (this *ContactManager) Collide() {
+func (cm *ContactManager) Collide() {
 	// Update awake contacts.
-	c := this.ContactList
+	c := cm.ContactList
 	for c != nil {
 		fixtureA := c.GetFixtureA()
 		fixtureB := c.GetFixtureB()
@@ -201,15 +201,15 @@ func (this *ContactManager) Collide() {
 			if !bodyB.ShouldCollide(bodyA) {
 				cNuke := c
 				c = cNuke.GetNext()
-				this.Destroy(cNuke)
+				cm.Destroy(cNuke)
 				continue
 			}
 
 			// Check user filtering.
-			if this.ContactFilter != nil && !this.ContactFilter.ShouldCollide(fixtureA, fixtureB) {
+			if cm.ContactFilter != nil && !cm.ContactFilter.ShouldCollide(fixtureA, fixtureB) {
 				cNuke := c
 				c = cNuke.GetNext()
-				this.Destroy(cNuke)
+				cm.Destroy(cNuke)
 				continue
 			}
 
@@ -228,18 +228,18 @@ func (this *ContactManager) Collide() {
 
 		proxyIdA := fixtureA.Proxies[indexA].ProxyId
 		proxyIdB := fixtureB.Proxies[indexB].ProxyId
-		overlap := this.BroadPhase.TestOverlap(proxyIdA, proxyIdB)
+		overlap := cm.BroadPhase.TestOverlap(proxyIdA, proxyIdB)
 
 		// Here we destroy contacts that cease to overlap in the broad-phase.
 		if !overlap {
 			cNuke := c
 			c = cNuke.GetNext()
-			this.Destroy(cNuke)
+			cm.Destroy(cNuke)
 			continue
 		}
 
 		// The contact persists.
-		c.Update(this.ContactListener)
+		c.Update(cm.ContactListener)
 		c = c.GetNext()
 	}
 }
